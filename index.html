@@ -56,6 +56,14 @@
       text-decoration: none; transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--text); }
+    .nav-pulse {
+      animation: navPulse 2.8s ease-in-out infinite;
+    }
+    @keyframes navPulse {
+      0%   { color: #a09080; text-shadow: none; }
+      50%  { color: #fff; text-shadow: 0 0 6px rgba(255,255,255,0.4); }
+      100% { color: #a09080; text-shadow: none; }
+    }
 
     /* ── HERO ── */
     .hero {
@@ -117,7 +125,7 @@
     }
     h2 strong { font-weight: 600; }
     h2 em { font-style: italic; color: var(--accent); }
-    .body-text { color: var(--dim); font-size: 0.9rem; max-width: 50ch; }
+    .body-text { color: var(--dim); font-size: 1.15rem; max-width: 50ch; }
     .body-text p + p { margin-top: 0.85em; }
     .hr { border: none; border-top: 1px solid var(--border); }
 
@@ -351,8 +359,8 @@
 <nav>
   <a href="#" class="nav-brand">Avventure Micologiche</a>
   <div class="nav-links">
-    <a href="#youtube">YouTube</a>
-    <a href="#piogge">Mappa piogge</a>
+    <a href="#youtube" class="nav-pulse">YouTube</a>
+    <a href="#piogge" class="nav-pulse">Mappa piogge <span style="font-size:0.65rem;">NEW</span></a>
     <a href="#chi-siamo">Chi siamo</a>
   </div>
 </nav>
