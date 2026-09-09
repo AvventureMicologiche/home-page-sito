@@ -369,7 +369,11 @@
       .yt-grid, .chi-grid { grid-template-columns: 1fr; gap: 3rem; }
       section { padding: 5rem 0; }
       .piogge-inner { grid-template-columns: 1fr; min-height: unset; }
-      .piogge-left { padding: 4rem 1.5rem 3rem; border-right: none; border-bottom: 1px solid var(--border); }
+      /* ⚠️ `min-width: 0`: una colonna di griglia `1fr` non si stringe sotto
+         la larghezza del figlio piu' largo, e un bottone da 34rem bastava a
+         portare la colonna a 592 px dentro uno schermo da 412, facendo
+         scorrere la pagina di lato. Aggiunto l'8/9/2026. */
+      .piogge-left { padding: 4rem 1.5rem 3rem; border-right: none; border-bottom: 1px solid var(--border); min-width: 0; }
       .piogge-right { padding: 2.5rem 1.5rem; }
       .piogge-bar { flex-direction: column; text-align: center; padding: 1.2rem; }
       .footer-row { flex-direction: column; text-align: center; }
@@ -457,12 +461,27 @@
     <div class="piogge-left">
       <h2>Mappa pluviometrica<br /><em>Italia, Svizzera, Austria, Francia e Slovenia</em></h2>
       <div class="piogge-cta" style="margin: 1.5rem 0;">
-        <a href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener" class="btn btn-green-lg">
+        <a href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener" class="btn btn-green-lg" style="width: 100%; max-width: 38rem; justify-content: center;">
           Apri la mappa
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10"/><path d="M9 4l4 4-4 4"/></svg>
         </a>
       </div>
       <p class="piogge-desc">Abbiamo costruito una mappa interattiva con dati da stazioni meteo reali per pianificare ogni uscita con informazioni concrete. Trova le zone dove ha piovuto di più: non aspettare che i funghi arrivino da te, vai tu dove stanno nascendo.</p>
+      <!-- ⚠️ IL SECONDO BOTTONE STA QUI, dopo la frase, e non accanto al primo:
+           la riga sopra promette «trova le zone dove ha piovuto di più», e questa
+           è la pagina che quelle zone le elenca davvero. Aggiunto l'8/9/2026.
+           Serve anche a Google: la mappa, resa a 412 px — la finestra con cui il
+           motore la scansiona — nasconde 26 dei suoi 27 link interni, mentre
+           questa pagina è normale e scorre, quindi il link qui conta pieno. -->
+      <div style="margin: 1.6rem 0 0;">
+        <a href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener" class="btn btn-green btn-green-lg" style="width: 100%; max-width: 38rem; justify-content: center; padding-left: 1.5rem; padding-right: 1.5rem;">
+          <span>🍄 La nostra selezione: le località più bagnate</span>
+          <!-- ⚠️ La misura dell'svg va scritta qui: il foglio di stile la dà solo
+               a .btn-green-lg, e senza la freccia esce alta quanto tre righe e
+               spinge il testo a capo. Visto al primo scatto. -->
+          <svg viewBox="0 0 16 16" style="flex: 0 0 auto;" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10"/><path d="M9 4l4 4-4 4"/></svg>
+        </a>
+      </div>
       <div class="stats-grid">
         <div class="stat"><div class="stat-n">5000+</div><div class="stat-l">Stazioni meteo</div></div>
         <div class="stat"><div class="stat-n">5</div><div class="stat-l">Nazioni coperte</div></div>
