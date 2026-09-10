@@ -271,6 +271,27 @@
     }
     .piogge-cta { margin-top: 3rem; }
 
+    /* La storia: perché la mappa esiste. Tono più basso della .piogge-desc,
+       che è la promessa, e filetto verde a sinistra: così si legge come un
+       inciso e non come un secondo annuncio. Aggiunta il 10/9/2026. */
+    .piogge-storia {
+      margin-top: 2.8rem;
+      padding-left: 1.4rem;
+      border-left: 2px solid var(--green);
+      max-width: 52ch;
+    }
+    .piogge-storia h3 {
+      font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--green); font-weight: 600; margin: 0 0 0.9rem;
+    }
+    /* ⚠️ --dim e non --muted: misurato, --muted su questo fondo fa 2,5:1 di
+       contrasto, sotto il minimo leggibile. Va bene per le etichettine
+       maiuscole, non per tre paragrafi da leggere. --dim fa 5,1:1. */
+    .piogge-storia p {
+      color: var(--dim); font-size: 1rem; line-height: 1.75; margin: 0 0 0.9rem;
+    }
+    .piogge-storia p:last-child { margin-bottom: 0; }
+
     /* Colonna destra: le due mappe impilate, centrate verticalmente
        con padding generoso a sx per spostarle verso il centro */
     .piogge-right {
@@ -481,6 +502,16 @@
                spinge il testo a capo. Visto al primo scatto. -->
           <svg viewBox="0 0 16 16" style="flex: 0 0 auto;" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10"/><path d="M9 4l4 4-4 4"/></svg>
         </a>
+      </div>
+      <!-- ⚠️ LA STORIA STA QUI, dopo i due bottoni e prima dei numeri. Chi
+           arriva deciso deve poter aprire la mappa senza leggere niente; chi
+           invece si ferma trova il perché appena prima delle cifre che lo
+           dimostrano. Chiesta il 10/9/2026. -->
+      <div class="piogge-storia">
+        <h3>Perché l'abbiamo fatta</h3>
+        <p>L'abbiamo fatta per noi. Quando si va a funghi la domanda è sempre la stessa: dove è piovuto davvero, e quanto. Le previsioni dicono cosa succederà domani, non quanta acqua è caduta a terra due settimane fa, che è l'unica cosa che conta per sapere se stanno nascendo.</p>
+        <p>Così abbiamo cominciato a leggere i pluviometri veri, quelli delle agenzie regionali, e a metterli su una mappa. All'inizio era una regione sola e poche stazioni, giusto per decidere dove andare la domenica.</p>
+        <p>Non era pensata per nessun altro. Poi ci siamo detti che se serviva a noi poteva servire a chiunque vada per boschi, e l'abbiamo aperta a tutti. È gratis, non ha pubblicità e non chiede di registrarsi.</p>
       </div>
       <div class="stats-grid">
         <div class="stat"><div class="stat-n">5000+</div><div class="stat-l">Stazioni meteo</div></div>
