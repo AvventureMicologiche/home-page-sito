@@ -292,6 +292,22 @@
     }
     .piogge-storia p:last-child { margin-bottom: 0; }
 
+    /* Cosa fa la mappa, una funzione per riga: il nome chiaro, la spiegazione
+       in --dim (stessa ragione di contrasto della storia qui sopra). Senza
+       filetto: e' un elenco, non un inciso. Aggiunto il 18/9/2026. */
+    .piogge-funzioni { margin-top: 2.8rem; max-width: 52ch; }
+    .piogge-funzioni h3 {
+      font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--green); font-weight: 600; margin: 0 0 1rem;
+    }
+    .piogge-funzioni ul { list-style: none; margin: 0; padding: 0; }
+    .piogge-funzioni li {
+      color: var(--dim); font-size: 1rem; line-height: 1.6;
+      padding: 0.7rem 0; border-top: 1px solid var(--border);
+    }
+    .piogge-funzioni li:first-child { border-top: none; padding-top: 0; }
+    .piogge-funzioni li strong { color: var(--text); font-weight: 500; display: block; }
+
     /* Colonna destra: le due mappe impilate, centrate verticalmente
        con padding generoso a sx per spostarle verso il centro */
     .piogge-right {
@@ -310,6 +326,8 @@
       width: 75%;
       align-self: flex-start;
     }
+    a.shot { display: block; text-decoration: none; }
+    a.shot:hover .shot-cap { color: rgba(232,224,208,0.9); }
     .shot img {
       width: 100%;
       aspect-ratio: 16/9;
@@ -503,6 +521,21 @@
           <svg viewBox="0 0 16 16" style="flex: 0 0 auto;" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10"/><path d="M9 4l4 4-4 4"/></svg>
         </a>
       </div>
+      <!-- Cosa c'e' nella mappa oltre ai millimetri: la sezione diceva solo
+           «mappa pluviometrica» e radar e boschi non erano nominati da nessuna
+           parte (segnalato il 18/9/2026). Sta PRIMA della storia: chi si ferma
+           a leggere vuole sapere prima cosa fa, poi perche' esiste. -->
+      <div class="piogge-funzioni">
+        <h3>Cosa trovi nella mappa</h3>
+        <ul>
+          <li><strong>La pioggia caduta davvero</strong>I millimetri misurati dai pluviometri delle agenzie regionali: ieri, 7, 10, 15, 20 o 30 giorni, oppure le date che scegli tu.</li>
+          <li><strong>Piogge per funghi</strong>Con un tocco la finestra da 13 a 20 giorni fa, la pioggia che conta per le nascite di oggi.</li>
+          <li><strong>Diretta radar</strong>La pioggia che sta cadendo adesso, le ultime due ore e i prossimi 40 minuti.</li>
+          <li><strong>Mappa boschi</strong>Faggete, castagneti, querceti, abetaie, lariceti e pinete, dalle carte forestali delle Regioni: per capire dove è piovuto sul bosco giusto.</li>
+          <li><strong>Ogni stazione, giorno per giorno</strong>Tocca un pallino: grafico della pioggia, della temperatura, del vento e dell'umidità.</li>
+          <li><strong>Cerca il tuo paese</strong>Scrivi il nome e la mappa ti porta lì, con i pluviometri intorno.</li>
+        </ul>
+      </div>
       <!-- ⚠️ LA STORIA STA QUI, dopo i due bottoni e prima dei numeri. Chi
            arriva deciso deve poter aprire la mappa senza leggere niente; chi
            invece si ferma trova il perché appena prima delle cifre che lo
@@ -531,6 +564,19 @@
         <img src="immagini/mappa_nordovest.jpg" alt="Mappa pluviometrica Nord-Ovest" />
         <div class="shot-cap">Nord-Ovest · mm cumulati</div>
       </div>
+      <!-- Le due cose della mappa che non sono i cumulati: la diretta radar
+           (dal 31/8/2026) e la mappa boschi (dal 16/9/2026). Aggiunte il
+           18/9/2026. Sono link: portano la mappa gia' in quel modo. Immagini
+           in 16:9, come la cornice, cosi' `object-fit: cover` non taglia niente;
+           si rifanno con `scatta-home.js` nella cartella claudio. -->
+      <a class="shot" href="https://precipitazioni.avventuremicologiche.it/?r=lombardia,veneto,emilia&amp;radar=ora" target="_blank" rel="noopener">
+        <img src="immagini/home-radar.jpg" alt="Diretta radar della pioggia sulla mappa pluviometrica" />
+        <div class="shot-cap">Diretta radar · pioggia adesso</div>
+      </a>
+      <a class="shot" href="https://precipitazioni.avventuremicologiche.it/?r=trentino&amp;boschi=1" target="_blank" rel="noopener">
+        <img src="immagini/home-boschi.jpg" alt="Mappa boschi: faggete, castagneti, querceti e abetaie in Trentino" />
+        <div class="shot-cap">Mappa boschi · tipi di bosco</div>
+      </a>
     </div>
   </div>
 
