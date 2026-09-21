@@ -111,7 +111,7 @@
     }
     .hero-content {
       position: absolute; bottom: 0; left: 0; right: 0; z-index: 3;
-      padding: 4.5rem 5rem;
+      padding: 3rem 5rem;            /* era 4.5rem: 24 px in meno sotto il titolo */
       display: flex; align-items: flex-end; justify-content: space-between; gap: 4rem;
     }
     h1 {
@@ -129,7 +129,10 @@
     }
 
     /* ── SHARED ── */
-    section { padding: 8rem 0; }
+    /* 21/9/2026: erano 8rem, cioe' 128 px sopra e 128 sotto, quindi 256 px di
+       vuoto fra una sezione e l'altra. Portati a 5rem: restano 160 px, che
+       separano ancora ma non lasciano lo schermo mezzo vuoto. */
+    section { padding: 5rem 0; }
     .container { max-width: 1160px; margin: 0 auto; padding: 0 3rem; }
     .label {
       font-size: 0.65rem; letter-spacing: 0.28em;
@@ -237,7 +240,7 @@
     }
 
     .piogge-left {
-      padding: 3.5rem 5rem 2.5rem 3rem;
+      padding: 2.5rem 5rem 2rem 3rem;   /* era 3.5rem sopra e 2.5 sotto */
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -328,7 +331,8 @@
     }
     a.shot { display: block; text-decoration: none; }
     a.shot:hover .shot-cap { color: rgba(232,224,208,0.9); }
-    .shot img {
+    .shot img,
+    .shot video {
       width: 100%;
       aspect-ratio: 16/9;
       object-fit: cover;
@@ -337,6 +341,9 @@
       filter: brightness(1) saturate(1);
       transition: filter 0.5s, transform 0.5s;
     }
+    /* I filmati (21/9/2026) hanno gia' le scritte dentro, quindi la didascalia
+       .shot-cap non c'e': starebbe nello stesso angolo e si sovrapporrebbe.
+       Finche' il filmato non parte si vede il `poster`, che e' la jpg di prima. */
     .shot-cap {
       position: absolute; bottom: 0; left: 0; right: 0;
       padding: 0.9rem 1.1rem 0.75rem;
@@ -358,7 +365,7 @@
     footer {
       background: #070605;
       color: var(--muted);
-      padding: 3.5rem 0;
+      padding: 2.5rem 0;             /* era 3.5rem */
       border-top: 1px solid var(--border);
     }
     .footer-row {
@@ -406,14 +413,30 @@
       nav { padding: 1rem 1.5rem; }
       .nav-links { display: none; }
       .yt-grid, .chi-grid { grid-template-columns: 1fr; gap: 3rem; }
-      section { padding: 5rem 0; }
+      section { padding: 3.25rem 0; }   /* era 5rem: 52 px invece di 80 */
       .piogge-inner { grid-template-columns: 1fr; min-height: unset; }
       /* ⚠️ `min-width: 0`: una colonna di griglia `1fr` non si stringe sotto
          la larghezza del figlio piu' largo, e un bottone da 34rem bastava a
          portare la colonna a 592 px dentro uno schermo da 412, facendo
          scorrere la pagina di lato. Aggiunto l'8/9/2026. */
-      .piogge-left { padding: 4rem 1.5rem 3rem; border-right: none; border-bottom: 1px solid var(--border); min-width: 0; }
-      .piogge-right { padding: 2.5rem 1.5rem; }
+      /* ⚠️ SUL TELEFONO I FILMATI VENGONO PRIMA della lista «Cosa trovi nella
+         mappa» (21/9/2026, sua richiesta). Chi apre da telefono vede subito i
+         due bottoni e poi la mappa che si muove; l'elenco, il perche' e i
+         numeri vengono dopo, per chi si ferma a leggere.
+         Il markup NON si tocca: si tolgono di mezzo le due colonne con
+         `display: contents`, cosi' i loro figli diventano figli della griglia
+         e si possono riordinare con `order`. Su computer non cambia niente. */
+      .piogge-inner { display: flex; flex-direction: column; padding: 2.5rem 1.5rem 2rem; }
+      .piogge-left, .piogge-right { display: contents; }
+      .piogge-left > *  { order: 2; }
+      .piogge-right > .shot { order: 3; width: 100%; margin: 0 0 8px; }
+      /* ⚠️ `:nth-child(1)` e non `:first-of-type`: i quattro riquadri sono due
+         <div> e due <a>, e `first-of-type` prendeva anche il primo <a>, cioe' il
+         terzo filmato, aprendo un buco in mezzo alla fila. */
+      .piogge-right > .shot:nth-child(1) { margin-top: 1.4rem; }
+      .piogge-funzioni { order: 4; margin-top: 2.4rem; }
+      .piogge-storia   { order: 5; }
+      .stats-grid      { order: 6; }
       .piogge-bar { flex-direction: column; text-align: center; padding: 1.2rem; }
       .footer-row { flex-direction: column; text-align: center; }
     }
@@ -556,26 +579,41 @@
 
     <!-- DX: due sole mappe reali, centrate, spostate verso sx con padding-left ridotto -->
     <div class="piogge-right">
+      <!-- 21/9/2026: quattro mini filmati al posto delle quattro foto. Sono
+           registrazioni del sito vero (`registra-filmati-veri.js` nella cartella
+           claudio), con le scritte incise da `incidi-scritte.js`. Muti, in loop,
+           16:9 come la cornice.
+           ⚠️ `preload="none"` e partenza solo quando il riquadro entra nello
+           schermo (lo script in fondo alla pagina): chi non arriva quaggiu' non
+           scarica i 3,4 MB. Il `poster` e' la jpg di prima, quindi chi ha il
+           risparmio dati o un browser che non li fa partire vede la home di
+           sempre. -->
       <div class="shot">
-        <img src="immagini/mappa_italia_svizzera.jpg" alt="Mappa pluviometrica Italia e Svizzera" />
-        <div class="shot-cap">Italia + Svizzera · mm cumulati</div>
+        <video src="video/piogge.mp4" poster="immagini/mappa_italia_svizzera.jpg"
+               muted loop playsinline preload="none"
+               aria-label="La mappa pluviometrica si colora quando si sceglie il periodo: sette giorni, poi trenta"></video>
       </div>
       <div class="shot">
-        <img src="immagini/mappa_nordovest.jpg" alt="Mappa pluviometrica Nord-Ovest" />
-        <div class="shot-cap">Nord-Ovest · mm cumulati</div>
+        <video src="video/scheda.mp4" poster="immagini/mappa_nordovest.jpg"
+               muted loop playsinline preload="none"
+               aria-label="La scheda di un pluviometro: pioggia, temperatura, vento e umidita"></video>
       </div>
       <!-- Le due cose della mappa che non sono i cumulati: la diretta radar
            (dal 31/8/2026) e la mappa boschi (dal 16/9/2026). Aggiunte il
            18/9/2026. Sono link: portano la mappa gia' in quel modo. Immagini
            in 16:9, come la cornice, cosi' `object-fit: cover` non taglia niente;
            si rifanno con `scatta-home.js` nella cartella claudio. -->
-      <a class="shot" href="https://precipitazioni.avventuremicologiche.it/?r=lombardia,veneto,emilia&amp;radar=ora" target="_blank" rel="noopener">
-        <img src="immagini/home-radar.jpg" alt="Diretta radar della pioggia sulla mappa pluviometrica" />
-        <div class="shot-cap">Diretta radar · pioggia adesso</div>
+      <a class="shot" href="https://precipitazioni.avventuremicologiche.it/?r=lombardia,veneto,emilia&amp;radar=ora" target="_blank" rel="noopener"
+         aria-label="Diretta radar: la pioggia che sta cadendo adesso">
+        <video src="video/radar.mp4" poster="immagini/home-radar.jpg"
+               muted loop playsinline preload="none"
+               aria-label="Le piogge che si muovono sul radar, le ultime due ore"></video>
       </a>
-      <a class="shot" href="https://precipitazioni.avventuremicologiche.it/?r=trentino&amp;boschi=1" target="_blank" rel="noopener">
-        <img src="immagini/home-boschi.jpg" alt="Mappa boschi: faggete, castagneti, querceti e abetaie in Trentino" />
-        <div class="shot-cap">Mappa boschi · tipi di bosco</div>
+      <a class="shot" href="https://precipitazioni.avventuremicologiche.it/?r=trentino&amp;boschi=1" target="_blank" rel="noopener"
+         aria-label="Mappa boschi: faggete, castagneti, querceti e abetaie">
+        <video src="video/boschi.mp4" poster="immagini/home-boschi.jpg"
+               muted loop playsinline preload="none"
+               aria-label="La mappa dei boschi che si accende sul Trentino"></video>
       </a>
     </div>
   </div>
@@ -610,6 +648,41 @@
     <div class="footer-copy">© 2025-2026 Avventure Micologiche · avventuremicologiche.it · Tutti i diritti riservati</div>
   </div>
 </footer>
+
+<script>
+/* I quattro filmati della sezione «piogge» partono SOLO quando il riquadro
+   entra nello schermo, e si fermano quando esce (21/9/2026).
+   ⚠️ Non si usa l'attributo `autoplay`: con quello il browser scarica i
+   filmati appena apre la pagina, anche a chi resta sulla prima schermata e
+   non arriva mai quaggiu'. Cosi' invece si scarica solo a chi guarda.
+   ⚠️ `play()` puo' essere rifiutato (risparmio energetico, «riduci
+   animazioni», impostazioni del telefono): in quel caso non si insiste e
+   resta il `poster`, che e' la foto che c'era prima. */
+(function () {
+  var video = document.querySelectorAll('.piogge-right video');
+  if (!video.length) return;
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  if (!('IntersectionObserver' in window)) {          // browser vecchio: si lascia il poster
+    return;
+  }
+  var guardia = new IntersectionObserver(function (voci) {
+    voci.forEach(function (v) {
+      var el = v.target;
+      if (v.isIntersecting) {
+        if (el.preload === 'none') el.preload = 'auto';
+        var p = el.play();
+        if (p && p.catch) p.catch(function () {});
+      } else {
+        el.pause();
+      }
+    });
+  }, { threshold: 0.35 });
+
+  Array.prototype.forEach.call(video, function (el) { guardia.observe(el); });
+})();
+</script>
 
 </body>
 </html>
