@@ -478,6 +478,15 @@
       .footer-row > div { min-width: 0; max-width: 100%; }
       .footer-mail { overflow-wrap: anywhere; }
       .socials { flex-wrap: wrap; justify-content: center; }
+      /* Copertina al telefono (3/10/2026, sua scelta): solo due foto affiancate,
+         Archie (spugnole.jpg, il nome del file e' sbagliato) e gli ovoli
+         (porcini.jpg, idem), poi titolo, bottoni e social sul fondo nero:
+         prima i bottoni stavano sopra le foto e le coprivano. */
+      .hero { height: auto; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+      .hero::after { display: none; }
+      .hero-cell { display: none; }
+      .hero-cell:nth-child(3), .hero-cell:nth-child(4) { display: block; grid-row: 1; aspect-ratio: 3 / 4; }
+      .hero-content { position: static; grid-column: 1 / -1; grid-row: 2; padding: 1.4rem 1.5rem 1.8rem; background: var(--bg); }
       .hero-azioni { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; opacity: 0; animation: fadeUp 1s 0.6s forwards; }
       .hero-azioni .btn { justify-content: space-between; padding: 0.95rem 1.1rem; font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(12,11,9,0.55); }
       .hero-azioni .socials { margin-top: 0.6rem; }
