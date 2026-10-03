@@ -405,6 +405,30 @@
       to   { opacity:1; transform:translateY(0); }
     }
 
+    /* ── 4. QUIZ TARTUFI (3/10/2026): stesso taglio della sezione piogge,
+       testo a sinistra e figura a destra. Testi lunghi in --dim per il contrasto. */
+    .quiz-section { background: var(--surface); }
+    .quiz-inner { display: grid; grid-template-columns: 55% 45%; }
+    .quiz-left {
+      padding: 2.5rem 5rem 2rem 3rem;
+      display: flex; flex-direction: column; justify-content: center;
+      border-right: 1px solid var(--border);
+    }
+    .quiz-section h2 { font-size: clamp(2.8rem, 5vw, 4.8rem); margin-bottom: 1.6rem; line-height: 1.05; }
+    .quiz-section h2 em { color: var(--accent); }
+    .quiz-desc { color: var(--dim); font-size: 1.15rem; line-height: 1.8; max-width: 48ch; }
+    .quiz-regioni { color: var(--dim); font-size: 1rem; margin-top: 1.2rem; }
+    .quiz-regioni a { color: var(--text); }
+    .quiz-right { display: flex; align-items: center; padding: 2rem 3rem 2rem 0; }
+    .quiz-right .shot { width: 85%; }
+
+    @media (max-width: 960px) {
+      .quiz-inner { grid-template-columns: 1fr; }
+      .quiz-left { padding: 0 1.5rem; border-right: none; min-width: 0; }
+      .quiz-right { padding: 1.4rem 1.5rem 0; }
+      .quiz-right .shot { width: 100%; }
+    }
+
     @media (max-width: 960px) {
       .hero { grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(3,1fr); }
       .hero-cell.tall { grid-row: span 1; }
@@ -447,8 +471,9 @@
 <nav>
   <a href="#" class="nav-brand">Avventure Micologiche</a>
   <div class="nav-links">
-    <a href="#youtube" class="nav-pulse">YouTube</a>
+    <a href="#youtube">YouTube</a>
     <a href="#piogge" class="nav-pulse">Mappa piogge <span style="font-size:0.65rem;">NEW</span></a>
+    <a href="/esame-tartufi/" class="nav-pulse">Quiz tartufi <span style="font-size:0.65rem;">NEW</span></a>
     <a href="#chi-siamo">Chi siamo</a>
   </div>
 </nav>
@@ -618,6 +643,32 @@
     </div>
   </div>
 
+</section>
+
+<hr class="hr" />
+
+<!-- 4. QUIZ ESAME TARTUFI (3/10/2026): porta alla sezione /esame-tartufi/.
+     I link alle quattro regioni sono testo vero: servono anche a Google per
+     trovare le pagine con le domande. -->
+<section class="quiz-section" id="quiz-tartufi">
+  <div class="quiz-inner">
+    <div class="quiz-left">
+      <h2>Quiz esame tartufi<br /><em>le domande ufficiali, in un gioco</em></h2>
+      <p class="quiz-desc">Per cercare tartufi serve il tesserino, e per averlo bisogna superare un esame. Abbiamo preso le domande ufficiali delle Regioni, con le risposte giuste, e ne abbiamo fatto un gioco a livelli con un tartufaio e il suo lagotto. Gratis, senza registrazione, anche dal telefono.</p>
+      <div style="margin: 1.6rem 0 0;">
+        <a href="/esame-tartufi/" class="btn btn-green-lg" style="width: 100%; max-width: 38rem; justify-content: center;">
+          Prova il quiz
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10"/><path d="M9 4l4 4-4 4"/></svg>
+        </a>
+      </div>
+      <p class="quiz-regioni">Le regioni: <a href="/esame-tartufi/marche/">Marche</a> · <a href="/esame-tartufi/toscana/">Toscana</a> · <a href="/esame-tartufi/lazio/">Lazio</a> · <a href="/esame-tartufi/campania/">Campania</a></p>
+    </div>
+    <div class="quiz-right">
+      <a class="shot" href="/esame-tartufi/" aria-label="Apri il quiz esame tartufi">
+        <img src="immagini/home-quiz-tartufi.jpg" alt="Il tartufaio esulta con un tartufo nero in mano, accanto al suo lagotto, in un bosco d'autunno" loading="lazy" />
+      </a>
+    </div>
+  </div>
 </section>
 
 </main>
