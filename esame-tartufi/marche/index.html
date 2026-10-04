@@ -237,8 +237,8 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
 .livelli:has(.barra){display:block;max-width:420px}
 /* ---------- serie di fila e classifica ---------- */
 #hFilaC.su{animation:pop .4s}
-/* la classifica sta nella scena, in alto a sinistra: si vede appena si apre la pagina */
-.class-scena{position:absolute;left:10px;top:10px;z-index:4;display:flex;align-items:center;gap:7px;max-width:calc(100% - 20px);padding:5px 14px 5px 8px;background:linear-gradient(180deg,#ffe08a,var(--oro));border:3px solid var(--legno2);border-radius:16px;box-shadow:0 4px 0 var(--legno2),0 6px 14px rgba(0,0,0,.35);color:var(--legno2);text-align:left;line-height:1.1;animation:classIn .6s cubic-bezier(.3,1.5,.5,1) .4s both}
+/* la classifica sta nella scena, in alto a destra dalla parte del cane (non sopra il tartufaio): si vede appena si apre la pagina */
+.class-scena{position:absolute;right:10px;top:10px;z-index:4;display:flex;align-items:center;gap:7px;max-width:calc(100% - 20px);padding:5px 14px 5px 8px;background:linear-gradient(180deg,#ffe08a,var(--oro));border:3px solid var(--legno2);border-radius:16px;box-shadow:0 4px 0 var(--legno2),0 6px 14px rgba(0,0,0,.35);color:var(--legno2);text-align:left;line-height:1.1;animation:classIn .6s cubic-bezier(.3,1.5,.5,1) .4s both}
 .class-scena:hover{filter:brightness(1.06)}
 .class-scena:active{transform:translateY(3px);box-shadow:0 1px 0 var(--legno2)}
 .class-scena .cop{font-size:26px;animation:coppa 2.4s ease-in-out infinite}
