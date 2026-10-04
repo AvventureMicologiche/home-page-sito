@@ -235,6 +235,44 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
   .carta.finale .cestino{width:min(200px,24vh)}
 }
 .livelli:has(.barra){display:block;max-width:420px}
+/* ---------- serie di fila e classifica ---------- */
+#hFilaC.su{animation:pop .4s}
+/* la classifica sta nella scena, in alto a sinistra: si vede appena si apre la pagina */
+.class-scena{position:absolute;left:10px;top:10px;z-index:4;display:flex;align-items:center;gap:7px;max-width:calc(100% - 20px);padding:5px 14px 5px 8px;background:linear-gradient(180deg,#ffe08a,var(--oro));border:3px solid var(--legno2);border-radius:16px;box-shadow:0 4px 0 var(--legno2),0 6px 14px rgba(0,0,0,.35);color:var(--legno2);text-align:left;line-height:1.1;animation:classIn .6s cubic-bezier(.3,1.5,.5,1) .4s both}
+.class-scena:hover{filter:brightness(1.06)}
+.class-scena:active{transform:translateY(3px);box-shadow:0 1px 0 var(--legno2)}
+.class-scena .cop{font-size:26px;animation:coppa 2.4s ease-in-out infinite}
+.class-scena .tx{display:flex;flex-direction:column;min-width:0}
+.class-scena b{font-size:17px;font-weight:800}
+#classPrimo{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#classPrimo:empty{display:none}
+@keyframes classIn{from{transform:translateY(-30px) scale(.6);opacity:0}}
+@keyframes coppa{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-14deg) scale(1.15)}92%{transform:rotate(12deg) scale(1.15)}}
+.btn-class{display:inline-block;vertical-align:middle;margin:8px 8px 0 0;padding:4px 12px;background:var(--oro);border:2px solid #a8761a;color:var(--legno2);border-radius:99px;font-weight:800;font-size:14px;box-shadow:0 3px 0 #a8761a}
+.conferma .carta.class{max-width:400px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
+/* titolo: nastro di legno con le lettere dorate (scelto il 4/10, variante C) */
+.class .nastro{margin:-4px -2px 8px;padding:10px 12px 8px;background:linear-gradient(180deg,#8a5a2c,var(--legno2));border-radius:12px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 3px 0 #3c2410}
+.class h2{margin:0;font-size:22px;font-weight:800;line-height:1;color:var(--oro);letter-spacing:.14em;text-transform:uppercase;text-shadow:0 2px 0 #2e1a08}
+.class h2 small{display:block;font-size:13px;letter-spacing:.3em;color:#ffe08a;margin-top:4px}
+.c-sotto{color:var(--muted);font-size:14px;margin:0 0 10px}
+.classifica{list-style:none;padding:0;margin:0 0 6px;text-align:left}
+.classifica li{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:10px;font-weight:700}
+.classifica li:nth-child(odd){background:#f3e4c4}
+.classifica li.mio{background:var(--oro);animation:pop .5s}
+.classifica .pos{flex:0 0 28px;text-align:center;font-weight:800;color:var(--muted)}
+.classifica .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.classifica b{font-size:18px;color:var(--legno2)}
+.classifica b small{font-size:11px;color:var(--muted);margin-left:2px}
+.c-vuota{color:var(--muted);margin:10px 0}
+.c-tuo{font-weight:800;margin:8px 0 0}
+.class-entra{margin:12px 0 4px;padding:12px;border-radius:14px;background:#fff;border:3px solid var(--oro);animation:pop .5s}
+.class-entra .tit{display:block;font-size:19px;line-height:1.25;color:var(--legno2)}
+.class-entra input{display:block;width:100%;margin:8px 0 2px;padding:10px 12px;font:inherit;font-size:18px;border:3px solid #e8d6b2;border-radius:12px;text-align:center}
+.class-entra input:focus{outline:none;border-color:var(--arancio)}
+.class-entra small{color:var(--muted);font-size:13px}
+.class-entra .due{display:flex;gap:10px}.class-entra .due .btn{flex:1;font-size:17px;padding:11px}
+.c-err{color:var(--ko);font-weight:700;margin:6px 0 0;min-height:0}
+.fine .c-fila{color:var(--muted);font-weight:700;font-size:14px;margin:6px 0 0}
 .barra{height:12px;border-radius:6px;background:rgba(251,243,226,.12);border:1px solid rgba(251,243,226,.25);overflow:hidden}
 .barra i{display:block;height:100%;background:linear-gradient(90deg,var(--oro),var(--arancio))}
 .barra-tit{display:block;margin-top:5px;color:#e9d6b4;font-weight:700;font-size:13px}
@@ -270,6 +308,7 @@ a.reg{text-decoration:none;display:block}
   .hud{left:6px;right:6px;top:6px;gap:5px}
   .chip{padding:0 7px;font-size:14px;border-radius:10px}
   .chip small{font-size:11px}
+  #hPuntiC small{display:none}
   .vita{width:19px;height:19px}
   #suono{width:30px;height:30px;line-height:26px;font-size:13px;right:6px;bottom:6px}
   .tappe{margin:8px 2px 12px}
@@ -303,10 +342,12 @@ a.reg{text-decoration:none;display:block}
     <img id="pop" src="img/tartufo-nero.webp" alt="">
     <div class="hud" id="hud" hidden>
       <div class="chip" id="hLiv">Livello 1</div>
-      <div class="chip"><small>Punti</small><span id="hPunti">0</span></div>
+      <div class="chip" id="hPuntiC"><small>Punti</small><span id="hPunti">0</span></div>
+      <div class="chip" id="hFilaC" title="Risposte giuste di fila"><small>Di fila</small><span id="hFila">0</span></div>
       <div class="chip vite" id="vite"></div>
     </div>
     <button id="suono" title="Suono">🔊</button>
+    <button class="class-scena" id="classScena" hidden><span class="cop">🏆</span><span class="tx"><b>Classifica</b><span id="classPrimo"></span></span></button>
   </div>
 
   <section id="sRegione" hidden><div id="h1r"></div><div id="regioni"></div></section>  <!-- TITOLO -->
@@ -345,6 +386,8 @@ a.reg{text-decoration:none;display:block}
       <div id="fRacc"></div>
       <div id="tess"></div>
       <div class="totale"><small>Punti del livello</small><span id="fPunti">0</span></div>
+      <p class="c-fila" id="fFila"></p>
+      <div id="fClass"></div>
       <button class="btn pulsa" id="fBtn"></button>
       <p class="ripasso-tit" id="ripTit"></p>
       <ul class="ripasso" id="rip"></ul>
@@ -399,7 +442,7 @@ const mescola = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 const attesa = ms => new Promise(r => setTimeout(r, ms));
 
 /* ---------- salvataggio ---------- */
-let S = { mazzo: [], livello: 1, stelle: {}, record: 0, muto: false, ripasso: [] };
+let S = { mazzo: [], livello: 1, stelle: {}, record: 0, muto: false, ripasso: [], fila: 0, filaMax: 0, gettone: null, daInviare: null };
 try { Object.assign(S, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) {}
 // ?cestino=N fa vedere il cestino con N tartufi senza giocare (prova: non salva niente)
 const PROVA = Math.min(LIVELLI, parseInt(PAR.get('cestino')) || 0);
@@ -642,6 +685,110 @@ async function trovato() {
 }
 function sbaglia() { metti('cane', 'cane-triste-video'); metti('uomo', 'uomo-dubbioso-video'); }
 
+/* ---------- serie di fila e classifica dei primi 10 ----------
+   «Di fila» = risposte giuste una dopo l'altra, anche attraverso i livelli e i giorni. Al primo errore torna a zero.
+   Il massimo è fare tutte le domande della regione senza sbagliare. Quando la serie si chiude, se entra nei primi 10
+   della regione, a fine livello si chiede il nome. Il server (worker Cloudflare) controlla il gettone dato
+   all'inizio della serie: niente serie più veloci del possibile. */
+const API = /(^|\.)avventuremicologiche\.it$/.test(location.hostname) ? 'https://classifica-tartufi.avventuremicologiche.workers.dev' : '/api';
+const MIN_CLASS = 5, POSTI_CLASS = 10;
+async function chiama(via, dati) {
+  const r = await fetch(API + via, dati ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dati) } : undefined);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.errore || r.status);
+  return j;
+}
+const leggiClassifica = () => chiama('/classifica?regione=' + REG);
+function prendiGettone() {
+  if (PROVA || FESTA || S.gettone || prendiGettone.inCorso) return;
+  prendiGettone.inCorso = true;
+  chiama('/inizio', { regione: REG }).then(g => { if (!S.gettone) { S.gettone = g; salva(); } }).catch(() => {}).finally(() => prendiGettone.inCorso = false);
+}
+let recordDetto = false;
+function filaGiusta() {
+  if (S.fila < D.length) S.fila++;
+  const h = $('hFilaC'); $('hFila').textContent = S.fila; h.classList.remove('su'); void h.offsetWidth; h.classList.add('su');
+  if (S.fila > S.filaMax) {
+    if (S.filaMax >= MIN_CLASS && !recordDetto) { recordDetto = true; setTimeout(() => { const [x, y] = punto('cane', .5, 0); vola('Nuovo record!', x, y + 10); }, 700); }
+    S.filaMax = S.fila;
+  }
+  if (S.fila >= D.length) chiudiSerie();   // serie perfetta: tutte le domande senza un errore
+  salva();
+}
+function chiudiSerie() {
+  if (S.fila >= MIN_CLASS && S.gettone && !PROVA && !FESTA && (!S.daInviare || S.fila > S.daInviare.fila))
+    S.daInviare = { fila: S.fila, t: S.gettone.t, firma: S.gettone.firma };
+  S.fila = 0; S.gettone = null; recordDetto = false; salva();
+}
+// «al 2° posto», ma «all'8° posto» e «all'11° posto»
+const alPosto = n => `${n === 8 || n === 11 ? "all'" : 'al '}<b>${n}° posto</b>`;
+function righeClassifica(l, mio) {
+  if (!l.length) return '<p class="c-vuota">Ancora nessuno: il primo posto è libero!</p>';
+  const ol = document.createElement('ol'); ol.className = 'classifica';
+  l.forEach((r, k) => {
+    const li = document.createElement('li'); if (k + 1 === mio) li.className = 'mio';
+    li.innerHTML = `<span class="pos">${['🥇', '🥈', '🥉'][k] || k + 1}</span><span class="n"></span><b>${r.fila}<small>di fila</small></b>`;
+    li.children[1].textContent = r.nome; ol.appendChild(li);
+  });
+  return ol.outerHTML;
+}
+function apriClassifica() {
+  qa('quiz_classifica_vista');
+  const c = document.createElement('div'); c.className = 'conferma';
+  c.innerHTML = `<div class="carta class"><div class="nastro"><h2>🏆 Classifica<small>${R.nome}</small></h2></div>
+    <p class="c-sotto">Risposte giuste di fila, senza errori. Il massimo è ${D.length}: tutte le domande.</p>
+    <div id="cLista"><p class="c-vuota">Un attimo…</p></div>
+    <p class="c-tuo">Il tuo record: ${S.filaMax} di fila${S.fila ? ` · serie in corso: ${S.fila}` : ''}</p>
+    <button class="btn" id="cChiudi">Chiudi</button></div>`;
+  document.body.appendChild(c);
+  c.querySelector('#cChiudi').onclick = () => c.remove();
+  c.onclick = e => { if (e.target === c) c.remove(); };
+  leggiClassifica().then(j => c.querySelector('#cLista').innerHTML = righeClassifica(j.lista))
+    .catch(() => c.querySelector('#cLista').innerHTML = '<p class="c-vuota">La classifica adesso non risponde: riprova più tardi.</p>');
+}
+$('classScena').onclick = apriClassifica;
+// sul bottone della scena: chi è primo, per incuriosire
+function primoInClassifica() {
+  leggiClassifica().then(j => { const p = j.lista[0]; $('classPrimo').textContent = p ? `1° ${p.nome} · ${p.fila} di fila` : 'Il primo posto è libero!'; }).catch(() => {});
+}
+// a fine livello: se la serie appena chiusa entra nei primi 10, si chiede il nome
+async function propostaClassifica() {
+  const box = $('fClass'), p = S.daInviare; box.innerHTML = '';
+  if (!p || PROVA || FESTA) return;
+  let l; try { l = (await leggiClassifica()).lista; } catch (e) { return; }   // senza rete si riprova al prossimo livello
+  if (l.length >= POSTI_CLASS && p.fila <= l[l.length - 1].fila) { S.daInviare = null; salva(); return; }
+  const posto = l.filter(r => r.fila >= p.fila).length + 1;
+  let nome = ''; try { nome = localStorage.getItem('cacciaNome') || ''; } catch (e) {}
+  box.innerHTML = `<div class="class-entra"><span class="tit">🏆 <b>${p.fila} di fila!</b> Entri nella classifica ${R.nome} ${alPosto(posto)}</span>
+    <input id="cNome" maxlength="16" autocomplete="nickname" enterkeyhint="done" aria-label="Il tuo nome in classifica" placeholder="Il tuo nome">
+    <small>Lo vedono tutti: va bene anche un soprannome.</small>
+    <div class="due"><button class="btn grigio" id="cSalta">No grazie</button><button class="btn arancio" id="cInvia">Salva</button></div>
+    <p class="c-err" id="cErr"></p></div>`;
+  $('cNome').value = nome;
+  SUONI.combo();
+  $('cSalta').onclick = () => { S.daInviare = null; salva(); box.innerHTML = ''; };
+  $('cNome').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') $('cInvia').click(); };
+  $('cInvia').onclick = async () => {
+    const n = $('cNome').value.trim();
+    if (n.length < 2) { $('cErr').textContent = 'Scrivi almeno 2 lettere.'; return; }
+    $('cInvia').disabled = true; $('cErr').textContent = '';
+    try {
+      const j = await chiama('/invia', { regione: REG, nome: n, fila: p.fila, t: p.t, firma: p.firma });
+      try { localStorage.setItem('cacciaNome', n); } catch (e) {}
+      S.daInviare = null; salva();
+      qa('quiz_classifica', { fila: p.fila, posto: j.posto });
+      box.innerHTML = `<div class="class-entra"><span class="tit">${j.posto ? `Sei ${j.posto}° nella classifica ${R.nome}!` : 'Qualcuno ti ha appena superato!'}</span>${righeClassifica(j.lista, j.posto)}</div>`;
+      if (j.posto) { SUONI.stella(); const r = box.getBoundingClientRect(); scoppio(r.left + r.width / 2, r.top + 30, 24, 6, ['stella']); }
+    } catch (e) {
+      $('cInvia').disabled = false;
+      if (e.message === 'nome') $('cErr').textContent = 'Questo nome non va: da 2 a 16 tra lettere e numeri, niente parolacce.';
+      else if (e.message === 'troppi invii') $('cErr').textContent = 'Troppi invii: riprova fra un po\'.';
+      else if (/^\d+$|fetch|network/i.test(e.message)) $('cErr').textContent = 'Non riesco a raggiungere la classifica: riprova.';
+      else { S.daInviare = null; salva(); box.innerHTML = '<p class="c-err">Questa serie non si può salvare in classifica.</p>'; }
+    }
+  };
+}
+
 /* ---------- gioco ---------- */
 let giro, i, errori, sbagliate, punti, serie, bloccato;
 // le domande sbagliate tornano: fino a 3 per livello, finché non si azzeccano
@@ -663,6 +810,7 @@ function schermo(id) {
   ['sRegione', 'sTitolo', 'sGioco', 'sFine'].forEach(s => $(s).hidden = s !== id); $('hud').hidden = id === 'sTitolo' || id === 'sRegione';
   // al telefono durante il gioco la scena è più bassa e resta in alto: si rimisurano i personaggi
   document.body.classList.toggle('in-gioco', id === 'sGioco' || id === 'sFine'); misura();
+  $('classScena').hidden = id !== 'sTitolo';
 }
 const tipo = n => n % 2 ? 'tartufo-nero' : 'tartufo-bianco';
 // dove si appoggia il k-esimo tartufo nel cestino (frazioni dell'immagine): prima davanti, poi in mezzo, poi dietro
@@ -704,7 +852,7 @@ function livelliTitolo() {
     const np = presi().length, st = Object.values(S.stelle).reduce((a, b) => a + b, 0);
     $('livelli').innerHTML = `<div class="barra"><i style="width:${np / LIVELLI * 100}%"></i></div><small class="barra-tit">Livello ${S.livello} di ${LIVELLI} · ★ ${st} su ${LIVELLI * 3}</small>`;
   }
-  $('record').textContent = S.record ? `Record: ${S.record} punti in un livello` : '';
+  $('record').textContent = [S.filaMax ? `Il tuo record: ${S.filaMax} di fila` : '', S.record ? `${S.record} punti in un livello` : ''].filter(Boolean).join(' · ');
   rimaste();
 }
 function rimaste() { const r = (S.ripasso || []).length; $('rimaste').textContent = `Domande non ancora uscite: ${S.mazzo.length || D.length} su ${D.length}` + (r ? ` · da ripassare: ${r}` : ''); }
@@ -714,7 +862,7 @@ async function iniziaLivello() {
   giro = pesca(); i = 0; errori = 0; sbagliate = []; punti = 0; serie = 0;
   qa('quiz_livello', { livello: S.livello });
   schermo('sGioco'); scrollTo({ top: 0, behavior: 'smooth' });
-  $('hLiv').textContent = 'Livello ' + S.livello; $('hPunti').textContent = '0'; $('combo').innerHTML = '';
+  $('hLiv').textContent = 'Livello ' + S.livello; $('hPunti').textContent = '0'; $('hFila').textContent = S.fila; $('combo').innerHTML = '';
   $('tappe').innerHTML = Array.from({ length: N }, () => '<i class="tappa"></i>').join('');
   disegnaVite();
   camminando = false;
@@ -723,6 +871,7 @@ async function iniziaLivello() {
 function mostraDomanda() {
   const d = giro[i]; bloccato = false;
   attendi();
+  if (!S.fila) prendiGettone();
   [...$('tappe').children].forEach((t, k) => t.classList.toggle('ora', k === i));
   $('etich').textContent = (inRipasso.has(d.n) ? '↻ Ripasso · ' : '') + `${d.sez} · domanda n. ${d.n}`;
   $('etich').classList.toggle('rip', inRipasso.has(d.n));
@@ -756,7 +905,7 @@ async function rispondi(k, el) {
   if (FIG.has(d.n)) setTimeout(() => $('fig').classList.add('svela'), 250);
   const tp = $('tappe').children[i]; tp.classList.remove('ora'); tp.classList.add(giusta ? 'ok' : 'ko');
   if (giusta) {
-    serie++;
+    serie++; filaGiusta();
     if (S.ripasso.includes(d.n)) { S.ripasso = S.ripasso.filter(n => n !== d.n); salva(); }
     const molt = Math.min(3, 1 + Math.floor(serie / 3)), guad = 100 * molt;
     punti += guad;
@@ -769,6 +918,7 @@ async function rispondi(k, el) {
     avanti();
   } else {
     serie = 0; errori++; sbagliate.push({ d, k }); $('combo').innerHTML = '';
+    chiudiSerie(); $('hFila').textContent = 0;
     if (!S.ripasso.includes(d.n)) { S.ripasso.push(d.n); salva(); }
     const v = $('vite').children[VITE - errori]; if (v) v.classList.add('persa');
     SUONI.sbagliato(); sbaglia();
@@ -845,6 +995,8 @@ async function fineLivello(vinto) {
     sbaglia(); SUONI.perso();
     $('fBtn').textContent = 'Riprova il livello';
   }
+  $('fFila').textContent = S.fila ? `Di fila: ${S.fila} · il tuo record: ${S.filaMax}` : `Il tuo record: ${S.filaMax} di fila`;
+  propostaClassifica();
   const fine = punti, t0 = performance.now();
   (function conta(t) { const p = Math.min(1, (t - t0) / 700); $('fPunti').textContent = Math.round(fine * p); if (p < 1) requestAnimationFrame(conta); })(t0);
 }
@@ -861,7 +1013,7 @@ function chiediReset() {
   c.onclick = e => { if (e.target === c) c.remove(); };
   c.querySelector('#cSi').onclick = () => {
     qa('quiz_reset', { livello: S.livello });
-    S.mazzo = []; S.livello = 1; S.stelle = {}; S.ripasso = []; S.puntiTot = 0; S.record = 0;
+    S.mazzo = []; S.livello = 1; S.stelle = {}; S.ripasso = []; S.puntiTot = 0; S.record = 0; S.fila = 0; S.gettone = null;
     salva(); c.remove(); titolo();
   };
 }
@@ -879,7 +1031,7 @@ addEventListener('keydown', e => {
 // schermata del titolo: camminano nel bosco
 const TITOLO = 'Caccia al<br>' + [...'Tesserino'].map((c, k) => `<span style="animation-delay:${k * .09}s">${c}</span>`).join('');
 function titolo() {
-  schermo('sTitolo'); livelliTitolo();
+  schermo('sTitolo'); livelliTitolo(); primoInClassifica();
   $('h1').innerHTML = TITOLO;
   $('regTit').innerHTML = `Regione <b>${R.nome}</b> · <button id="cambiaReg">cambia regione</button>`;
   $('cambiaReg').onclick = () => { try { localStorage.removeItem('cacciaRegione'); } catch (e) {} location.href = SITO ? '/esame-tartufi/' : location.pathname; };
