@@ -784,5 +784,22 @@
 })();
 </script>
 
+<script>
+/* Eventi GA4 sui tasti che portano al quiz (4/10/2026): un nome evento per tasto,
+   cosi' si leggono senza registrare dimensioni. Le regioni portano anche il nome. */
+document.addEventListener('click', function (e) {
+  var a = e.target.closest && e.target.closest('a[href^="/esame-tartufi/"]');
+  if (!a || typeof gtag !== 'function') return;
+  var dove = a.closest('nav') ? 'menu'
+    : a.closest('.hero-azioni') ? 'alto'
+    : a.closest('.quiz-regioni') ? 'regione'
+    : a.closest('.shot') ? 'immagine'
+    : a.closest('.quiz-section') ? 'sezione' : 'altro';
+  var p = {};
+  if (dove === 'regione') p.regione = a.getAttribute('href').split('/')[2];
+  gtag('event', 'click_quiz_' + dove, p);
+});
+</script>
+
 </body>
 </html>
