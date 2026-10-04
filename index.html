@@ -493,6 +493,11 @@
       .hero-azioni .soc { width: 44px; height: 44px; }
       .hero-azioni .soc svg { width: 20px; height: 20px; }
       .hero-azioni .btn-yt { border-color: #FF0000; color: #ff5a4f; }
+      /* al telefono il bottone toccato resta in :hover quando si torna indietro: il fondo resta scuro,
+         quindi la scritta non deve diventare scura (sparirebbe) */
+      .hero-azioni .btn-green:hover { color: var(--green); }
+      .hero-azioni .btn-gold:hover { color: var(--accent); }
+      .hero-azioni .btn-yt:hover { color: #ff5a4f; }
     }
   </style>
 </head>
