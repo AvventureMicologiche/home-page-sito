@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quiz esame tartufi Marche: 120 domande ufficiali e risposte</title>
 <meta name="description" content="Quiz per il patentino dei tartufi in Marche: le 120 domande ufficiali dell&#x27;esame con le risposte giuste, in un gioco a livelli gratis, anche dal telefono.">
+<!-- Google tag (gtag.js), stessa proprieta' della home; config solo sul dominio vero -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4WLB4PFS69"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  if (/(^|\.)avventuremicologiche\.it$/.test(location.hostname)) gtag('config', 'G-4WLB4PFS69');
+</script>
 <link rel="canonical" href="https://avventuremicologiche.it/esame-tartufi/marche/">
 <base href="/esame-tartufi/">
 <meta property="og:type" content="website">
@@ -398,6 +406,8 @@ const PROVA = Math.min(LIVELLI, parseInt(PAR.get('cestino')) || 0);
 if (PROVA) { S.stelle = {}; for (let n = 1; n <= PROVA; n++) S.stelle[n] = n % 3 + 1; S.livello = Math.min(LIVELLI, PROVA + 1); }
 // ?festa=1 fa vedere subito la festa finale (prova: non salva niente)
 const FESTA = new URLSearchParams(location.search).has('festa');
+// eventi GA4 del gioco (4/10/2026): regione e livello in ogni evento
+function qa(nome, p) { if (FESTA) return; try { gtag('event', nome, Object.assign({ regione: REG || '' }, p || {})); } catch (e) {} }
 const salva = () => { if (PROVA || FESTA) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
 /* ---------- immagini ---------- */
@@ -702,6 +712,7 @@ function disegnaVite() { $('vite').innerHTML = Array.from({ length: VITE }, () =
 
 async function iniziaLivello() {
   giro = pesca(); i = 0; errori = 0; sbagliate = []; punti = 0; serie = 0;
+  qa('quiz_livello', { livello: S.livello });
   schermo('sGioco'); scrollTo({ top: 0, behavior: 'smooth' });
   $('hLiv').textContent = 'Livello ' + S.livello; $('hPunti').textContent = '0'; $('combo').innerHTML = '';
   $('tappe').innerHTML = Array.from({ length: N }, () => '<i class="tappa"></i>').join('');
@@ -783,6 +794,7 @@ async function fineLivello(vinto) {
   camminando = false;   // a fine livello si sta fermi: il bosco non scorre
   schermo('sFine');
   const st = vinto ? VITE - errori : 0, tutto = vinto && S.livello === LIVELLI;
+  qa(tutto ? 'quiz_festa' : vinto ? 'quiz_livello_ok' : 'quiz_livello_ko', { livello: S.livello, errori: errori });
   $('cFine').classList.toggle('perso', !vinto);
   $('cFine').classList.toggle('finale', tutto);
   // alla festa finale: prima il tesserino e i numeri, poi il cestino; via le stelle del livello e la barra in alto
@@ -848,6 +860,7 @@ function chiediReset() {
   c.querySelector('#cNo').onclick = () => c.remove();
   c.onclick = e => { if (e.target === c) c.remove(); };
   c.querySelector('#cSi').onclick = () => {
+    qa('quiz_reset', { livello: S.livello });
     S.mazzo = []; S.livello = 1; S.stelle = {}; S.ripasso = []; S.puntiTot = 0; S.record = 0;
     salva(); c.remove(); titolo();
   };
