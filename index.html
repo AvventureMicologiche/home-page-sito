@@ -400,6 +400,26 @@
        (mappa, quiz, YouTube) e i social. Scelta sua: niente menu ☰, che da
        solo nessuno apre. */
     .hero-azioni { display: none; }
+    /* ── BANNER NELLA COPERTINA AL COMPUTER (4/10/2026, mockup C scelto) ──
+       La copertina aveva l'angolo in basso a destra vuoto: ci vanno mappa, quiz
+       e YouTube come banner, con una riga che dice cosa c'e', piu' i social.
+       Portano direttamente ai siti, come i bottoni del telefono. */
+    @media (min-width: 961px) {
+      .hero-azioni { display: flex; flex-direction: column; gap: .9rem; width: min(500px, 36vw); opacity: 0; animation: fadeUp 1s .6s forwards; }
+      .hero-azioni .btn { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 1rem; padding: 1.1rem 1.5rem 1.15rem; border-width: 1px; border-left-width: 5px; text-align: left; background: rgba(12,11,9,.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+      .hero-azioni .btn b { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 500; line-height: 1.05; display: flex; align-items: center; gap: .6rem; }
+      .hero-azioni .btn b i { font-style: normal; font-family: 'DM Sans', sans-serif; font-size: .6rem; letter-spacing: .12em; padding: .2rem .45rem; border: 1px solid currentColor; border-radius: 3px; }
+      .hero-azioni .btn small { grid-column: 1; font-size: .8rem; color: var(--dim); margin-top: .25rem; letter-spacing: .02em; }
+      .hero-azioni .btn > span { grid-row: 1 / span 2; grid-column: 2; font-size: 1.4rem; }
+      .hero-azioni .btn-yt { border-color: #FF0000; color: #ff5a4f; }
+      .hero-azioni .btn-green:hover { background: var(--green); color: var(--bg); }
+      .hero-azioni .btn-gold:hover { background: var(--accent); color: var(--bg); }
+      .hero-azioni .btn-yt:hover { background: #FF0000; color: #fff; }
+      .hero-azioni .btn:hover small { color: inherit; }
+      .hero-azioni .socials { margin-top: .3rem; justify-content: flex-end; }
+      .hero-azioni .soc { width: 46px; height: 46px; }
+      .hero-azioni .soc svg { width: 20px; height: 20px; }
+    }
     .footer-copy {
       margin-top: 2rem; padding-top: 1.5rem;
       border-top: 1px solid var(--border);
@@ -498,6 +518,9 @@
       .hero-azioni .btn-green:hover { color: var(--green); }
       .hero-azioni .btn-gold:hover { color: var(--accent); }
       .hero-azioni .btn-yt:hover { color: #ff5a4f; }
+      /* al telefono restano bottoni semplici: niente sottotitolo e niente NEW */
+      .hero-azioni .btn b { font-weight: inherit; }
+      .hero-azioni .btn b i, .hero-azioni .btn small { display: none; }
     }
   </style>
 </head>
@@ -523,11 +546,11 @@
   <div class="hero-cell"><img src="immagini/tartufo_nero.jpg" alt="Tartufo nero" /></div>
   <div class="hero-content">
     <h1>Avventure<em>Micologiche</em></h1>
-    <!-- Solo al telefono: mappa, quiz, YouTube e i social, subito sotto il titolo -->
+    <!-- Mappa, quiz, YouTube e i social: al telefono sotto il titolo, al computer banner a destra -->
     <div class="hero-azioni">
-      <a href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener" class="btn btn-green">Mappa delle piogge <span>→</span></a>
-      <a href="/esame-tartufi/" class="btn btn-gold">Quiz esame tartufi <span>→</span></a>
-      <a href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" class="btn btn-yt">Canale YouTube <span>→</span></a>
+      <a href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener" class="btn btn-green"><b>Mappa delle piogge <i>NEW</i></b><small>Dove è piovuto davvero, stazione per stazione</small><span>→</span></a>
+      <a href="/esame-tartufi/" class="btn btn-gold"><b>Quiz esame tartufi <i>NEW</i></b><small>Le domande ufficiali del tesserino, in un gioco</small><span>→</span></a>
+      <a href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" class="btn btn-yt"><b>Canale YouTube</b><small>Le nostre uscite nel bosco, in video</small><span>→</span></a>
       <div class="socials"><a href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" aria-label="YouTube" class="soc soc-yt">
           <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
         </a>
