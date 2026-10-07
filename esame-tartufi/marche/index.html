@@ -33,6 +33,11 @@
 .ico{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#e9d6b4;background:rgba(251,243,226,.08);border:1px solid rgba(251,243,226,.18);transition:background .15s,color .15s}
 .ico:hover{background:var(--arancio);color:#fff}
 .ico svg{width:18px;height:18px}
+.iscriviti{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px 0 11px;border-radius:99px;background:#ff0000;color:#fff;text-decoration:none;font-weight:800;font-size:14px;box-shadow:0 3px 10px rgba(255,0,0,.35);animation:iscr 3s ease-in-out 1.5s infinite}
+.iscriviti:hover{background:#d00000}
+.iscriviti svg{width:18px;height:18px}
+@keyframes iscr{0%,85%,100%{transform:scale(1)}90%{transform:scale(1.08)}95%{transform:scale(.98)}}
+@media (max-width:400px){ .icone{gap:4px} .ico{width:31px;height:31px} .iscriviti{padding:0 10px 0 8px;font-size:13px} }
 .h1-sito{max-width:720px;margin:4px auto 0;padding:0 12px;font-size:13px;font-weight:700;color:#c9b28c;line-height:1.3}
 .titolo .gtit{margin:10px 0 2px;font-size:clamp(28px,min(10vw,6vh),52px);line-height:1;font-weight:800;color:#fff4d6;text-shadow:0 3px 0 var(--arancio),0 6px 0 var(--legno2),0 10px 20px rgba(0,0,0,.4)}
 .titolo .gtit span{display:inline-block;animation:onda 2.6s ease-in-out infinite}
@@ -61,17 +66,10 @@
 .piede-sito a{color:#e9d6b4}
 .piede-sito .marchio-p{font-weight:800;color:#e9d6b4;font-size:17px}
 .piede-sito .link-p{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 14px;margin:8px 0}
-@media (max-width:560px){ body.in-gioco .barra-sito, body.in-gioco .h1-sito{display:none} }
+@media (max-width:560px){ body.in-gioco:has(#sGioco:not([hidden])) .barra-sito, body.in-gioco .h1-sito{display:none} }
 </style>
 
-<script>
-// Immagini dal CDN con riserva locale: sta qui in testa perche' le <img> scritte nella pagina chiamano
-// imgRiserva prima che giri lo script in fondo. Spiegazione completa nel blocco «immagini» in fondo.
-var IMG_CDN = 'https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/', IMG_LOC = 'img/', IMG_B = IMG_CDN;
-function imgUrl(n) { return IMG_B + n + '.webp'; }
-function imgRiserva(el) { el.onerror = null; IMG_B = IMG_LOC; if (el.src && el.src.indexOf(IMG_CDN) === 0) el.src = el.src.replace(IMG_CDN, IMG_LOC); try { document.querySelector('#scena .bg').style.backgroundImage = 'url(img/sfondo-giro.webp)'; } catch (e) {} }
-</script>
-<link rel="preload" as="image" href="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/sfondo-giro.webp">
+<link rel="preload" as="image" href="img/sfondo-giro.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -89,7 +87,7 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
 
 /* ---------- la scena ---------- */
 #scena{position:relative;height:clamp(170px,30vh,380px);border-radius:18px;overflow:hidden;border:4px solid var(--legno2);box-shadow:0 6px 0 #1d140c,0 12px 30px rgba(0,0,0,.4);background:#c98a3a}
-#scena .bg{position:absolute;inset:0;background:url(https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/sfondo-giro.webp) 0 100%/auto 100% repeat-x}
+#scena .bg{position:absolute;inset:0;background:url(img/sfondo-giro.webp) 0 100%/auto 100% repeat-x}
 #scena .pg{position:absolute;bottom:5%;transform-origin:50% 100%;filter:drop-shadow(0 4px 3px rgba(0,0,0,.28));user-select:none;-webkit-user-drag:none;pointer-events:none}
 .pg.passo{animation:passo .32s ease-in-out infinite alternate}
 .pg.fiuto{animation:fiuto .22s ease-in-out infinite alternate}
@@ -242,6 +240,22 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
   .carta.finale .cestino{width:min(200px,24vh)}
 }
 .livelli:has(.barra){display:block;max-width:420px}
+/* ---------- il video del canale a fine livello superato (7/10/2026) ----------
+   Dopo la festa del tartufaio il bosco sfuma e al suo posto c'è la copertina del video, intera (16:9, mai stirata),
+   con ai lati la stessa copertina sfocata; al computer a sinistra Archie, a destra Iscriviti. Solo ai livelli superati:
+   niente all'inizio e niente alla festa finale. */
+#scena .yt-scena{position:absolute;inset:0;z-index:4;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;overflow:hidden;background:#000;opacity:0;transition:opacity .6s}
+#scena .yt-scena.su{opacity:1}
+#scena .yt-scena .sfoca{position:absolute;inset:-30px;background-position:center;background-size:cover;filter:blur(18px) brightness(.62) saturate(1.15)}
+#scena .yt-scena .cop16{position:relative;height:100%;aspect-ratio:16/9;display:block}
+/* niente stacco netto: i bordi della copertina sfumano nello sfondo sfocato */
+#scena .yt-scena .cop16 img{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 4%,#000 96%,transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 4%,#000 96%,transparent 100%)}
+#scena .yt-scena .cop16 img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s}
+#scena .yt-scena .cop16:hover img{transform:scale(1.03)}
+#scena .yt-scena .play{position:absolute;left:50%;top:44%;width:68px;height:48px;margin:-24px 0 0 -34px;border-radius:13px;background:#ff0000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 2l5 3-5 3z' fill='white'/%3E%3C/svg%3E") center/24px no-repeat;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+#scena .yt-scena .scritta{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 9px;background:linear-gradient(transparent,rgba(0,0,0,.9));color:#fff;font-weight:800;font-size:17px;line-height:1.15;text-align:left}
+#scena .yt-scena .scritta small{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#ff6b62;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+@media (max-width:639px){ #scena .yt-scena{grid-template-columns:0 auto 0} #scena .yt-scena .cop16 img{-webkit-mask-image:none;mask-image:none} }
 /* ---------- serie di fila e classifica ---------- */
 #hFilaC.su{animation:pop .4s}
 /* la classifica sta nella scena, in alto a destra dalla parte del cane (non sopra il tartufaio): si vede appena si apre la pagina */
@@ -334,7 +348,7 @@ a.reg{text-decoration:none;display:block}
 <body>
 <header class="barra-sito">
   <a class="marchio" href="https://avventuremicologiche.it/">Avventure Micologiche<small>Quiz esame tartufi</small></a>
-  <nav class="icone" aria-label="Link"><a class="ico" href="https://avventuremicologiche.it/" aria-label="Home Avventure Micologiche" title="Home Avventure Micologiche"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v9.5h5v-6h3v6h5V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></a><a class="ico" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener" aria-label="Mappa delle piogge (pluviometro)" title="Mappa delle piogge (pluviometro)"><svg viewBox="0 0 24 24"><path d="M7 15.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.4 1.6A3.8 3.8 0 0 1 17.5 15.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 18.5l-1 2.5M12.5 18.5l-1 2.5M17 18.5l-1 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a><a class="ico" href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" aria-label="YouTube" title="YouTube"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg></a><a class="ico" href="https://www.facebook.com/avventuremicologiche/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg></a><a class="ico" href="https://www.instagram.com/avventuremicologiche/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.6" cy="6.4" r="1.3" fill="currentColor"/></svg></a></nav>
+  <nav class="icone" aria-label="Link"><a class="ico" href="https://avventuremicologiche.it/" aria-label="Home Avventure Micologiche" title="Home Avventure Micologiche"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v9.5h5v-6h3v6h5V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></a><a class="ico" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener" aria-label="Mappa delle piogge (pluviometro)" title="Mappa delle piogge (pluviometro)"><svg viewBox="0 0 24 24"><path d="M7 15.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.4 1.6A3.8 3.8 0 0 1 17.5 15.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 18.5l-1 2.5M12.5 18.5l-1 2.5M17 18.5l-1 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a><a class="ico" href="https://www.facebook.com/avventuremicologiche/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg></a><a class="ico" href="https://www.instagram.com/avventuremicologiche/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.6" cy="6.4" r="1.3" fill="currentColor"/></svg></a><a class="iscriviti" href="https://www.youtube.com/@avventuremicologiche?sub_confirmation=1" target="_blank" rel="noopener" title="Iscriviti al canale YouTube" onclick="try{gtag(&#39;event&#39;,&#39;quiz_iscriviti&#39;,{posto:&#39;barra&#39;})}catch(e){}"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg><span>Iscriviti</span></a></nav>
 </header>
 <h1 class="h1-sito">Quiz esame tartufi Marche: le 120 domande ufficiali per il patentino, con le risposte</h1>
 <canvas id="fx"></canvas>
@@ -346,7 +360,7 @@ a.reg{text-decoration:none;display:block}
     <div class="pg sprite" id="uomoP" hidden></div>
     <img class="pg" id="cane" alt="">
     <div class="pg sprite" id="caneP" hidden></div>
-    <img id="pop" src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/tartufo-nero.webp" onerror="imgRiserva(this)" alt="">
+    <img id="pop" src="img/tartufo-nero.webp" alt="">
     <div class="hud" id="hud" hidden>
       <div class="chip" id="hLiv">Livello 1</div>
       <div class="chip" id="hPuntiC"><small>Punti</small><span id="hPunti">0</span></div>
@@ -376,7 +390,7 @@ a.reg{text-decoration:none;display:block}
     <div class="combo" id="combo"></div>
     <div class="carta" id="carta">
       <span class="etichetta" id="etich"></span>
-      <div class="fig" id="fig" hidden><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/tartufo-tagliato.webp" onerror="imgRiserva(this)" alt="Tartufo tagliato a metà"><span class="et e-peridio">peridio</span><span class="et e-gleba">gleba</span></div>
+      <div class="fig" id="fig" hidden><img src="img/tartufo-tagliato.webp" alt="Tartufo tagliato a metà"><span class="et e-peridio">peridio</span><span class="et e-gleba">gleba</span></div>
       <p class="domanda" id="dom"></p>
       <div class="opzioni" id="opz"></div>
       <p class="esito" id="esito" aria-live="polite"></p>
@@ -461,13 +475,8 @@ function qa(nome, p) { if (FESTA) return; try { gtag('event', nome, Object.assig
 const salva = () => { if (PROVA || FESTA) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
 /* ---------- immagini ---------- */
-// 7/10/2026: le immagini (anche quelle di scena da 0,3-0,9 MB) arrivano da jsDelivr, CDN gratuito che legge
-// questo repo su GitHub al commit 31e194b: una partita costava 1,3 MB di banda Netlify. Se il CDN non risponde
-// si torna alla cartella locale img/ per tutto il resto della partita (imgRiserva). Cambiando un'immagine
-// si aggiorna il commit in IMG_CDN, qui e nelle altre 4 copie della pagina.
-// (IMG_CDN, IMG_B, imgUrl e imgRiserva sono definiti nello <script> in testa alla pagina)
 const IMG = {};
-Object.keys(M).forEach(k => { if (k !== 'sfondo') { const im = new Image(); im.onerror = () => imgRiserva(im); im.src = imgUrl(k); IMG[k] = im; } });
+Object.keys(M).forEach(k => { if (k !== 'sfondo') { const im = new Image(); im.src = `img/${k}.webp`; IMG[k] = im; } });
 
 /* ---------- personaggi ---------- */
 // posizione del centro di ciascuno, in % della larghezza della scena
@@ -486,12 +495,12 @@ function metti(chi, nome, anim, zitto) {
   const w = m.w * m.scala * pxUnita, h = m.h * m.scala * pxUnita;
   img.hidden = striscia; spr.hidden = !striscia;
   if (striscia) {
-    spr.style.backgroundImage = `url(${imgUrl(nome)})`;
+    spr.style.backgroundImage = `url(img/${nome}.webp)`;
     spr.style.backgroundSize = `${w * m.fotogrammi}px ${h}px`;
     giraStriscia(chi, nome, w);
   } else {
     fermaStriscia(chi);
-    if (posa[chi] !== nome) { img.onerror = () => imgRiserva(img); img.src = imgUrl(nome); }
+    if (posa[chi] !== nome) img.src = `img/${nome}.webp`;
   }
   el.style.width = w + 'px'; el.style.height = h + 'px';
   el.style.left = `calc(${POS[chi]}% - ${w / 2}px)`;
@@ -819,7 +828,8 @@ function pesca() {
   return mescola(rip.concat(presi)).map(n => D.find(d => d.n === n));
 }
 function schermo(id) {
-  ['sRegione', 'sTitolo', 'sGioco', 'sFine'].forEach(s => $(s).hidden = s !== id); $('hud').hidden = id === 'sTitolo' || id === 'sRegione';
+  ['sRegione', 'sTitolo', 'sGioco', 'sFine'].forEach(s => $(s).hidden = s !== id);
+  if (id !== 'sFine') togliVideo(); $('hud').hidden = id === 'sTitolo' || id === 'sRegione';
   // al telefono durante il gioco la scena è più bassa e resta in alto: si rimisurano i personaggi
   document.body.classList.toggle('in-gioco', id === 'sGioco' || id === 'sFine'); misura();
   $('classScena').hidden = id !== 'sTitolo';
@@ -844,9 +854,9 @@ function presi() { return Object.keys(S.stelle).map(Number).filter(n => S.stelle
 function cestino(nuovo) {
   const t = presi().map((n, k) => ({ n, k, p: POSTI[k % POSTI.length] }));
   t.sort((a, b) => a.p[1] - b.p[1]);   // quelli dietro si disegnano prima
-  return `<img class="c-strato" src="${imgUrl('cestino-dietro')}" onerror="imgRiserva(this)" alt="">` +
-    t.map(({ n, k, p }) => `<img class="tt${n === nuovo ? ' nuovo' : ''}" src="${imgUrl(tipo(n))}" onerror="imgRiserva(this)" style="left:${p[0] * 100}%;top:${p[1] * 100}%;width:${TT}%;--r:${GIRI[k]}deg" alt="">`).join('') +
-    `<img class="c-strato" src="${imgUrl('cestino-davanti')}" onerror="imgRiserva(this)" alt="">`;
+  return `<img class="c-strato" src="img/cestino-dietro.webp" alt="">` +
+    t.map(({ n, k, p }) => `<img class="tt${n === nuovo ? ' nuovo' : ''}" src="img/${tipo(n)}.webp" style="left:${p[0] * 100}%;top:${p[1] * 100}%;width:${TT}%;--r:${GIRI[k]}deg" alt="">`).join('') +
+    `<img class="c-strato" src="img/cestino-davanti.webp" alt="">`;
 }
 function raccolto() {
   return Array.from({ length: LIVELLI }, (_, k) => {
@@ -868,7 +878,7 @@ function livelliTitolo() {
   rimaste();
 }
 function rimaste() { const r = (S.ripasso || []).length; $('rimaste').textContent = `Domande non ancora uscite: ${S.mazzo.length || D.length} su ${D.length}` + (r ? ` · da ripassare: ${r}` : ''); }
-function disegnaVite() { $('vite').innerHTML = Array.from({ length: VITE }, () => `<img class="vita" src="${imgUrl('tartufo-nero')}" onerror="imgRiserva(this)" alt="">`).join(''); }
+function disegnaVite() { $('vite').innerHTML = Array.from({ length: VITE }, () => `<img class="vita" src="img/tartufo-nero.webp" alt="">`).join(''); }
 
 async function iniziaLivello() {
   giro = pesca(); i = 0; errori = 0; sbagliate = []; punti = 0; serie = 0;
@@ -989,7 +999,7 @@ async function fineLivello(vinto) {
       const stelleTot = Object.values(S.stelle).reduce((a, b) => a + b, 0);
       $('tess').innerHTML = `<p class="sotto2">Hai superato tutti i ${LIVELLI} livelli: le ${D.length} domande dell'esame dei tartufi della Regione ${R.nome}. Sei pronto per l'esame vero!</p>
         <div class="numeri"><div><b>${D.length}</b><small>domande</small></div><div><b>★ ${stelleTot}</b><small>su ${LIVELLI * 3} stelle</small></div><div><b>${S.puntiTot.toLocaleString('it-IT')}</b><small>punti</small></div></div>
-        <div class="tesserino"><h3>Tesserino del tartufaio</h3><p>Regione ${R.nome} · tutti i ${LIVELLI} livelli superati</p><img src="${imgUrl('tartufo-nero')}" onerror="imgRiserva(this)" style="width:46px;margin-top:6px" alt=""><span class="timbro">PROMOSSO</span></div>`;
+        <div class="tesserino"><h3>Tesserino del tartufaio</h3><p>Regione ${R.nome} · tutti i ${LIVELLI} livelli superati</p><img src="img/tartufo-nero.webp" style="width:46px;margin-top:6px" alt=""><span class="timbro">PROMOSSO</span></div>`;
       S.puntiTot = 0;
     }
     $('fRacc').innerHTML = `<div class="cestino">${cestino(S.livello)}</div><p class="raccolto-tit">Il tuo raccolto: ${presi().length} su ${LIVELLI}</p>`;
@@ -997,7 +1007,7 @@ async function fineLivello(vinto) {
     S.livello = tutto ? 1 : S.livello + 1; if (tutto) S.stelle = {};
     salva();
     if (tutto) { $('stelle').hidden = true; $('hud').hidden = true; SUONI.fanfara(); pioggia(120); setTimeout(() => fuochi(11000), 600); }
-    else { SUONI.vinto(); pioggia(80); }
+    else { SUONI.vinto(); pioggia(80); videoFineLivello(S.livello - 1); }
     const stelle = [...$('stelle').children];
     for (let k = 0; k < 3; k++) {
       await attesa(380); stelle[k].classList.add(k < st ? 'accesa' : 'vuota');
@@ -1013,6 +1023,41 @@ async function fineLivello(vinto) {
   (function conta(t) { const p = Math.min(1, (t - t0) / 700); $('fPunti').textContent = Math.round(fine * p); if (p < 1) requestAnimationFrame(conta); })(t0);
 }
 $('fBtn').onclick = iniziaLivello;
+
+/* ---------- video del canale a fine livello ---------- */
+const CANALE = 'https://www.youtube.com/@avventuremicologiche?sub_confirmation=1';
+// i video del canale sui tartufi (14, scelti da lui il 7/10): a ogni livello superato uno a caso, mai lo stesso due volte di fila
+const VIDEO = [
+  { id: 'pI3Rd1P57rw', link: 'https://youtu.be/pI3Rd1P57rw', img: 'img/yt-pI3Rd1P57rw.webp', tit: "TARTUFO BIANCHETTO 2026: ARCHIE CONTRO I CINGHIALI IN LIGURIA!" },
+  { id: 'ClL_G40bGh0', link: 'https://youtu.be/ClL_G40bGh0', img: 'img/yt-ClL_G40bGh0.webp', tit: "TARTUFO ESTIVO 2026 : APRIAMO LA STAGIONE CON ARCHIE" },
+  { id: 'kMMZemJzwr0', link: 'https://youtu.be/kMMZemJzwr0', img: 'img/yt-kMMZemJzwr0.webp', tit: "TARTUFO BIANCO 30/12/2025 BOTTI DI FINE ANNO E SORPRESE" },
+  { id: 'VsFqrrwGcpw', link: 'https://youtu.be/VsFqrrwGcpw', img: 'img/yt-VsFqrrwGcpw.webp', tit: "TARTUFO NERO PREGIATO 2026 Portami a casa #@#!!! fa troppo freddo" },
+  { id: '5dv7G_oty-Y', link: 'https://youtu.be/5dv7G_oty-Y', img: 'img/yt-5dv7G_oty-Y.webp', tit: "TARTUFO BIANCO 2025 giornata da tregenda, l'impresa epica di Archie!" },
+  { id: 'Lo9nQmxV_Ko', link: 'https://youtu.be/Lo9nQmxV_Ko', img: 'img/yt-Lo9nQmxV_Ko.webp', tit: "TARTUFO BIANCO 2025, Ecco come sta andando davvero la stagione" },
+  { id: 'vWSNeB9-ogs', link: 'https://youtu.be/vWSNeB9-ogs', img: 'img/yt-vWSNeB9-ogs.webp', tit: "TARTUFO BIANCO 2025 scelte difficili con tartufi complicati" },
+  { id: 'pEE0g2ZJ3dk', link: 'https://youtu.be/pEE0g2ZJ3dk', img: 'img/yt-pEE0g2ZJ3dk.webp', tit: "Tartufo Estivo apertura stagione Scorzone" },
+  { id: 'LpLnFd-X5pI', link: 'https://youtu.be/LpLnFd-X5pI', img: 'img/yt-LpLnFd-X5pI.webp', tit: "Tartufo Bianchetto Liguria prima uscita della stagione" },
+  { id: '4l_GqdaOA9o', link: 'https://youtu.be/4l_GqdaOA9o', img: 'img/yt-4l_GqdaOA9o.webp', tit: "TARTUFO BIANCO TARTUFI DISPETTOSI IN UN POSTO DA LUPI CON ARCHIE" },
+  { id: 'vtSI0ZWfnSM', link: 'https://youtu.be/vtSI0ZWfnSM', img: 'img/yt-vtSI0ZWfnSM.webp', tit: "TARTUFO BIANCO !! CAVIAMO TUBER MAGNATUM TRA RUSCELLI PIOPPI E QUERCE" },
+  { id: 'YeTn0IoKU6g', link: 'https://youtu.be/YeTn0IoKU6g', img: 'img/yt-YeTn0IoKU6g.webp', tit: "TARTUFO BIANCO E TARTUFO UNCINATO CI SIAMO !!" },
+  { id: '8BJ-CYLoTGE', link: 'https://youtu.be/8BJ-CYLoTGE', img: 'img/yt-8BJ-CYLoTGE.webp', tit: "TARTUFO ESTIVO 15 giugno sempre meglio Scorzoni" },
+  { id: 'B8LSnSkYLfA', link: 'https://youtu.be/B8LSnSkYLfA', img: 'img/yt-B8LSnSkYLfA.webp', tit: "TARTUFO NERO A MILANO E' POSSIBILE?" }
+];
+let ultimoVideo = -1;
+const YT_LOGO = '<svg width="18" height="13" viewBox="0 0 24 17" aria-hidden="true"><path fill="currentColor" d="M23.5 2.7A3 3 0 0 0 21.4.6C19.5 0 12 0 12 0S4.5 0 2.6.6A3 3 0 0 0 .5 2.7C0 4.6 0 8.5 0 8.5s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 12.1V4.9l6.2 3.6-6.2 3.6z"/></svg>';
+let videoTimer = null;
+function togliVideo() { clearTimeout(videoTimer); document.querySelectorAll('.yt-scena').forEach(e => e.remove()); }
+function videoFineLivello(n) {
+  togliVideo();
+  let k; do { k = Math.random() * VIDEO.length | 0; } while (k === ultimoVideo && VIDEO.length > 1);
+  ultimoVideo = k;
+  const v = VIDEO[k], liv = n;
+  $('scena').insertAdjacentHTML('beforeend', `<div class="yt-scena"><span class="sfoca" style="background-image:url(${v.img})"></span><span></span>
+    <a class="cop16" data-yt="video" href="${v.link}" target="_blank" rel="noopener"><img src="${v.img}" alt=""><span class="play"></span><span class="scritta"><small>${YT_LOGO} Guarda su YouTube</small>${v.tit}</span></a><span></span></div>`);
+  document.querySelectorAll('.yt-scena [data-yt]').forEach(a => a.addEventListener('click', () => qa('quiz_video', { video: v.id, livello: liv })));
+  // prima si vede il tartufaio che esulta, poi il bosco lascia il posto al video
+  videoTimer = setTimeout(() => { const y = document.querySelector('.yt-scena'); if (y) y.classList.add('su'); }, 2500);
+}
 $('gioca').onclick = iniziaLivello;
 // ricomincia da capo: si chiede conferma, poi si svuota tutto (cestino, stelle, mazzo, ripasso, punti)
 function chiediReset() {
