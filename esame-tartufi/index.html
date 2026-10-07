@@ -64,7 +64,14 @@
 @media (max-width:560px){ body.in-gioco .barra-sito, body.in-gioco .h1-sito{display:none} }
 </style>
 
-<link rel="preload" as="image" href="img/sfondo-giro.webp">
+<script>
+// Immagini dal CDN con riserva locale: sta qui in testa perche' le <img> scritte nella pagina chiamano
+// imgRiserva prima che giri lo script in fondo. Spiegazione completa nel blocco «immagini» in fondo.
+var IMG_CDN = 'https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/', IMG_LOC = 'img/', IMG_B = IMG_CDN;
+function imgUrl(n) { return IMG_B + n + '.webp'; }
+function imgRiserva(el) { el.onerror = null; IMG_B = IMG_LOC; if (el.src && el.src.indexOf(IMG_CDN) === 0) el.src = el.src.replace(IMG_CDN, IMG_LOC); try { document.querySelector('#scena .bg').style.backgroundImage = 'url(img/sfondo-giro.webp)'; } catch (e) {} }
+</script>
+<link rel="preload" as="image" href="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/sfondo-giro.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -82,7 +89,7 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
 
 /* ---------- la scena ---------- */
 #scena{position:relative;height:clamp(170px,30vh,380px);border-radius:18px;overflow:hidden;border:4px solid var(--legno2);box-shadow:0 6px 0 #1d140c,0 12px 30px rgba(0,0,0,.4);background:#c98a3a}
-#scena .bg{position:absolute;inset:0;background:url(img/sfondo-giro.webp) 0 100%/auto 100% repeat-x}
+#scena .bg{position:absolute;inset:0;background:url(https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/sfondo-giro.webp) 0 100%/auto 100% repeat-x}
 #scena .pg{position:absolute;bottom:5%;transform-origin:50% 100%;filter:drop-shadow(0 4px 3px rgba(0,0,0,.28));user-select:none;-webkit-user-drag:none;pointer-events:none}
 .pg.passo{animation:passo .32s ease-in-out infinite alternate}
 .pg.fiuto{animation:fiuto .22s ease-in-out infinite alternate}
@@ -339,7 +346,7 @@ a.reg{text-decoration:none;display:block}
     <div class="pg sprite" id="uomoP" hidden></div>
     <img class="pg" id="cane" alt="">
     <div class="pg sprite" id="caneP" hidden></div>
-    <img id="pop" src="img/tartufo-nero.webp" alt="">
+    <img id="pop" src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/tartufo-nero.webp" onerror="imgRiserva(this)" alt="">
     <div class="hud" id="hud" hidden>
       <div class="chip" id="hLiv">Livello 1</div>
       <div class="chip" id="hPuntiC"><small>Punti</small><span id="hPunti">0</span></div>
@@ -378,7 +385,7 @@ a.reg{text-decoration:none;display:block}
     <div class="combo" id="combo"></div>
     <div class="carta" id="carta">
       <span class="etichetta" id="etich"></span>
-      <div class="fig" id="fig" hidden><img src="img/tartufo-tagliato.webp" alt="Tartufo tagliato a metà"><span class="et e-peridio">peridio</span><span class="et e-gleba">gleba</span></div>
+      <div class="fig" id="fig" hidden><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/esame-tartufi/img/tartufo-tagliato.webp" onerror="imgRiserva(this)" alt="Tartufo tagliato a metà"><span class="et e-peridio">peridio</span><span class="et e-gleba">gleba</span></div>
       <p class="domanda" id="dom"></p>
       <div class="opzioni" id="opz"></div>
       <p class="esito" id="esito" aria-live="polite"></p>
@@ -461,8 +468,13 @@ function qa(nome, p) { if (FESTA) return; try { gtag('event', nome, Object.assig
 const salva = () => { if (PROVA || FESTA) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
 /* ---------- immagini ---------- */
+// 7/10/2026: le immagini (anche quelle di scena da 0,3-0,9 MB) arrivano da jsDelivr, CDN gratuito che legge
+// questo repo su GitHub al commit 31e194b: una partita costava 1,3 MB di banda Netlify. Se il CDN non risponde
+// si torna alla cartella locale img/ per tutto il resto della partita (imgRiserva). Cambiando un'immagine
+// si aggiorna il commit in IMG_CDN, qui e nelle altre 4 copie della pagina.
+// (IMG_CDN, IMG_B, imgUrl e imgRiserva sono definiti nello <script> in testa alla pagina)
 const IMG = {};
-Object.keys(M).forEach(k => { if (k !== 'sfondo') { const im = new Image(); im.src = `img/${k}.webp`; IMG[k] = im; } });
+Object.keys(M).forEach(k => { if (k !== 'sfondo') { const im = new Image(); im.onerror = () => imgRiserva(im); im.src = imgUrl(k); IMG[k] = im; } });
 
 /* ---------- personaggi ---------- */
 // posizione del centro di ciascuno, in % della larghezza della scena
@@ -481,12 +493,12 @@ function metti(chi, nome, anim, zitto) {
   const w = m.w * m.scala * pxUnita, h = m.h * m.scala * pxUnita;
   img.hidden = striscia; spr.hidden = !striscia;
   if (striscia) {
-    spr.style.backgroundImage = `url(img/${nome}.webp)`;
+    spr.style.backgroundImage = `url(${imgUrl(nome)})`;
     spr.style.backgroundSize = `${w * m.fotogrammi}px ${h}px`;
     giraStriscia(chi, nome, w);
   } else {
     fermaStriscia(chi);
-    if (posa[chi] !== nome) img.src = `img/${nome}.webp`;
+    if (posa[chi] !== nome) { img.onerror = () => imgRiserva(img); img.src = imgUrl(nome); }
   }
   el.style.width = w + 'px'; el.style.height = h + 'px';
   el.style.left = `calc(${POS[chi]}% - ${w / 2}px)`;
@@ -839,9 +851,9 @@ function presi() { return Object.keys(S.stelle).map(Number).filter(n => S.stelle
 function cestino(nuovo) {
   const t = presi().map((n, k) => ({ n, k, p: POSTI[k % POSTI.length] }));
   t.sort((a, b) => a.p[1] - b.p[1]);   // quelli dietro si disegnano prima
-  return `<img class="c-strato" src="img/cestino-dietro.webp" alt="">` +
-    t.map(({ n, k, p }) => `<img class="tt${n === nuovo ? ' nuovo' : ''}" src="img/${tipo(n)}.webp" style="left:${p[0] * 100}%;top:${p[1] * 100}%;width:${TT}%;--r:${GIRI[k]}deg" alt="">`).join('') +
-    `<img class="c-strato" src="img/cestino-davanti.webp" alt="">`;
+  return `<img class="c-strato" src="${imgUrl('cestino-dietro')}" onerror="imgRiserva(this)" alt="">` +
+    t.map(({ n, k, p }) => `<img class="tt${n === nuovo ? ' nuovo' : ''}" src="${imgUrl(tipo(n))}" onerror="imgRiserva(this)" style="left:${p[0] * 100}%;top:${p[1] * 100}%;width:${TT}%;--r:${GIRI[k]}deg" alt="">`).join('') +
+    `<img class="c-strato" src="${imgUrl('cestino-davanti')}" onerror="imgRiserva(this)" alt="">`;
 }
 function raccolto() {
   return Array.from({ length: LIVELLI }, (_, k) => {
@@ -863,7 +875,7 @@ function livelliTitolo() {
   rimaste();
 }
 function rimaste() { const r = (S.ripasso || []).length; $('rimaste').textContent = `Domande non ancora uscite: ${S.mazzo.length || D.length} su ${D.length}` + (r ? ` · da ripassare: ${r}` : ''); }
-function disegnaVite() { $('vite').innerHTML = Array.from({ length: VITE }, () => `<img class="vita" src="img/tartufo-nero.webp" alt="">`).join(''); }
+function disegnaVite() { $('vite').innerHTML = Array.from({ length: VITE }, () => `<img class="vita" src="${imgUrl('tartufo-nero')}" onerror="imgRiserva(this)" alt="">`).join(''); }
 
 async function iniziaLivello() {
   giro = pesca(); i = 0; errori = 0; sbagliate = []; punti = 0; serie = 0;
@@ -984,7 +996,7 @@ async function fineLivello(vinto) {
       const stelleTot = Object.values(S.stelle).reduce((a, b) => a + b, 0);
       $('tess').innerHTML = `<p class="sotto2">Hai superato tutti i ${LIVELLI} livelli: le ${D.length} domande dell'esame dei tartufi della Regione ${R.nome}. Sei pronto per l'esame vero!</p>
         <div class="numeri"><div><b>${D.length}</b><small>domande</small></div><div><b>★ ${stelleTot}</b><small>su ${LIVELLI * 3} stelle</small></div><div><b>${S.puntiTot.toLocaleString('it-IT')}</b><small>punti</small></div></div>
-        <div class="tesserino"><h3>Tesserino del tartufaio</h3><p>Regione ${R.nome} · tutti i ${LIVELLI} livelli superati</p><img src="img/tartufo-nero.webp" style="width:46px;margin-top:6px" alt=""><span class="timbro">PROMOSSO</span></div>`;
+        <div class="tesserino"><h3>Tesserino del tartufaio</h3><p>Regione ${R.nome} · tutti i ${LIVELLI} livelli superati</p><img src="${imgUrl('tartufo-nero')}" onerror="imgRiserva(this)" style="width:46px;margin-top:6px" alt=""><span class="timbro">PROMOSSO</span></div>`;
       S.puntiTot = 0;
     }
     $('fRacc').innerHTML = `<div class="cestino">${cestino(S.livello)}</div><p class="raccolto-tit">Il tuo raccolto: ${presi().length} su ${LIVELLI}</p>`;

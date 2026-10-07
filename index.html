@@ -538,12 +538,12 @@
 
 
 <header class="hero">
-  <div class="hero-cell tall"><img src="immagini/ovoli_mano.jpg" alt="Ovoli in mano" /></div>
-  <div class="hero-cell"><img src="immagini/ovolo_uovo.jpg" alt="Ovolo uovo" /></div>
-  <div class="hero-cell"><img src="immagini/spugnole.jpg" alt="Spugnole" /></div>
-  <div class="hero-cell tall"><img src="immagini/porcini.jpg" alt="Porcini" /></div>
-  <div class="hero-cell"><img src="immagini/clipboard03.jpg" alt="Fungo bianco" /></div>
-  <div class="hero-cell"><img src="immagini/tartufo_nero.jpg" alt="Tartufo nero" /></div>
+  <div class="hero-cell tall"><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/ovoli_mano.jpg" onerror="this.onerror=null;this.src='immagini/ovoli_mano.jpg'" alt="Ovoli in mano" /></div>
+  <div class="hero-cell"><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/ovolo_uovo.jpg" onerror="this.onerror=null;this.src='immagini/ovolo_uovo.jpg'" alt="Ovolo uovo" /></div>
+  <div class="hero-cell"><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/spugnole.jpg" onerror="this.onerror=null;this.src='immagini/spugnole.jpg'" alt="Spugnole" /></div>
+  <div class="hero-cell tall"><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/porcini.jpg" onerror="this.onerror=null;this.src='immagini/porcini.jpg'" alt="Porcini" /></div>
+  <div class="hero-cell"><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/Clipboard03.jpg" onerror="this.onerror=null;this.src='immagini/Clipboard03.jpg'" alt="Fungo bianco" /></div>
+  <div class="hero-cell"><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/tartufo_nero.jpg" onerror="this.onerror=null;this.src='immagini/tartufo_nero.jpg'" alt="Tartufo nero" /></div>
   <div class="hero-content">
     <h1>Avventure<em>Micologiche</em></h1>
     <!-- Mappa, quiz, YouTube e i social: al telefono sotto il titolo, al computer banner a destra -->
@@ -585,9 +585,9 @@
         </a>
       </div>
       <div class="yt-mosaic">
-        <img src="immagini/cestino_giorno.jpg" alt="Cestino del giorno" />
-        <img src="immagini/porcino_bosco.jpg" alt="Porcino nel bosco" />
-        <img src="immagini/tartufi_bianchi.jpg" alt="Tartufi bianchi" />
+        <img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/cestino_giorno.jpg" onerror="this.onerror=null;this.src='immagini/cestino_giorno.jpg'" alt="Cestino del giorno" />
+        <img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/porcino_bosco.jpg" onerror="this.onerror=null;this.src='immagini/porcino_bosco.jpg'" alt="Porcino nel bosco" />
+        <img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/tartufi_bianchi.jpg" onerror="this.onerror=null;this.src='immagini/tartufi_bianchi.jpg'" alt="Tartufi bianchi" />
       </div>
     </div>
   </div>
@@ -600,10 +600,10 @@
   <div class="container">
     <div class="chi-grid">
       <div class="chi-mosaic">
-        <img src="immagini/archie_corre.jpg" alt="Archie che corre verso il porcino" />
-        <img src="immagini/archie_tartufo.jpg" alt="Archie con tartufo" />
-        <img src="immagini/mappa_piemonte.jpg" alt="Mappa precipitazioni Piemonte" />
-        <img src="immagini/bottino_giornata.jpg" alt="Bottino di giornata" />
+        <img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/archie_corre.jpg" onerror="this.onerror=null;this.src='immagini/archie_corre.jpg'" alt="Archie che corre verso il porcino" />
+        <img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/archie_tartufo.jpg" onerror="this.onerror=null;this.src='immagini/archie_tartufo.jpg'" alt="Archie con tartufo" />
+        <img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/mappa_piemonte.jpg" onerror="this.onerror=null;this.src='immagini/mappa_piemonte.jpg'" alt="Mappa precipitazioni Piemonte" />
+        <img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/bottino_giornata.jpg" onerror="this.onerror=null;this.src='immagini/bottino_giornata.jpg'" alt="Bottino di giornata" />
       </div>
       <div>
         <p class="label">Chi siamo</p>
@@ -690,15 +690,27 @@
            scarica i 3,4 MB. Il `poster` e' la jpg di prima, quindi chi ha il
            risparmio dati o un browser che non li fa partire vede la home di
            sempre. -->
+      <!-- 7/10/2026: filmati, copertine e foto grandi arrivano da jsDelivr (CDN gratuito che legge
+           questo stesso repo su GitHub, agganciato al commit 31e194b: i file non cambiano mai sotto
+           i piedi del CDN). Netlify serviva 4-5 MB a visita, 9 crediti al giorno di banda. Se il CDN non
+           risponde, le immagini tornano al file locale (onerror) e i filmati alla seconda <source>.
+           Quando si cambia un file: si committa, e si aggiorna il commit nell'indirizzo del CDN
+           (qui, nelle <source> e nelle 5 pagine del quiz), se no jsDelivr serve quello vecchio. -->
       <div class="shot">
-        <video src="video/piogge.mp4" poster="immagini/mappa_italia_svizzera.jpg"
+        <video poster="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/mappa_italia_svizzera.jpg"
                muted loop playsinline preload="none"
-               aria-label="La mappa pluviometrica si colora quando si sceglie il periodo: sette giorni, poi trenta"></video>
+               aria-label="La mappa pluviometrica si colora quando si sceglie il periodo: sette giorni, poi trenta">
+          <source src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/video/piogge.mp4" type="video/mp4">
+          <source src="video/piogge.mp4" type="video/mp4">
+        </video>
       </div>
       <div class="shot">
-        <video src="video/scheda.mp4" poster="immagini/mappa_nordovest.jpg"
+        <video poster="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/mappa_nordovest.jpg"
                muted loop playsinline preload="none"
-               aria-label="La scheda di un pluviometro: pioggia, temperatura, vento e umidita"></video>
+               aria-label="La scheda di un pluviometro: pioggia, temperatura, vento e umidita">
+          <source src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/video/scheda.mp4" type="video/mp4">
+          <source src="video/scheda.mp4" type="video/mp4">
+        </video>
       </div>
       <!-- Le due cose della mappa che non sono i cumulati: la diretta radar
            (dal 31/8/2026) e la mappa boschi (dal 16/9/2026). Aggiunte il
@@ -707,15 +719,21 @@
            si rifanno con `scatta-home.js` nella cartella claudio. -->
       <a class="shot" href="https://precipitazioni.avventuremicologiche.it/?r=lombardia,veneto,emilia&amp;radar=ora" target="_blank" rel="noopener"
          aria-label="Diretta radar: la pioggia che sta cadendo adesso">
-        <video src="video/radar.mp4" poster="immagini/home-radar.jpg"
+        <video poster="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/home-radar.jpg"
                muted loop playsinline preload="none"
-               aria-label="Le piogge che si muovono sul radar, le ultime due ore"></video>
+               aria-label="Le piogge che si muovono sul radar, le ultime due ore">
+          <source src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/video/radar.mp4" type="video/mp4">
+          <source src="video/radar.mp4" type="video/mp4">
+        </video>
       </a>
       <a class="shot" href="https://precipitazioni.avventuremicologiche.it/?r=trentino&amp;boschi=1" target="_blank" rel="noopener"
          aria-label="Mappa boschi: faggete, castagneti, querceti e abetaie">
-        <video src="video/boschi.mp4" poster="immagini/home-boschi.jpg"
+        <video poster="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/home-boschi.jpg"
                muted loop playsinline preload="none"
-               aria-label="La mappa dei boschi che si accende sul Trentino"></video>
+               aria-label="La mappa dei boschi che si accende sul Trentino">
+          <source src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/video/boschi.mp4" type="video/mp4">
+          <source src="video/boschi.mp4" type="video/mp4">
+        </video>
       </a>
     </div>
   </div>
@@ -742,7 +760,7 @@
     </div>
     <div class="quiz-right">
       <a class="shot" href="/esame-tartufi/" aria-label="Apri il quiz esame tartufi">
-        <img src="immagini/home-quiz-tartufi.jpg" alt="Il tartufaio esulta con un tartufo nero in mano, accanto al suo lagotto, in un bosco d'autunno" loading="lazy" />
+        <img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@31e194b/immagini/home-quiz-tartufi.jpg" onerror="this.onerror=null;this.src='immagini/home-quiz-tartufi.jpg'" alt="Il tartufaio esulta con un tartufo nero in mano, accanto al suo lagotto, in un bosco d'autunno" loading="lazy" />
       </a>
     </div>
   </div>
