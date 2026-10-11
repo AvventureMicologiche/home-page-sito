@@ -420,6 +420,12 @@
       .hero-azioni .soc { width: 46px; height: 46px; }
       .hero-azioni .soc svg { width: 20px; height: 20px; }
     }
+    /* Il primo banner parte dal taglio tra le foto (11/10/2026). Sotto i 900 px
+       di altezza i banner non stanno nella meta' bassa: restano appoggiati sul fondo. */
+    @media (min-width: 961px) and (min-height: 900px) {
+      .hero-content { top: 50%; padding-top: 0; }
+      .hero-azioni { align-self: flex-start; }
+    }
     .footer-copy {
       margin-top: 2rem; padding-top: 1.5rem;
       border-top: 1px solid var(--border);
