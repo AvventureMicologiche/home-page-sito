@@ -1028,7 +1028,7 @@ async function fineLivello(vinto) {
     S.puntiTot = (S.puntiTot || 0) + punti;
     if (tutto) {
       const stelleTot = Object.values(S.stelle).reduce((a, b) => a + b, 0);
-      $('tess').innerHTML = `<p class="sotto2">Hai superato tutti i ${LIVELLI} livelli: le ${D.length} domande dell'esame dei tartufi della Regione ${R.nome}. Sei pronto per l'esame vero!</p>
+      $('tess').innerHTML = `<p class="sotto2">Hai superato tutti i ${LIVELLI} livelli: ${R.prep ? `le ${D.length} domande di preparazione all'esame dei tartufi in ${R.nome}` : `le ${D.length} domande dell'esame dei tartufi della Regione ${R.nome}`}. Sei pronto per l'esame vero!</p>
         <div class="numeri"><div><b>${D.length}</b><small>domande</small></div><div><b>★ ${stelleTot}</b><small>su ${LIVELLI * 3} stelle</small></div><div><b>${S.puntiTot.toLocaleString('it-IT')}</b><small>punti</small></div></div>
         <div class="tesserino"><h3>Tesserino del tartufaio</h3><p>Regione ${R.nome} · tutti i ${LIVELLI} livelli superati</p><img src="${imgUrl('tartufo-nero')}" onerror="imgRiserva(this)" style="width:46px;margin-top:6px" alt=""><span class="timbro">PROMOSSO</span></div>`;
       S.puntiTot = 0;
