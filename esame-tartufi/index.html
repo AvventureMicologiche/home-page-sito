@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quiz esame tartufi, il gioco: domande ufficiali e risposte</title>
-<meta name="description" content="Un gioco a livelli per preparare l&#x27;esame del patentino dei tartufi: 962 domande ufficiali con le risposte di Marche, Toscana, Lazio e Campania. Gratis, anche dal telefono.">
+<title>Quiz esame tartufi, il gioco: domande e risposte del patentino</title>
+<meta name="description" content="Un gioco a livelli per preparare l&#x27;esame del patentino dei tartufi: le domande con le risposte di Campania, Lazio, Marche, Toscana, Emilia-Romagna, Liguria, Lombardia e Piemonte. Gratis, anche dal telefono.">
 <!-- Google tag (gtag.js), stessa proprieta' della home; config solo sul dominio vero -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-4WLB4PFS69"></script>
 <script>
@@ -17,8 +17,8 @@
 <base href="/esame-tartufi/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Avventure Micologiche">
-<meta property="og:title" content="Quiz esame tartufi, il gioco: domande ufficiali e risposte">
-<meta property="og:description" content="Un gioco a livelli per preparare l&#x27;esame del patentino dei tartufi: 962 domande ufficiali con le risposte di Marche, Toscana, Lazio e Campania. Gratis, anche dal telefono.">
+<meta property="og:title" content="Quiz esame tartufi, il gioco: domande e risposte del patentino">
+<meta property="og:description" content="Un gioco a livelli per preparare l&#x27;esame del patentino dei tartufi: le domande con le risposte di Campania, Lazio, Marche, Toscana, Emilia-Romagna, Liguria, Lombardia e Piemonte. Gratis, anche dal telefono.">
 <meta property="og:url" content="https://avventuremicologiche.it/esame-tartufi/">
 <meta property="og:image" content="https://avventuremicologiche.it/esame-tartufi/img/anteprima.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -311,6 +311,11 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
 .scegli .sotto{margin-bottom:10px}
 .regioni{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:520px;margin:6px auto 8px}
 a.reg{text-decoration:none;display:block}
+/* «new» sulle regioni aggiunte (18/10/2026, suo: come le novità della mappa, per un mese): stesso stile e stessa pulsazione */
+.reg{position:relative}
+.reg.nuova::after{content:'new';position:absolute;top:-8px;right:-6px;background:#e12b2b;color:#fff;font-size:11px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;line-height:1.35;pointer-events:none;animation:newPulsa 1.6s ease-in-out infinite}
+@keyframes newPulsa{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(225,43,43,.6)}50%{transform:scale(1.18);box-shadow:0 0 0 5px rgba(225,43,43,0)}}
+@media (prefers-reduced-motion:reduce){.reg.nuova::after{animation:none}}
 .reg{background:var(--carta);border:3px solid var(--legno);border-radius:16px;padding:12px 8px 10px;box-shadow:0 6px 0 var(--legno2);text-align:center;color:var(--ink);transition:transform .08s,box-shadow .08s}
 .reg:hover{border-color:var(--arancio)}
 .reg:active{transform:translateY(5px);box-shadow:0 1px 0 var(--legno2)}
@@ -357,7 +362,7 @@ a.reg{text-decoration:none;display:block}
   <a class="marchio" href="https://avventuremicologiche.it/">Avventure Micologiche<small>Quiz esame tartufi</small></a>
   <nav class="icone" aria-label="Link"><a class="ico" href="https://avventuremicologiche.it/" aria-label="Home Avventure Micologiche" title="Home Avventure Micologiche"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v9.5h5v-6h3v6h5V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></a><a class="ico" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener" aria-label="Mappa delle piogge (pluviometro)" title="Mappa delle piogge (pluviometro)"><svg viewBox="0 0 24 24"><path d="M7 15.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.4 1.6A3.8 3.8 0 0 1 17.5 15.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 18.5l-1 2.5M12.5 18.5l-1 2.5M17 18.5l-1 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a><a class="ico" href="https://www.facebook.com/avventuremicologiche/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg></a><a class="ico" href="https://www.instagram.com/avventuremicologiche/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.6" cy="6.4" r="1.3" fill="currentColor"/></svg></a><a class="iscriviti" href="https://www.youtube.com/@avventuremicologiche?sub_confirmation=1" target="_blank" rel="noopener" title="Iscriviti al canale YouTube" onclick="try{gtag(&#39;event&#39;,&#39;quiz_iscriviti&#39;,{posto:&#39;barra&#39;})}catch(e){}"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg><span>Iscriviti</span></a></nav>
 </header>
-<h1 class="h1-sito">Quiz esame tartufi: le domande ufficiali del patentino di Marche, Toscana, Lazio e Campania</h1>
+<h1 class="h1-sito">Quiz esame tartufi: le domande del patentino di Campania, Lazio, Marche, Toscana, Emilia-Romagna, Liguria, Lombardia e Piemonte</h1>
 <canvas id="fx"></canvas>
 <main>
   <div id="scena">
@@ -382,9 +387,9 @@ a.reg{text-decoration:none;display:block}
   <section class="titolo scegli" id="sRegione" hidden>
     <div class="gtit" id="h1r"></div>
     <h2>In che regione fai l'esame?</h2>
-    <p class="sotto">Ogni regione ha le sue domande ufficiali: scegli quella dove prenderai il tesserino.</p>
-    <div class="regioni" id="regioni"><a class="reg" href="/esame-tartufi/campania/" data-r="campania"><b>Campania</b><small>249 domande · 25 livelli</small></a><a class="reg" href="/esame-tartufi/lazio/" data-r="lazio"><b>Lazio</b><small>275 domande · 28 livelli</small></a><a class="reg" href="/esame-tartufi/marche/" data-r="marche"><b>Marche</b><small>120 domande · 12 livelli</small></a><a class="reg" href="/esame-tartufi/toscana/" data-r="toscana"><b>Toscana</b><small>318 domande · 32 livelli</small></a></div>
-    <p class="nota-reg">Domande e risposte pubblicate dalle Regioni. Altre regioni in arrivo.</p>
+    <p class="sotto">Ogni regione ha le sue domande e le sue regole: scegli quella dove prenderai il tesserino.</p>
+    <div class="regioni" id="regioni"><a class="reg" href="/esame-tartufi/lombardia/" data-r="lombardia" data-nuova="2026-11-18"><b>Lombardia</b><small>120 domande · 12 livelli</small></a><a class="reg" href="/esame-tartufi/piemonte/" data-r="piemonte" data-nuova="2026-11-18"><b>Piemonte</b><small>137 domande · 14 livelli</small></a><a class="reg" href="/esame-tartufi/emilia-romagna/" data-r="emilia-romagna" data-nuova="2026-11-18"><b>Emilia-Romagna</b><small>130 domande · 13 livelli</small></a><a class="reg" href="/esame-tartufi/liguria/" data-r="liguria" data-nuova="2026-11-18"><b>Liguria</b><small>124 domande · 13 livelli</small></a><a class="reg" href="/esame-tartufi/campania/" data-r="campania"><b>Campania</b><small>249 domande · 25 livelli</small></a><a class="reg" href="/esame-tartufi/lazio/" data-r="lazio"><b>Lazio</b><small>275 domande · 28 livelli</small></a><a class="reg" href="/esame-tartufi/marche/" data-r="marche"><b>Marche</b><small>120 domande · 12 livelli</small></a><a class="reg" href="/esame-tartufi/toscana/" data-r="toscana"><b>Toscana</b><small>318 domande · 32 livelli</small></a></div>
+    <p class="nota-reg">Campania, Lazio, Marche e Toscana: domande e risposte pubblicate dalle Regioni. Le altre: esempi di domande elaborati sui testi di studio delle Regioni.</p>
   </section>
 
   <!-- TITOLO -->
@@ -439,10 +444,12 @@ a.reg{text-decoration:none;display:block}
 
 <section class="info">
   <h2>Il quiz per il patentino dei tartufi</h2>
-  <p>Per cercare e raccogliere tartufi in Italia serve il tesserino di idoneità, che tutti chiamano patentino, che si ottiene superando un esame nella propria Regione. Ogni Regione ha le sue domande: qui trovi quelle ufficiali, con le risposte giuste, trasformate in un gioco a livelli con il tartufaio e il suo lagotto.</p>
-  <h2>Le regioni disponibili</h2>
+  <p>Per cercare e raccogliere tartufi in Italia serve il tesserino di idoneità, che tutti chiamano patentino, che si ottiene superando un esame nella propria Regione. Ogni Regione ha le sue domande e le sue regole: qui le trovi con le risposte giuste, trasformate in un gioco a livelli con il tartufaio e il suo lagotto.</p>
+  <h2>Regioni con le domande ufficiali</h2>
   <ul><li><a href="/esame-tartufi/campania/">Quiz esame tartufi Campania</a>: 249 domande ufficiali. Fonte: Regione Campania, domande della prova d&#x27;esame pubblicate nel quiz della Regione.</li><li><a href="/esame-tartufi/lazio/">Quiz esame tartufi Lazio</a>: 275 domande ufficiali. Fonte: Regione Lazio, determinazione n. 10268 del 27/8/2015, quesiti oggetto della prova d&#x27;esame.</li><li><a href="/esame-tartufi/marche/">Quiz esame tartufi Marche</a>: 120 domande ufficiali. Fonte: Allegato A, Regione Marche, abilitazione alla ricerca e raccolta dei tartufi.</li><li><a href="/esame-tartufi/toscana/">Quiz esame tartufi Toscana</a>: 318 domande ufficiali. Fonte: Regione Toscana, decreto n. 12918 del 13/6/2025, allegati B e C.</li></ul>
-  <p>Altre regioni arriveranno quando le Regioni pubblicheranno l'elenco ufficiale delle domande con le risposte.</p>
+  <h2>Regioni con le domande di preparazione</h2>
+  <p>Per queste regioni non ci sono domande d'esame ufficiali. Le domande le abbiamo elaborate sulla base dei testi di studio per la preparazione all'esame pubblicati dalle Regioni: sono solo esempi delle possibili domande. Possono essere presenti errori, e leggi e calendari possono essere aggiornati: se trovi un problema, scrivici a <a href="mailto:avventuremicologiche@gmail.com">avventuremicologiche@gmail.com</a>. Nella pagina di ogni regione trovi i link ai testi di studio, con l'anno di aggiornamento.</p>
+  <ul><li><a href="/esame-tartufi/emilia-romagna/">Quiz esame tartufi Emilia-Romagna</a>: 130 domande di preparazione.</li><li><a href="/esame-tartufi/liguria/">Quiz esame tartufi Liguria</a>: 124 domande di preparazione.</li><li><a href="/esame-tartufi/lombardia/">Quiz esame tartufi Lombardia</a>: 120 domande di preparazione.</li><li><a href="/esame-tartufi/piemonte/">Quiz esame tartufi Piemonte</a>: 137 domande di preparazione.</li></ul>
   <h2>Domande frequenti</h2><h3>Patentino e tesserino dei tartufi sono la stessa cosa?</h3><p>Sì: «patentino» è il nome con cui tutti chiamano il tesserino di idoneità alla ricerca e raccolta dei tartufi, che si ottiene superando l&#x27;esame della propria Regione.</p><h3>Le domande del quiz sono quelle vere dell&#x27;esame?</h3><p>Sì: per ogni regione sono le domande e le risposte ufficiali pubblicate dalla Regione, con la fonte indicata in fondo alla pagina.</p><h3>Come funziona il gioco?</h3><p>Le domande escono 10 alla volta, una per livello. Hai tre vite: al terzo errore rifai il livello con 10 domande nuove. Le domande sbagliate tornano più spesso finché non le azzecchi, e ogni livello superato aggiunge un tartufo al cestino.</p><h3>Serve registrarsi o installare qualcosa?</h3><p>No. Il quiz è gratis, senza registrazione e senza pubblicità, e funziona dal browser anche sul telefono. I progressi restano salvati sul tuo dispositivo.</p>
   <div class="avvisi">
   <h2>Fonti e avvertenze</h2>
@@ -460,10 +467,12 @@ a.reg{text-decoration:none;display:block}
 </footer>
 
 <script>
-const REGIONI = {"marche":{"nome":"Marche","fonte":"Allegato A, Regione Marche, abilitazione alla ricerca e raccolta dei tartufi","n":120,"D":[]},"toscana":{"nome":"Toscana","fonte":"Regione Toscana, decreto n. 12918 del 13/6/2025, allegati B e C","n":318,"D":[]},"lazio":{"nome":"Lazio","fonte":"Regione Lazio, determinazione n. 10268 del 27/8/2015, quesiti oggetto della prova d'esame","n":275,"D":[]},"campania":{"nome":"Campania","fonte":"Regione Campania, domande della prova d'esame pubblicate nel quiz della Regione","n":249,"D":[]}};
+const REGIONI = {"lombardia":{"nome":"Lombardia","fonte":"esempi di domande elaborati sui testi di studio della Regione Lombardia","prep":true,"n":120,"D":[]},"piemonte":{"nome":"Piemonte","fonte":"esempi di domande elaborati sui testi di studio della Regione Piemonte","prep":true,"n":137,"D":[]},"emilia-romagna":{"nome":"Emilia-Romagna","fonte":"esempi di domande elaborati sui testi di studio della Regione Emilia-Romagna","prep":true,"n":130,"D":[]},"liguria":{"nome":"Liguria","fonte":"esempi di domande elaborati sui testi di studio della Regione Liguria","prep":true,"n":124,"D":[]},"campania":{"nome":"Campania","fonte":"Regione Campania, domande della prova d'esame pubblicate nel quiz della Regione","prep":false,"n":249,"D":[]},"lazio":{"nome":"Lazio","fonte":"Regione Lazio, determinazione n. 10268 del 27/8/2015, quesiti oggetto della prova d'esame","prep":false,"n":275,"D":[]},"marche":{"nome":"Marche","fonte":"Allegato A, Regione Marche, abilitazione alla ricerca e raccolta dei tartufi","prep":false,"n":120,"D":[]},"toscana":{"nome":"Toscana","fonte":"Regione Toscana, decreto n. 12918 del 13/6/2025, allegati B e C","prep":false,"n":318,"D":[]}};
 const M = {"uomo-cammina":{"w":366,"h":504,"scala":1},"cane-fermo":{"w":404,"h":335,"scala":0.85},"cane-cammina":{"w":605,"h":494,"scala":0.561},"cane-fiuta":{"w":824,"h":355,"scala":0.561},"cane-scava":{"w":677,"h":513,"scala":0.561},"cane-felice":{"w":649,"h":513,"scala":0.561},"cane-triste":{"w":688,"h":512,"scala":0.561},"uomo-esulta":{"w":417,"h":504,"scala":1},"uomo-dubbioso":{"w":366,"h":504,"scala":1},"uomo-ginocchio":{"w":404,"h":501,"scala":1},"tartufo-nero":{"w":295,"h":279,"scala":1},"tartufo-bianco":{"w":298,"h":278,"scala":1},"tartufo-tagliato":{"w":288,"h":277,"scala":1},"sfondo":{"w":954,"h":537},"cane-passo":{"w":358,"h":300,"scala":0.9859,"fotogrammi":18,"avanza":8.976},"uomo-passo":{"w":228,"h":300,"scala":1.727,"fotogrammi":30,"avanza":8.98},"sfondo-giro":{"w":1908,"h":537},"cane-scava-video":{"w":493,"h":300,"scala":0.8075,"fotogrammi":32},"uomo-esulta-video":{"w":243,"h":300,"scala":1.7509,"fotogrammi":16},"cane-felice-video":{"w":410,"h":300,"scala":1.0036,"fotogrammi":21},"cane-triste-video":{"w":511,"h":300,"scala":0.7395,"fotogrammi":26},"uomo-dubbioso-video":{"w":222,"h":300,"scala":1.6947,"fotogrammi":16}};
 // la regione: dall'indirizzo (?regione=toscana) o dall'ultima scelta; senza regione si mostra la scelta
 const PAR = new URLSearchParams(location.search);
+// il «new» sulle carte delle regioni dura fino alla data scritta in data-nuova (compreso quel giorno)
+document.querySelectorAll('.reg[data-nuova]').forEach(a => { if (new Date().toISOString().slice(0, 10) <= a.dataset.nuova) a.classList.add('nuova'); });
 const FISSA = null, SITO = true;   // nel sito ogni regione ha la sua pagina
 let REG = SITO ? FISSA : PAR.get('regione');
 if (!REGIONI[REG] && !SITO) { try { REG = localStorage.getItem('cacciaRegione'); } catch (e) {} }
@@ -471,6 +480,8 @@ if (!REGIONI[REG]) REG = null;
 const R = REG ? REGIONI[REG] : null;
 const D = R ? R.D : [];
 const N = 10, VITE = 3, LIVELLI = R ? Math.ceil(D.length / N) : 12;
+// sul sito di prova (anteprima Cloudflare «test») gli errori non fanno perdere vite: serve a provare tutte le domande
+const SENZA_LIMITE = location.hostname === 'test.avventuremicologiche.pages.dev';
 const KEY = REG === 'marche' ? 'cacciaTesserinoIll' : 'cacciaTesserino-' + REG;   // ogni regione ha i suoi progressi
 const $ = id => document.getElementById(id);
 const mescola = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -479,6 +490,14 @@ const attesa = ms => new Promise(r => setTimeout(r, ms));
 /* ---------- salvataggio ---------- */
 let S = { mazzo: [], livello: 1, stelle: {}, record: 0, muto: false, ripasso: [], fila: 0, filaMax: 0, gettone: null, daInviare: null };
 try { Object.assign(S, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) {}
+// 18/10/2026: se l'elenco delle domande cambia (domande tolte o rinumerate), via dal mazzo e dal ripasso salvati i numeri che
+// non esistono più: altrimenti a metà livello esce una domanda vuota e il gioco si ferma (successo sul test della Lombardia)
+if (D.length) {
+  const esiste = new Set(D.map(d => d.n));
+  if (Array.isArray(S.mazzo)) S.mazzo = S.mazzo.filter(n => esiste.has(n));
+  if (Array.isArray(S.ripasso)) S.ripasso = S.ripasso.filter(n => esiste.has(n));
+  if (S.livello > LIVELLI) S.livello = LIVELLI;
+}
 // ?cestino=N fa vedere il cestino con N tartufi senza giocare (prova: non salva niente)
 const PROVA = Math.min(LIVELLI, parseInt(PAR.get('cestino')) || 0);
 if (PROVA) { S.stelle = {}; for (let n = 1; n <= PROVA; n++) S.stelle[n] = n % 3 + 1; S.livello = Math.min(LIVELLI, PROVA + 1); }
@@ -694,13 +713,13 @@ function attendi() { cammina(Infinity); }
 const fine = (anim, ms) => Promise.race([anim.finished, attesa(ms + 60)]);
 async function trovato() {
   // 1. il cane scava
-  metti('cane', 'cane-scava-video'); SUONI.scava(); setTimeout(SUONI.scava, 600);
+  metti('cane', 'cane-scava-video'); SUONI.scava(); setTimeout(SUONI.scava, 350);
   const [nx, ny] = punto('cane', .8, .97);
   const sc = $('scena').getBoundingClientRect();
   const bx = Math.min(nx + 14, sc.right - 30);
   const b = $('buca'); const [bxs] = puntoScena(bx, 0); b.style.left = (bxs - b.offsetWidth / 2) + 'px'; b.classList.add('su');
   const t = setInterval(() => terra(bx - 10, ny - 4), 40);
-  await attesa(1150); clearInterval(t);
+  await attesa(650); clearInterval(t);   // 18/10: tempi accorciati (prima 1150/550/550/1200/1000), più veloce tra una domanda e l'altra
   // 2. salta fuori il tartufo e il cane fa festa
   metti('cane', 'cane-felice-video'); SUONI.giusto();
   const pop = $('pop'), pw = pop.offsetWidth || 40;
@@ -708,8 +727,8 @@ async function trovato() {
   const sali = pop.animate([
     { left: px - pw / 2 + 'px', top: py - pw * .3 + 'px', opacity: 1, transform: 'scale(.4) rotate(0)' },
     { left: px - pw / 2 + 'px', top: py - pw * 2.4 + 'px', opacity: 1, transform: 'scale(1.15) rotate(200deg)', offset: .6 },
-    { left: px - pw / 2 + 'px', top: py - pw * 2 + 'px', opacity: 1, transform: 'scale(1) rotate(360deg)' }], { duration: 550, easing: 'ease-out', fill: 'forwards' });
-  await fine(sali, 550);
+    { left: px - pw / 2 + 'px', top: py - pw * 2 + 'px', opacity: 1, transform: 'scale(1) rotate(360deg)' }], { duration: 400, easing: 'ease-out', fill: 'forwards' });
+  await fine(sali, 400);
   const [sx, sy] = [sc.left + px, sc.top + py - pw * 2];
   scoppio(sx, sy, 16, 5, ['stella', 'foglia']);
   // 3. il tartufo vola nella mano del tartufaio che esulta
@@ -717,8 +736,8 @@ async function trovato() {
   const r = pop.animate([
     { left: px - pw / 2 + 'px', top: py - pw * 2 + 'px', transform: 'scale(1) rotate(0)' },
     { left: (px + mx) / 2 - pw / 2 + 'px', top: Math.min(py, my) - pw * 2.2 + 'px', transform: 'scale(1.1) rotate(-200deg)', offset: .5 },
-    { left: mx - pw / 2 + 'px', top: my - pw / 2 + 'px', transform: 'scale(.7) rotate(-360deg)', opacity: 1 }], { duration: 550, easing: 'ease-in-out', fill: 'forwards' });
-  await fine(r, 550);
+    { left: mx - pw / 2 + 'px', top: my - pw / 2 + 'px', transform: 'scale(.7) rotate(-360deg)', opacity: 1 }], { duration: 400, easing: 'ease-in-out', fill: 'forwards' });
+  await fine(r, 400);
   metti('uomo', 'uomo-esulta-video');
   pop.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 80, fill: 'forwards' });
   sali.cancel();
@@ -730,7 +749,9 @@ function sbaglia() { metti('cane', 'cane-triste-video'); metti('uomo', 'uomo-dub
    Il massimo è fare tutte le domande della regione senza sbagliare. Quando la serie si chiude, se entra nei primi 10
    della regione, a fine livello si chiede il nome. Il server (worker Cloudflare) controlla il gettone dato
    all'inizio della serie: niente serie più veloci del possibile. */
-const API = /(^|\.)avventuremicologiche\.it$/.test(location.hostname) ? 'https://classifica-tartufi.avventuremicologiche.workers.dev' : '/api';
+// il sito vero e quello di prova (anteprima Cloudflare «test») usano la classifica vera; in locale la finta di prova-locale.mjs
+const SITO_VERO = /(^|\.)avventuremicologiche\.it$/.test(location.hostname) || location.hostname === 'test.avventuremicologiche.pages.dev';
+const API = SITO_VERO ? 'https://classifica-tartufi.avventuremicologiche.workers.dev' : '/api';
 const MIN_CLASS = 5, POSTI_CLASS = 10;
 async function chiama(via, dati) {
   const r = await fetch(API + via, dati ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dati) } : undefined);
@@ -955,10 +976,10 @@ async function rispondi(k, el) {
     await trovato();
     $('hPunti').textContent = punti;
     const [ux, uy] = punto('uomo', .5, 0); vola('+' + guad, ux, uy + 10);
-    await attesa(1200);
+    await attesa(500);
     avanti();
   } else {
-    serie = 0; errori++; sbagliate.push({ d, k }); $('combo').innerHTML = '';
+    serie = 0; if (!SENZA_LIMITE) errori++; sbagliate.push({ d, k }); $('combo').innerHTML = '';
     chiudiSerie(); $('hFila').textContent = 0;
     if (!S.ripasso.includes(d.n)) { S.ripasso.push(d.n); salva(); }
     const v = $('vite').children[VITE - errori]; if (v) v.classList.add('persa');
@@ -966,7 +987,7 @@ async function rispondi(k, el) {
     $('carta').classList.remove('entra'); void $('carta').offsetWidth; $('carta').classList.add('trema');
     try { navigator.vibrate && navigator.vibrate(120); } catch (e) {}
     $('esito').className = 'esito ko';
-    $('esito').innerHTML = `<b>${errori >= VITE ? 'Terzo errore!' : `Sbagliato! ${VITE - errori === 1 ? 'Ti resta 1 vita' : 'Ti restano 2 vite'}`}</b>`;
+    $('esito').innerHTML = SENZA_LIMITE ? '<b>Sbagliato! (prova: nessun limite di errori)</b>' : `<b>${errori >= VITE ? 'Terzo errore!' : `Sbagliato! ${VITE - errori === 1 ? 'Ti resta 1 vita' : 'Ti restano 2 vite'}`}</b>`;
     $('avanti').textContent = errori >= VITE ? 'Continua' : 'Avanti';
     $('avanti').hidden = false;
   }
@@ -975,7 +996,7 @@ async function avanti() {
   $('avanti').hidden = true;
   if (errori >= VITE) return fineLivello(false);
   i++;
-  await cammina(i === N ? 700 : 1000);
+  await cammina(i === N ? 500 : 600);
   if (i === N) return fineLivello(true);
   mostraDomanda();
 }
@@ -1065,7 +1086,7 @@ const VIDEO = [
 let ultimoVideo = -1;
 /* L'elenco aggiornato sta nel repo della MAPPA (data/quiz-video.json + data/quiz-video/yt-<id>.webp) e si legge da raw:
    aggiungere un video = un commit lì, zero crediti, nessun deploy del quiz. Se il file non risponde restano i 14 qui sopra. */
-const DATI_VIDEO = /(^|\.)avventuremicologiche\.it$/.test(location.hostname)
+const DATI_VIDEO = SITO_VERO
   ? 'https://raw.githubusercontent.com/AvventureMicologiche/Mappa-Precipitazioni-Nord/main/' : '/dati-video/';
 (async () => {
   try {
@@ -1125,8 +1146,10 @@ function titolo() {
   $('h1').innerHTML = TITOLO;
   $('regTit').innerHTML = `Regione <b>${R.nome}</b> · <button id="cambiaReg">cambia regione</button>`;
   $('cambiaReg').onclick = () => { try { localStorage.removeItem('cacciaRegione'); } catch (e) {} location.href = SITO ? '/esame-tartufi/' : location.pathname; };
-  $('sotto').textContent = `Le ${D.length} domande ufficiali dell'esame dei tartufi della Regione ${R.nome}, in ${LIVELLI} livelli da 10. Al terzo errore si rifà il livello con domande nuove.`;
-  $('fonte').textContent = 'Domande e risposte: ' + R.fonte + '. Regole e risposte possono cambiare: verifica sempre sul sito della Regione.';
+  $('sotto').textContent = R.prep
+    ? `${D.length} domande per preparare l'esame dei tartufi in ${R.nome}, in ${LIVELLI} livelli da 10. Al terzo errore si rifà il livello con domande nuove.`
+    : `Le ${D.length} domande ufficiali dell'esame dei tartufi della Regione ${R.nome}, in ${LIVELLI} livelli da 10. Al terzo errore si rifà il livello con domande nuove.`;
+  $('fonte').textContent = (R.prep ? 'Domande di preparazione: ' : 'Domande e risposte: ') + R.fonte + '. Regole e risposte possono cambiare: verifica sempre sul sito della Regione.';
   cammina(Infinity);
 }
 function sceltaRegione() {
