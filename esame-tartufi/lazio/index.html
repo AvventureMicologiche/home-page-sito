@@ -70,13 +70,13 @@
 </style>
 
 <script>
-// Immagini dal CDN con riserva locale: sta qui in testa perche' le <img> scritte nella pagina chiamano
-// imgRiserva prima che giri lo script in fondo. Spiegazione completa nel blocco «immagini» in fondo.
-var IMG_CDN = 'https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@9ed0fb7/esame-tartufi/img/', IMG_LOC = 'img/', IMG_B = IMG_CDN;
+// 20/10/2026: niente piu' jsDelivr, le immagini arrivano da img/ (Cloudflare Pages, banda gratis). IMG_CDN e
+// imgRiserva restano solo per non toccare il resto del gioco: con IMG_CDN = IMG_LOC la riserva non fa niente.
+var IMG_CDN = 'img/', IMG_LOC = 'img/', IMG_B = IMG_CDN;
 function imgUrl(n) { return IMG_B + n + '.webp'; }
 function imgRiserva(el) { el.onerror = null; IMG_B = IMG_LOC; if (el.src && el.src.indexOf(IMG_CDN) === 0) el.src = el.src.replace(IMG_CDN, IMG_LOC); try { document.querySelector('#scena .bg').style.backgroundImage = 'url(img/sfondo-giro.webp)'; } catch (e) {} }
 </script>
-<link rel="preload" as="image" href="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@9ed0fb7/esame-tartufi/img/sfondo-giro.webp">
+<link rel="preload" as="image" href="img/sfondo-giro.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -94,7 +94,7 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
 
 /* ---------- la scena ---------- */
 #scena{position:relative;height:clamp(170px,30vh,380px);border-radius:18px;overflow:hidden;border:4px solid var(--legno2);box-shadow:0 6px 0 #1d140c,0 12px 30px rgba(0,0,0,.4);background:#c98a3a}
-#scena .bg{position:absolute;inset:0;background:url(https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@9ed0fb7/esame-tartufi/img/sfondo-giro.webp) 0 100%/auto 100% repeat-x}
+#scena .bg{position:absolute;inset:0;background:url(img/sfondo-giro.webp) 0 100%/auto 100% repeat-x}
 #scena .pg{position:absolute;bottom:5%;transform-origin:50% 100%;filter:drop-shadow(0 4px 3px rgba(0,0,0,.28));user-select:none;-webkit-user-drag:none;pointer-events:none}
 .pg.passo{animation:passo .32s ease-in-out infinite alternate}
 .pg.fiuto{animation:fiuto .22s ease-in-out infinite alternate}
@@ -372,7 +372,7 @@ a.reg{text-decoration:none;display:block}
     <div class="pg sprite" id="uomoP" hidden></div>
     <img class="pg" id="cane" alt="">
     <div class="pg sprite" id="caneP" hidden></div>
-    <img id="pop" src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@9ed0fb7/esame-tartufi/img/tartufo-nero.webp" onerror="imgRiserva(this)" alt="">
+    <img id="pop" src="img/tartufo-nero.webp" onerror="imgRiserva(this)" alt="">
     <div class="hud" id="hud" hidden>
       <div class="chip" id="hLiv">Livello 1</div>
       <div class="chip" id="hPuntiC"><small>Punti</small><span id="hPunti">0</span></div>
@@ -402,7 +402,7 @@ a.reg{text-decoration:none;display:block}
     <div class="combo" id="combo"></div>
     <div class="carta" id="carta">
       <span class="etichetta" id="etich"></span>
-      <div class="fig" id="fig" hidden><img src="https://cdn.jsdelivr.net/gh/AvventureMicologiche/home-page-sito@9ed0fb7/esame-tartufi/img/tartufo-tagliato.webp" onerror="imgRiserva(this)" alt="Tartufo tagliato a metà"><span class="et e-peridio">peridio</span><span class="et e-gleba">gleba</span></div>
+      <div class="fig" id="fig" hidden><img src="img/tartufo-tagliato.webp" onerror="imgRiserva(this)" alt="Tartufo tagliato a metà"><span class="et e-peridio">peridio</span><span class="et e-gleba">gleba</span></div>
       <p class="domanda" id="dom"></p>
       <div class="opzioni" id="opz"></div>
       <p class="esito" id="esito" aria-live="polite"></p>
@@ -499,6 +499,8 @@ function qa(nome, p) { if (FESTA) return; try { gtag('event', nome, Object.assig
 const salva = () => { if (PROVA || FESTA) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
 /* ---------- immagini ---------- */
+// ⚠️ 20/10/2026: jsDelivr TOLTO (sul commit nuovo della home dava 404 e attese di 20 s a caso): le immagini
+// arrivano da img/ sul sito, Cloudflare Pages, banda gratis. Storia di prima:
 // 7/10/2026: le immagini (anche quelle di scena da 0,3-0,9 MB) arrivano da jsDelivr, CDN gratuito che legge
 // il repo home-page-sito su GitHub al commit 9ed0fb7: una partita costava 1,3 MB di banda Netlify. Se il CDN non
 // risponde si torna alla cartella locale img/ per tutto il resto della partita (imgRiserva). Aggiungendo o cambiando
