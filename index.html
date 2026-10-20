@@ -9,7 +9,8 @@
   <meta name="author" content="Avventure Micologiche">
   <meta property="og:title" content="Avventure Micologiche">
   <meta property="og:description" content="Un diario di bosco. Funghi, tartufi e un lagotto — esplorando foreste in ogni stagione.">
-  <meta property="og:url" content="https://avventuremicologiche.it">
+  <link rel="canonical" href="https://avventuremicologiche.it/">
+  <meta property="og:url" content="https://avventuremicologiche.it/">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://avventuremicologiche.it/immagini/preview.jpg">
 
@@ -422,7 +423,9 @@
     }
     /* Il primo banner parte dal taglio tra le foto (11/10/2026). Sotto i 900 px
        di altezza i banner non stanno nella meta' bassa: restano appoggiati sul fondo. */
-    @media (min-width: 961px) and (min-height: 900px) {
+    /* 20/10/2026 (check): da 961 a ~1015 px i banner vanno a capo, si allungano e i social uscivano dal fondo
+       della copertina (overflow hidden), tagliati a meta'. Il «da meta' altezza» parte da 1024 px. */
+    @media (min-width: 1024px) and (min-height: 900px) {
       .hero-content { top: 50%; padding-top: 0; }
       .hero-azioni { align-self: flex-start; }
     }
@@ -543,13 +546,16 @@
 </nav>
 
 
+<!-- 20/10/2026 (check): le celle 1, 2, 5 e 6 hanno loading="lazy": al telefono sono display:none e cosi' non si
+     scaricano (~500 KB); al computer sono nello schermo e arrivano subito. Gli alt dicono cosa si VEDE: i nomi
+     dei file sono scambiati (spugnole.jpg e' Archie, porcini.jpg gli ovoli...) e si lasciano come sono. -->
 <header class="hero">
-  <div class="hero-cell tall"><img src="immagini/ovoli_mano.jpg" alt="Ovoli in mano" /></div>
-  <div class="hero-cell"><img src="immagini/ovolo_uovo.jpg" alt="Ovolo uovo" /></div>
-  <div class="hero-cell"><img src="immagini/spugnole.jpg" alt="Spugnole" /></div>
-  <div class="hero-cell tall"><img src="immagini/porcini.jpg" alt="Porcini" /></div>
-  <div class="hero-cell"><img src="immagini/Clipboard03.jpg" alt="Fungo bianco" /></div>
-  <div class="hero-cell"><img src="immagini/tartufo_nero.jpg" alt="Tartufo nero" /></div>
+  <div class="hero-cell tall"><img src="immagini/ovoli_mano.jpg" alt="Archie sul sentiero, dietro un porcino" loading="lazy" /></div>
+  <div class="hero-cell"><img src="immagini/ovolo_uovo.jpg" alt="Finferli, un porcino e tartufi appena raccolti, sul tavolo" loading="lazy" /></div>
+  <div class="hero-cell"><img src="immagini/spugnole.jpg" alt="Archie, il nostro lagotto, tra le foglie" /></div>
+  <div class="hero-cell tall"><img src="immagini/porcini.jpg" alt="Ovoli in mano" /></div>
+  <div class="hero-cell"><img src="immagini/Clipboard03.jpg" alt="Una manciata di tartufi appena raccolti" loading="lazy" /></div>
+  <div class="hero-cell"><img src="immagini/tartufo_nero.jpg" alt="Due porcini tra le foglie" loading="lazy" /></div>
   <div class="hero-content">
     <h1>Avventure<em>Micologiche</em></h1>
     <!-- Mappa, quiz, YouTube e i social: al telefono sotto il titolo, al computer banner a destra -->
@@ -591,9 +597,9 @@
         </a>
       </div>
       <div class="yt-mosaic">
-        <img src="immagini/cestino_giorno.jpg" alt="Cestino del giorno" loading="lazy" />
-        <img src="immagini/porcino_bosco.jpg" alt="Porcino nel bosco" loading="lazy" />
-        <img src="immagini/tartufi_bianchi.jpg" alt="Tartufi bianchi" loading="lazy" />
+        <img src="immagini/cestino_giorno.jpg" alt="Un tartufo nero in mano" loading="lazy" />
+        <img src="immagini/porcino_bosco.jpg" alt="Spugnole nel sottobosco" loading="lazy" />
+        <img src="immagini/tartufi_bianchi.jpg" alt="Un ovolo che esce dall'uovo" loading="lazy" />
       </div>
     </div>
   </div>
@@ -606,10 +612,10 @@
   <div class="container">
     <div class="chi-grid">
       <div class="chi-mosaic">
-        <img src="immagini/archie_corre.jpg" alt="Archie che corre verso il porcino" loading="lazy" />
-        <img src="immagini/archie_tartufo.jpg" alt="Archie con tartufo" loading="lazy" />
-        <img src="immagini/mappa_piemonte.jpg" alt="Mappa precipitazioni Piemonte" loading="lazy" />
-        <img src="immagini/bottino_giornata.jpg" alt="Bottino di giornata" loading="lazy" />
+        <img src="immagini/archie_corre.jpg" alt="Due porcini appena raccolti" loading="lazy" />
+        <img src="immagini/archie_tartufo.jpg" alt="Archie con un tartufo" loading="lazy" />
+        <img src="immagini/mappa_piemonte.jpg" alt="Un grande fungo bianco nel bosco" loading="lazy" />
+        <img src="immagini/bottino_giornata.jpg" alt="Porcini nel bosco" loading="lazy" />
       </div>
       <div>
         <p class="label">Chi siamo</p>
