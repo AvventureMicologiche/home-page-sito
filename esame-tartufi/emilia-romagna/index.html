@@ -255,6 +255,10 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
 #scena .yt-scena.su{opacity:1}
 #scena .yt-scena .sfoca{position:absolute;inset:-30px;background-position:center;background-size:cover;filter:blur(18px) brightness(.62) saturate(1.15)}
 #scena .yt-scena .cop16{position:relative;height:100%;aspect-ratio:16/9;display:block}
+/* 21/10/2026: la riga della griglia prendeva l'altezza vera della copertina (270 px) e non quella della scena: la scritta
+   col titolo finiva sotto il bordo tagliato (al computer tutta, al telefono in gioco la seconda riga). Riga = scena. */
+#scena .yt-scena{grid-template-rows:minmax(0,100%)}
+#scena .yt-scena .cop16{max-height:100%;min-height:0}
 /* niente stacco netto: i bordi della copertina sfumano nello sfondo sfocato */
 #scena .yt-scena .cop16 img{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 4%,#000 96%,transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 4%,#000 96%,transparent 100%)}
 #scena .yt-scena .cop16 img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s}
@@ -262,7 +266,8 @@ main{max-width:720px;margin:0 auto;padding:10px 12px 12px}
 #scena .yt-scena .play{position:absolute;left:50%;top:44%;width:68px;height:48px;margin:-24px 0 0 -34px;border-radius:13px;background:#ff0000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 2l5 3-5 3z' fill='white'/%3E%3C/svg%3E") center/24px no-repeat;box-shadow:0 4px 12px rgba(0,0,0,.5)}
 #scena .yt-scena .scritta{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 9px;background:linear-gradient(transparent,rgba(0,0,0,.9));color:#fff;font-weight:800;font-size:17px;line-height:1.15;text-align:left}
 #scena .yt-scena .scritta small{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#ff6b62;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
-@media (max-width:639px){ #scena .yt-scena{grid-template-columns:0 auto 0} #scena .yt-scena .cop16 img{-webkit-mask-image:none;mask-image:none} }
+/* 21/10/2026: tolta la regola del telefono (copertina a tutta larghezza, attaccata a sinistra): ora la copertina sta dentro
+   l'altezza della scena e in gioco è più stretta dello schermo; centrata con le bande sfocate ai due lati, come al computer */
 /* ---------- serie di fila e classifica ---------- */
 #hFilaC.su{animation:pop .4s}
 /* la classifica sta nella scena, in alto a destra dalla parte del cane (non sopra il tartufaio): si vede appena si apre la pagina */
@@ -1095,7 +1100,8 @@ const DATI_VIDEO = SITO_VERO
   try {
     const c = new AbortController(); setTimeout(() => c.abort(), 4000);
     const j = await (await fetch(DATI_VIDEO + 'data/quiz-video.json', { signal: c.signal, cache: 'no-cache' })).json();
-    const nuovi = (j.video || []).filter(v => /^[\w-]{11}$/.test(v.id) && v.tit)
+    // «da» (21/10/2026): un video programmato su YouTube entra in rotazione solo da quell'ora (es. "2026-10-21T17:30:00+02:00")
+    const nuovi = (j.video || []).filter(v => /^[\w-]{11}$/.test(v.id) && v.tit && !(v.da && Date.now() < Date.parse(v.da)))
       .map(v => ({ id: v.id, link: 'https://youtu.be/' + v.id, img: DATI_VIDEO + 'data/quiz-video/yt-' + v.id + '.webp', tit: String(v.tit) }));
     if (nuovi.length) VIDEO.splice(0, VIDEO.length, ...nuovi);
   } catch (e) {}
