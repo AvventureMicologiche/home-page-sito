@@ -18,7 +18,18 @@ const puppeteer = require('D:/video youtube/claudio/grafiche-social/node_modules
   await p.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
   // solo nello scatto: con 9 regioni le etichette sotto «Indietro» non ci stanno su una riga, si va a capo
   await p.addStyleTag({ content: '#rg-scelte{justify-content:center!important}#rg-scelte .rg-chip{flex:0 1 auto!important;width:auto!important;font-size:11.5px!important;padding-left:5px!important;padding-right:5px!important;gap:3px!important;white-space:nowrap!important}' });
-  await new Promise(r => setTimeout(r, 8000));
+  await new Promise(r => setTimeout(r, +(process.env.ATTESA || 8000)));
+  // VISTA=lat,lon,zoom: sposta la mappa prima dello scatto
+  if (process.env.VISTA) { const [la, lo, z] = process.env.VISTA.split(',').map(Number);
+    await p.evaluate((la, lo, z) => window._mapDebug.setView([la, lo], z, { animate: false }), la, lo, z);
+    await new Promise(r => setTimeout(r, +(process.env.ATTESA2 || 15000))); }
+  // INTENSITA=70: sposta il cursore «Intensità boschi» come farebbe chi guarda (col satellite parte dal 30%)
+  if (process.env.INTENSITA) {
+    const fatto = await p.evaluate(v => { const r = [...document.querySelectorAll('input[type=range]')].find(i => /ntensit/i.test((i.closest('div') || {}).textContent || ''));
+      if (!r) return false; r.value = v; r.dispatchEvent(new Event('input', { bubbles: true })); r.dispatchEvent(new Event('change', { bubbles: true })); return true; }, process.env.INTENSITA);
+    console.log('cursore intensita:', fatto);
+    await new Promise(r => setTimeout(r, 4000));
+  }
   await p.screenshot({ path: out, type: 'png' });
   await b.close();
 })();
