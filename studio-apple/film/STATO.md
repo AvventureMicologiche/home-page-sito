@@ -154,8 +154,30 @@ node studio-apple/film/tools/scarica-satellite.js --solo-conta                 q
   al motore nuovo).
 - Nel cloud, dietro il proxy, i comandi con rete vanno lanciati con `NODE_USE_ENV_PROXY=1` (dal PC non serve).
 
-## Misure
-_(dal render nel cloud, col segnaposto: vedi sotto)_
+## Misure (render del 22/10/2026 nel cloud, col segnaposto del satellite)
+- **Tempi**: 1.440 fotogrammi in circa 15 minuti (0,2 s a fotogramma a telecamera ferma, fino a 1,5 s nello zoom), più
+  3 minuti di codifica e 1 di misure. Dal PC, col satellite vero, conta 25-40 minuti.
+- **Pesi**: `apertura-1080.mp4` **8,12 MB**, `apertura-720.mp4` **2,39 MB**, poster 12 KB (libx264, due passate, 2,6 e
+  0,74 Mbit/s di media come prima). Con la foto aerea vera lo zoom avrà più dettaglio: le due passate tengono il peso,
+  il dettaglio lo pagano i fotogrammi più veloci.
+- **Uniformità della pioggia** (`uniformita.png`, `uniformita.csv`, fatto da `tools/uniformita.py` a ogni render):
+  opacità della pioggia stimata pixel per pixel e presa come mediana per regione, ogni 0,2 s della comparsa
+  (2,4-5,0 s), sulle **20 regioni**. Salgono insieme: **scarto massimo fra regioni 0,008** (su una scala da 0 a 1).
+  Per esempio a 3,6 s tutte fra 0,418 e 0,422, a 4,0 s fra 0,698 e 0,700, a 4,4 s fra 0,904 e 0,908.
+- **Fluidità** (`fluidita.png`, `fluidita.csv`): differenza media fra fotogrammi consecutivi su tutti i 1.440.
+  **0 picchi**, ultimo fotogramma contro il primo **0,00** (loop esatto), massimo 7,53 livelli su 255 a 17,6 s (il
+  centro dello zoom, il punto più veloce; prima era 12,2). Per zona: la pioggia che sale al massimo 0,11; pioggia →
+  boschi 0,22; il satellite che entra 0,09; lo **zoom** parte da zero e sale in modo liscio (salto massimo fra due
+  differenze consecutive 0,15: nessuno strappo all'inizio); il loop 0,81.
+  Sotto, nel grafico, la velocità della telecamera: zero per 11,6 s, poi una campana sola.
+  Corretto in questa sessione: la dissolvenza del loop fatta da Chrome abbassava di colpo tutto il fotogramma di
+  un livello (la fusione a 8 bit tronca, appena l'opacità arriva a 1/255): era un picco a 23,07 s. Ora la mescola
+  si fa pixel per pixel con l'arrotondamento giusto.
+- **Stills** (`stills/`): uno al secondo, e uno ogni mezzo secondo nelle dissolvenze (pioggia, boschi, satellite,
+  primi 3 s dello zoom, loop). Guardati tutti: nessuna regione prima delle altre, nessun fotogramma fangoso (a 7,5 s
+  l'Italia è scura e pulita fra pioggia e boschi), nessuna tessera mancante. Le strisce color sabbia a 20-23 s sono
+  del segnaposto (la maschera dei boschi dello z13 ingrandita), col satellite vero non ci sono.
+- **`node studio-apple/verify.js --v2`**: 28/28.
 
 ## Storia (sessioni precedenti, in breve)
 - **Rete dal cloud** (provata il 22/10/2026): Esri, EOX, previsioni di produzione, Open-Meteo, OpenStreetMap, Google,

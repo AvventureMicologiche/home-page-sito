@@ -103,7 +103,7 @@ async function main() {
     const rifai = !!arg('rifai', false);
     if (!prova && rifai && lista2.includes(0)) { try { fs.unlinkSync(primo); } catch (e) {} }
     const t0 = Date.now();
-    let fatti = 0;
+    let fatti = 0, tavolo = null;
     for (const i of lista2) {
       const f = path.join(dir, `f${String(i).padStart(5, '0')}.png`);
       if (!prova && !rifai && fs.existsSync(f)) continue;
@@ -114,18 +114,31 @@ async function main() {
         r = await scena(page, s);
         if (r.mancanti.length) throw new Error(`fotogramma ${i}: ${r.mancanti.length} immagini non arrivate, per esempio ${r.mancanti[0]}`);
       }
-      if (s.loop > 0) {   // il primo fotogramma sopra, sempre piu' pieno: il film si richiude su se stesso
+      const png = await page.screenshot({ type: 'png' });
+      if (s.loop > 0) {
+        /* IL LOOP: il primo fotogramma sopra, sempre piu' pieno, cosi' il film si richiude su se stesso.
+           ⚠️ Non con un <img> sopra la mappa (com'era) ne' con globalAlpha su una tela: la fusione a 8 bit di Chrome
+           tronca, e appena l'opacita' arrivava a 1/255 TUTTO il fotogramma scendeva di un livello di colpo (misurato:
+           un picco a 23,07 s). Ora la mescola si fa pixel per pixel, (1 - a) x questo fotogramma + a x il primo,
+           arrotondata: con a quasi zero il fotogramma resta identico. */
         const p0 = [path.join(dir, 'f00000.png'), primo].find(f => fs.existsSync(f));
         if (!p0) throw new Error('serve prima il fotogramma 0');
-        const b64 = fs.readFileSync(p0).toString('base64');
-        await page.evaluate(({ b64, a }) => new Promise(ok => {
-          let im = document.getElementById('film-loop');
-          if (!im) { im = document.createElement('img'); im.id = 'film-loop'; im.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:99999;pointer-events:none'; document.body.appendChild(im); }
-          im.style.opacity = a; im.style.display = 'block';
-          if (im.dataset.ok) return ok(); im.onload = () => { im.dataset.ok = 1; ok(); }; im.src = 'data:image/png;base64,' + b64;
-        }), { b64, a: s.loop });
-      } else await page.evaluate(() => { const im = document.getElementById('film-loop'); if (im) im.style.display = 'none'; });
-      await page.screenshot({ path: f, type: 'png' });
+        if (!tavolo) { tavolo = await browser.newPage(); await tavolo.setContent('<canvas></canvas>'); }
+        const b64 = await tavolo.evaluate(async ({ io, primo, a }) => {
+          const carica = async src => { const im = new Image(); im.src = src; await im.decode(); return im; };
+          window.__primo = window.__primo || await carica(primo);
+          const im = await carica(io), c = document.querySelector('canvas');
+          c.width = im.width; c.height = im.height;
+          const g = c.getContext('2d', { willReadFrequently: true });
+          if (!window.__p0) { g.drawImage(window.__primo, 0, 0); window.__p0 = g.getImageData(0, 0, c.width, c.height).data; }
+          g.drawImage(im, 0, 0);
+          const d = g.getImageData(0, 0, c.width, c.height), p = d.data, q = window.__p0;
+          for (let k = 0; k < p.length; k += 4) for (let j = 0; j < 3; j++) p[k + j] = Math.round(p[k + j] + a * (q[k + j] - p[k + j]));
+          g.putImageData(d, 0, 0);
+          return c.toDataURL('image/png').split(',')[1];
+        }, { io: 'data:image/png;base64,' + png.toString('base64'), primo: 'data:image/png;base64,' + fs.readFileSync(p0).toString('base64'), a: s.loop });
+        fs.writeFileSync(f, Buffer.from(b64, 'base64'));
+      } else fs.writeFileSync(f, png);
       fatti++;
       if (i % 60 === 0 || prova) {
         const al = (Date.now() - t0) / 1000 / fatti, resta = (lista2.length - fatti) * al;
