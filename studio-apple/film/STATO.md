@@ -6,11 +6,23 @@ Si lavora solo in `studio-apple/film/` e `studio-apple/home-v2/`. Il repo della 
 ## Fatto
 - [x] `tools/griglie.py`: la pioggia vera, giorno per giorno, con la stessa interpolazione della mappa.
 - [x] `tools/motore.js`: apre la mappa vera in Chromium, toglie tutta l'interfaccia, disegna una scena.
-- [x] `tools/film.js`: il film, fotogramma per fotogramma (in corso il primo render completo).
+- [x] `tools/film.js`: il film, fotogramma per fotogramma.
+- [x] **Passo 1**: `apertura-1080.mp4` (4,31 MB), `apertura-720.mp4` (1,43 MB), `apertura-poster.webp` (primo fotogramma),
+      `stills/` (uno ogni 2 s). 1920x1080, 60 fps veri, 14 s, 840 fotogrammi, muto, H.264 High, CRF 16 con tetto di banda
+      (2,6 Mbit/s il 1080, 0,82 il 720: senza tetto i boschi pesavano troppo), yuv420p, BT.709, range TV, faststart.
+      Controlli fatti: stills guardati uno per uno (niente interfaccia, niente buchi), differenza fra fotogrammi
+      consecutivi senza picchi, ultimo fotogramma = primo (loop senza scatto).
+- [x] **Passo 2**, quattro immagini su cinque in `foto/` (WebP qualità 82, 2880 e 1440):
+      `pioggia-italia` (61 e 27 KB), `boschi-vicino` (394 e 184 KB, sopra il rilievo), `finestra-funghi` (Toscana,
+      2-9 ottobre = 13-20 giorni prima del 22/10; 76 e 34 KB), `scheda-stazione` (Piampaludo, la scheda vera della
+      mappa ingrandita; 127 e 63 KB). Tutte sotto i limiti (600 e 250 KB).
 
 ## Da fare
-- [ ] Passo 1: guardare gli stills, correggere, codificare (`apertura-1080.mp4`, `apertura-720.mp4`, `apertura-poster.webp`).
-- [ ] Passo 2: immagini HD (`tools/foto.js`).
+- [ ] **Dal PC** (rete aperta): `node studio-apple/film/tools/foto.js boschi-vicino --satellite` per i boschi sopra
+      la foto aerea (nel cloud i server Esri sono chiusi), e l'immagine delle **previsioni**: nel cloud non si può,
+      la mappa le chiede a `/api/previsioni` (funzione Netlify che va su Open-Meteo, chiuso). Fino ad allora la
+      home v2 usa `immagini/poster-previsioni.jpg` (vecchia, piccola). Nel film si può aggiungere il satellite allo
+      stesso modo (opzione da portare in `film.js`).
 - [ ] Passo 3: `home-v2/index.html`.
 - [ ] Passo 4: `verify.js` esteso al v2, screenshot in `film/screenshot/`.
 
@@ -35,6 +47,11 @@ Si lavora solo in `studio-apple/film/` e `studio-apple/home-v2/`. Il repo della 
   pioggia è quasi sparita (regola della mappa: mai il rilievo sotto la pioggia piena). 13,2-14 s dissolvenza sul
   primo fotogramma: il loop si richiude senza scatto.
 - **Il testo** non è nel video: lo mette la pagina sopra.
+- **Il poster** è il primo fotogramma come chiesto: l'Italia scura senza pioggia. Se per chi ha «riduci animazioni»
+  si preferisce l'Italia già bagnata, basta generare il poster dal fotogramma 414 (6,9 s).
+- **Fluidità**: Leaflet arrotonda al pixel intero l'origine della mappa, i vettori e i livelli di tessere; con una
+  deriva di 0,1-0,2 px a fotogramma l'immagine tremava di un pixel. Nel render i tre arrotondamenti sono tolti
+  (`motore.js`, in pagina, non nel repo della mappa): misurato dopo, lo spostamento fra fotogrammi è costante.
 
 ## Fedeltà alla mappa
 - La pioggia è disegnata dalla `drawGrid()` della mappa (sua scala di colori, opacità 0,7, sfumatura, fasce di

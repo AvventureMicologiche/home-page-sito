@@ -27,6 +27,7 @@ const CACHE = path.join(FILM, 'cache');
 const TESSERE_COMMIT = '90a532e7a3f95e6cde1fc4fd0ee6fc658ffb2f6d';   // lo stesso di index.html della mappa
 const JSDELIVR = `https://cdn.jsdelivr.net/gh/AvventureMicologiche/Mappa-Precipitazioni-Tessere@${TESSERE_COMMIT}/`;
 const RAW = `https://raw.githubusercontent.com/AvventureMicologiche/Mappa-Precipitazioni-Tessere/${TESSERE_COMMIT}/`;
+const DATI = 'https://raw.githubusercontent.com/AvventureMicologiche/Mappa-Precipitazioni-Nord/main/data/';
 const PNG_VUOTO = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==', 'base64');
 
 /* una tessera dal repo delle tessere, con cache su disco e tre tentativi */
@@ -100,6 +101,10 @@ async function apri({ url, larghezza, altezza, scala = 1, griglia, nonPulire = f
       return r.fulfill({ response: resp, body: html });
     }
     if (u.startsWith(base.origin)) return r.continue();
+    if (u.startsWith(DATI)) {   // i file delle stazioni: dal clone locale della mappa, come fa lei in locale
+      const resp = await r.fetch({ url: base.origin + '/data/' + u.slice(DATI.length) });
+      return r.fulfill({ response: resp, headers: { ...resp.headers(), 'access-control-allow-origin': '*' } });
+    }
     if (satellite && u.includes('arcgisonline.com')) return r.continue();   // la foto aerea, solo se la rete la lascia passare (dal PC)
     // il resto del mondo: una risposta vuota, cosi' la pagina non resta appesa e la console non si riempie
     if (/\.(png|jpe?g|webp)(\?|$)/.test(u) || /tile/.test(u)) return r.fulfill({ status: 200, body: PNG_VUOTO, contentType: 'image/png' });
