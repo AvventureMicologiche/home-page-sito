@@ -100,7 +100,7 @@ const CSS_PULITO = `
   /* le targhette delle previsioni: lo stile della mappa (.pv-m), solo piu' grandi perche' il film si guarda
      ridotto nella pagina; il nome sta sotto l'icona come nella mappa */
   .film-pv{position:absolute;left:0;top:0;will-change:transform,opacity}
-  .film-pv .pv-m{zoom:1.55;cursor:default}
+  .film-pv .pv-m{zoom:1.9;cursor:default}
   #film-nota{position:fixed;right:18px;bottom:14px;z-index:99998;font:600 15px/1.3 system-ui,sans-serif;color:rgba(255,255,255,.55);
     letter-spacing:.02em;pointer-events:none}
 `;

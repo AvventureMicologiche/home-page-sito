@@ -148,7 +148,8 @@ function statoAl(t, { sat, prev }) {
     terra: hex(mixc(mixc(TERRA_BUIA, TERRA_RILIEVO, terraU), TERRA_FINE, terraFine)),
     // il rilievo sale solo quando la pioggia e' quasi andata (regola della mappa), e alla fine resta morbido
     rilievo: tratto(t, 13.0, 15.0) * (1 - 0.35 * terraFine),
-    boschi: tratto(t, 11.9, 12.3) * (1 - tratto(t, 18.9, 20.6)),
+    // vicino alle chiome i boschi si fanno un po' piu' trasparenti: sotto si vede il satellite
+    boschi: tratto(t, 11.9, 12.3) * (1 - tratto(t, 18.9, 20.6)) * (1 - 0.4 * tratto(t, 16.0, 17.6) * (1 - tratto(t, 18.4, 19.4))),
     soglia: mix(320, 25, tratto(t, 12.0, 15.2)),                 // prima dove e' piovuto di piu'
     morbidoBoschi: 30,
     sat: tratto(t, 14.6, 16.8) * (1 - tratto(t, 18.7, 20.6)),    // il satellite sfuma dentro SOTTO i boschi
