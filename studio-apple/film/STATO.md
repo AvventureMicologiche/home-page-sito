@@ -1,198 +1,176 @@
-# Film d'apertura e immagini HD: stato
+# Film d'apertura: stato
 
-Seconda sessione (22/10/2026): ramo `claude/intelligent-babbage-ckzf3g`, nato da `claude/dreamy-albattani-g6zdi2`.
-Si lavora solo in `studio-apple/film/` e `studio-apple/home-v2/`. Il repo della mappa si usa in sola lettura
-(clone in `/tmp/mappa`; le modifiche stanno solo nella risposta del server locale o nel CSS/JS iniettato da `motore.js`).
+Terza sessione (22/10/2026): ramo `claude/sweet-bell-rbe3jj`, nato da `claude/intelligent-babbage-ckzf3g`.
+Si lavora SOLO sul film (`studio-apple/film/`) e sul blocco dei tempi delle scritte in `home-v2/index.html`
+(`SCRITTE_FILM`). Immagini HD, previsioni e resto della pagina non si toccano. Il repo della mappa si usa in sola
+lettura (un clone qualsiasi, passato con `--mappa <cartella>`).
 
-## Passo 0: la rete dal cloud (provata il 22/10/2026)
-| Fonte | Esito |
-|---|---|
-| Satellite Esri `server.arcgisonline.com` (World_Imagery), anche `services.arcgisonline.com` | ❌ chiuso (il proxy risponde 403 al CONNECT) |
-| Sentinel-2 cloudless EOX `tiles.maps.eox.at` (e `s2maps-tiles.eu`) | ❌ chiuso |
-| Previsioni di produzione `https://precipitazioni.avventuremicologiche.it/api/previsioni` (e tutto il dominio) | ❌ chiuso |
-| Open-Meteo, MET Norway, OpenStreetMap, Google, NASA GIBS, jsDelivr | ❌ chiusi |
-| `raw.githubusercontent.com`, `github.com` (git) | ✅ aperti: dati delle stazioni, tessere boschi e rilievo |
+Il suo giudizio sul film precedente: «non ci siamo, il film iniziale è la base di tutto». Gli era piaciuto molto
+l'inizio coi pluviometri; non gli piacevano la pioggia che compariva prima in alcune regioni, lo zoom sulla Liguria
+troppo presto e i passaggi. Ha scritto lui la sceneggiatura nuova: qui sotto, seguita alla lettera.
 
-Quindi nel cloud satellite e previsioni sono **segnaposto** (con una scritta piccola in basso a destra che lo dice,
-nel film e nelle due immagini), e dal PC basta un comando (vedi «Cosa va lanciato dal PC»).
-- **Satellite**: `motore.js` disegna le tessere Esri World Imagery (le stesse della mappa del test) sotto i boschi;
-  senza rete al loro posto c'è il rilievo scuro. Le tessere scaricate restano in `cache/satellite/`.
-- **Previsioni**: `motore.js` scarica `/api/previsioni?capoluoghi=liguria` dalla produzione in
-  `cache/previsioni-liguria.json` e disegna le targhette con lo stile della mappa (`.pv-m`: icona, nome, massima e
-  minima di domani). C'è anche il **ponte**: la mappa clonata, in locale, chiede `http://127.0.0.1:8788/api/previsioni`
-  (così è scritto nel suo `index.html`); `motore.js` intercetta quella richiesta e la gira alla produzione (opzione
-  `ponteprevisioni` di `apri()`, per chi vuole fotografare la mappa vera in modo previsioni). Senza rete il
-  segnaposto mostra i capoluoghi veri (`data/capoluoghi.json` della mappa) col solo nome.
-
-## Fatto in questa sessione
-- [x] **Passo 0**: rete provata e scritta qui sopra.
-- [x] **I puntini neri nella pioggia**: erano tre cose diverse, tutte risolte.
-  1. **Pluviometri guasti che la mappa tiene fuori e `griglie.py` no.** La mappa ha liste scritte a mano
-     (`LOMB_ESCLUSE`, `PIEMONTE_ESCLUSE`, `LIGURIA_ESCLUSE`, `EMILIA_ESCLUSE`, `TOSCANA_ESCLUSE`, `MH_ESCLUSE`):
-     `griglie.py` non le leggeva, e un pluviometro fermo a zero, col **veto** (stazione entro 6 km sotto 1 mm =
-     punto a 0), faceva un buco trasparente, cioè nero sulla terra scura. Esempi: Cantagallo (Prato, sull'Appennino
-     verso Bologna, 0 mm in 30 giorni con i vicini a 49), Benevento, Ponte S.Maria. Ora `griglie.py` legge le liste
-     dall'`index.html` della mappa e le applica con le stesse chiavi; toglie anche i doppioni MeteoHub del Friuli
-     entro 1 km da OSMER, come la mappa.
-  2. **Pluviometri sordi nel periodo** (soprattutto in **Sicilia**: Palermo UIR, Cefalù, Menfi, Ganzirri e altri 20):
-     hanno consegnato zeri, o non hanno consegnato proprio i giorni di pioggia, mentre intorno pioveva 25-180 mm.
-     La mappa li mostra (passano la copertura del 60%), e anche lei li vede come buchi. Solo per l'immagine si tolgono
-     con la regola del controllo automatico della mappa (`check-stazioni-ferme.js`: sotto il 15% della mediana dei
-     cinque vicini), con i vicini ad almeno 20 mm; più gli zeri secchi (sotto 1,5 mm e sotto il 20% dei vicini, con
-     i vicini ad almeno 5 mm: era il buco di Comacchio). 32 stazioni in tutto, elencate da `griglie.py` quando gira.
-  3. **San Marino** (il puntino nero vicino a Rimini): non è una regione italiana, nel contorno dell'Italia era un
-     buco e il ritaglio «evenodd» della mappa lo lasciava nero. Ora il contorno tiene solo i bordi esterni.
-  Restano senza pioggia solo Lampedusa, Linosa e Lampione (piove poco davvero, e stanno fuori inquadratura).
-- [x] **Passo 1, il film rifatto per la fluidità** (`tools/motore.js`, `tools/film.js`): vedi «Il film» sotto.
-- [x] **Passo 2, le immagini HD** in `foto/` (WebP qualità 82, 2880 e 1440): vedi «Le immagini» sotto.
-  La finestra «piogge per funghi» è tolta (immagine, capitolo e ogni riferimento), come chiesto.
-- [x] **Passo 3, la pagina `home-v2/index.html`**: vedi «La pagina» sotto. `verify.js --v2` esteso.
-
-## Il film (`apertura-1080.mp4`, `apertura-720.mp4`, `apertura-poster.webp`, `stills/` uno al secondo)
-1920x1080, 60 fps veri, **24 s**, 1440 fotogrammi, muto, H.264 High, preset slow, tune film, yuv420p, BT.709, range TV,
-faststart, **in due passate** (1080: media 2,6 Mbit/s, picchi fino a 7; 720: media 0,74, picchi fino a 2). Pesi e misure:
-vedi «Misure» in fondo.
-⚠️ Due passate e non CRF 16-18 come chiesto, perché misurato: con CRF 17 e un tetto di banda i bit finivano nella
-pioggia sull'Italia (2-5 s: 3-4 Mbit/s per un PSNR di 45-51 dB, più del necessario) e la discesa sui boschi restava
-strozzata a 29 dB, impastata. In due passate, a parità di peso, il punto peggiore sale a 32,5 dB.
-
-**Il racconto** (una sola curva di telecamera, che non si ferma mai):
+## La sceneggiatura e i tempi (24 s, 60 fps, 1440 fotogrammi)
+La telecamera resta **ferma** sull'Italia intera (centro 41,85 N 12,5 E, zoom 6,62: la stessa inquadratura
+dell'inizio di prima) per 11,6 secondi, finché il satellite non è comparso. Tutti i tempi stanno in un solo
+oggetto, `T` in `tools/racconto.js`.
 
 | secondi | cosa |
 |---|---|
-| 0-2,6 | l'Italia scura; compaiono, scaglionati e morbidi, i pallini di un pluviometro ogni cinque (649 su 3.373, diradati perché stiano distanti: si capisce che sotto ci sono misure vere) |
-| 2,2-11 | i 30 giorni di pioggia. La prima pioggia (25/9) **nasce dai pallini**: si vede solo entro un raggio dai pallini che cresce, poi copre tutto; i pallini sfumano con la pioggia grande del 7-10 ottobre |
-| 9,2-15 | la telecamera parte verso la Liguria e, senza fermarsi, scende verso il bosco ancora sotto la pioggia |
-| 13,7-16,4 | **dissolvenza incrociata pioggia → boschi** (a zoom 11-12): i boschi si accendono prima dove è piovuto di più (soglia da 320 a 25 mm), la pioggia sfuma; il rilievo sale quando la pioggia è quasi andata (regola della mappa) |
-| 15,8-18,6 | **sotto i boschi sfuma dentro il satellite**, e si scende fino alle chiome (zoom 14,3 sopra Santo Stefano d'Aveto); vicino i boschi si fanno un po' più trasparenti perché sotto si vedano gli alberi |
-| 18,6-22 | si torna larghi sulla Liguria; boschi e satellite sfumano, resta il rilievo scuro |
-| 20,2-22,8 | le **previsioni** dei capoluoghi compaiono una dopo l'altra, da ovest a est (se due si toccano resta la più importante) |
-| 23,2-24 | dissolvenza sul primo fotogramma: il loop si richiude senza scatto |
+| 0-2,6 | **l'Italia scura, i pluviometri si accendono**: identico a prima (un pluviometro ogni cinque, 649 pallini, comparsa scaglionata) |
+| 2,4-5,0 | **la pioggia compare uniforme su tutta l'Italia nello stesso momento**: una griglia sola, il cumulato vero dei 30 giorni (22/9-21/10) levigato, che sale con un'opacità globale (smootherstep da 0 a 1). I pallini sfumano mentre sale (3,0-5,0) |
+| 5,0-6,2 | **pausa** con la pioggia piena |
+| 6,2-9,0 | **la pioggia sfuma e compaiono i boschi** su tutta l'Italia (pioggia 6,2-7,8, boschi 7,0-9,0): la pioggia è a zero (7,8 s) prima che i boschi arrivino a metà (8,0 s). Con i boschi la terra prende il rilievo della mappa |
+| 9,0-9,4 | i boschi da soli |
+| 9,4-11,4 | **sotto i boschi sfuma dentro il satellite**: la terra scura diventa foto aerea, ritagliata sul contorno dell'Italia (mare e paesi vicini restano neri); il rilievo se ne va |
+| 11,6-22,8 | **lo zoom**: una sola curva di van Wijk e Nuij (ρ = 1,42) dall'Italia intera alle chiome, col tempo in smootherstep (velocità e accelerazione zero alla partenza e all'arrivo). Il retino dei boschi sparisce man mano: opacità legata al livello di zoom raggiunto, piena all'inizio, zero ai due terzi (zoom 12,6, a 17,6 s); poi satellite puro |
+| 22,8-23,0 | fermi sulle chiome |
+| 23,0-24,0 | **loop**: dissolvenza dall'ultimo fotogramma al primo, senza scatto |
 
-Le **scritte** non sono nel video: le mette la pagina (vedi «La pagina»).
+Previsioni: fuori dal film, per ora («al resto ci arriviamo»).
 
-**Cosa è cambiato per la fluidità** (le sue parole: «non è fluido, appare a pezzi la mappa con la heatmap»):
-- **L'accumulo è continuo.** Prima il cumulato passava da un giorno al successivo in linea retta, un giorno ogni
-  0,21 s: a ogni cambio di giorno la velocità del colore cambiava di colpo (i gradini). Ora ogni giorno di pioggia
-  entra nel cumulato con una curva morbida (smootherstep) lunga 2,5 «giorni» e i giorni si sovrappongono: il
-  cumulato di ogni cella è una curva liscia. In più il tempo della pioggia è **pesato sulla pioggia**: i giorni
-  asciutti di fine settembre passano svelti, i giorni grandi (7-12 e 20-21 ottobre) si allargano, con partenza e
-  arrivo morbidi. 8,8 s di accumulo invece di 6,4.
-- **Niente pezzi.** Le tessere (rilievo, boschi, satellite) non le disegna più Leaflet, che le mostrava man mano
-  che arrivavano e cambiava livello di dettaglio di colpo a metà fra due zoom. Il motore aspetta **tutte** le
-  immagini della vista, poi compone; fra un livello e il successivo c'è una dissolvenza continua (le due tele si
-  sommano coi pesi giusti, trasparenze comprese). La griglia della pioggia si calcola tutta prima dello scatto
-  (`drawGrid` della mappa è sincrona).
-- **La telecamera è una curva sola**: lo zoom è una Hermite cubica con la velocità scelta a ogni nodo (continua anche
-  nella velocità); il centro scivola verso il bersaglio in proporzione a quanto si stringe la vista (niente
-  sbandate a zoom alto), lisciato con una gaussiana di 0,35 s dove il bersaglio cambia; in cima, dove lo zoom si
-  ferma e torna indietro, la telecamera continua a scorrere di lato (16 px/s).
-- **Si scende verso il bosco sotto la pioggia, non sopra i boschi.** I boschi fra lo zoom 9 e l'11 sono migliaia
-  di poligoni minuscoli: in movimento servivano 19 Mbit/s per tenerli nitidi e l'H.264 li impastava. Visti da
-  zoom 11-12 in su sono macchie grandi. In più, quando lo zoom corre, le tessere hanno un mosso leggerissimo (al
-  massimo 1,4 px), come una cinepresa vera.
-- **La costa non trema più.** Il renderer SVG di Leaflet, a ogni `setView`, si riposizionava annullando la
-  correzione sotto-pixel: la terra e i confini restavano agganciati al pixel intero mentre pioggia e tessere
-  scorrevano lisce (mezzo pixel di tremolio sulla costa). Ora si rimette al suo posto (`motore.js`). Provato con
-  una panoramica uniforme di 0,37 px a fotogramma: spostamento costante.
-- **Le targhette delle previsioni sono immagini**, non HTML: Chromium aggancia il testo al pixel intero e con la
-  deriva lenta della fine ogni nome avanzava a scatti. Si disegnano una volta (stile `.pv-m` della mappa) e si
-  posano a coordinate frazionarie.
-- Restano le correzioni sotto-pixel della prima sessione (niente arrotondamenti di Leaflet).
+**Le scritte della pagina** (`SCRITTE_FILM` in cima a `home-v2/index.html`; `da`-`a` = piena, entra ed esce in 0,6 s):
 
-## Le immagini (`foto/`, 2880 e 1440)
-| immagine | cosa | dal cloud |
+| scritta | piena da-a | sopra |
 |---|---|---|
-| `pioggia-nord` | il Nord Italia, 30 giorni, coi pallini dei pluviometri (uno ogni cinque) sopra la pioggia | vera |
-| `scheda-stazione` | la scheda di Piampaludo, quella della prima sessione (non rifatta) | vera |
-| `boschi-nord` | il Nord con la **stessa identica inquadratura** della pioggia (`NORD` in `foto.js`), boschi sopra il rilievo | vera |
-| `satellite` | i boschi (opacità 0,62) sopra la foto aerea, zoom 14,4 a scala 2: sopra Santo Stefano d'Aveto | **segnaposto** (rilievo) |
-| `previsioni` | la Liguria scura col rilievo e le targhette delle previsioni di domani sui capoluoghi | **segnaposto** (solo i nomi) |
+| «Migliaia di pluviometri veri.» | 0,6-2,4 | i pluviometri |
+| «La pioggia caduta davvero.» | 3,6-6,0 | la pioggia che sale e la pausa |
+| «Sui boschi giusti.» | 7,6-9,4 | i boschi |
+| «Come sono davvero, dal satellite.» | 10,7-21,8 | il satellite e lo zoom |
 
-Pesi: vedi «Misure».
+### Perché così
+- **Una griglia sola, levigata.** Lui: non gli interessa la pioggia giorno per giorno, gli interessa che sembri
+  reale. `griglie.py` scrive anche `pioggia-2026-09-22-30g-liscia`: il cumulato finale dei 30 giorni con una
+  gaussiana di 0,03° (circa 3 km), normalizzata sulla terra (il mare non entra, la costa non sbiadisce). Scioglie
+  gli «occhi di bue» che l'IDW lascia attorno a ogni stazione; scarto dal cumulato vero: 2,1 mm in media, entro
+  8,2 mm nel 95% delle celle (il massimo scende da 385 a 306 mm: erano picchi di una cella sopra una stazione).
+  Si cambia con `--liscia` di `griglie.py` (0 = il cumulato vero, senza levigare).
+- **Opacità globale, niente «fioritura» dai pallini.** La fioritura attorno ai pallini avrebbe riempito prima le
+  regioni dove le stazioni sono fitte (Toscana, Lombardia) e dopo quelle rade (interno dell'Abruzzo, Sardegna): di
+  nuovo una regione prima dell'altra. Con un'opacità sola la pioggia è la stessa immagine dall'inizio alla fine e
+  sale uguale ovunque: misurato, vedi «Misure».
+- **I boschi a tutta Italia ci sono e si leggono.** Le tessere della mappa vanno dallo z5 allo z13; a zoom 6,62 il
+  motore usa lo z7 (con la dissolvenza fra livelli): macchie dei tipi di bosco ben leggibili (faggete verdi sugli
+  Appennini, querceti gialli, abetaie blu sulle Alpi). Nessun livello sostituito.
+- **Niente fotogramma fangoso**: la pioggia scende a zero in 1,6 s e i boschi passano metà solo dopo; nel momento di
+  mezzo (7,4-7,8 s) c'è poca pioggia, pochi boschi e la terra grigia pulita.
+- **Il satellite ritagliato sull'Italia**: senza ritaglio, a tutta Italia sarebbero comparsi d'improvviso Francia,
+  Balcani e il mare; così la terra scura «diventa» foto aerea e il resto resta nero come all'inizio.
+- **Lo zoom parte da fermo**: smootherstep sul cammino di van Wijk e Nuij, nessuno strappo dopo 11 s di
+  telecamera ferma. Velocità massima circa 1,4 livelli al secondo a metà volo; quando corre, le tessere hanno un
+  mosso leggerissimo (al massimo 1,2 px), come una cinepresa.
 
-## La pagina (`home-v2/index.html`)
-- **Titolo**: due pillole, «Storico piogge» (piena, la mappa) e «Previsioni» (contorno,
-  `?r=liguria&m=prev`). ⚠️ Nella mappa un indirizzo previsioni **senza regione** non c'è: `?m=prev` da solo
-  aspetta 15 s una regione che non arriva e resta sullo storico (`index.html` della mappa, «link con ?m=prev»).
-  Si usa la Liguria, la regione del film. Via «Apri la mappa» e «Le località più bagnate» dal titolo.
-- **Ordine**: film → «È piovuto qui.» (Nord coi pluviometri) → «Ogni stazione, giorno per giorno.» (scheda) →
-  «Sui boschi giusti.» (stessa inquadratura) → «Come sono davvero.» (satellite) → «E i prossimi giorni.»
-  (previsioni) → chiusura → «E poi ci siamo noi». La finestra funghi non c'è più.
-- **Un link per capitolo**, che apre la mappa già in quel modo: pioggia `?r=<9 regioni del Nord>&g=30` (e il link
-  testuale a `/funghi/`, «Le località più bagnate», che serve a Google), scheda `?r=liguria&g=30`, boschi
-  `?boschi=1&r=liguria`, satellite `?boschi=1&sat=1&r=liguria` (il satellite parte solo coi boschi), previsioni
-  `?r=liguria&m=prev`. La chiusura ripete le due pillole.
-- **Le scritte del film**: «La pioggia caduta davvero.» → «Sui boschi giusti.» → «Come sono davvero, dal
-  satellite.» → «E i prossimi giorni.». I tempi stanno in un solo oggetto in cima alla pagina (`SCRITTE_FILM`):
-  si ritoccano lì. Seguono il tempo vero del video fotogramma per fotogramma (`requestVideoFrameCallback`, o
-  `requestAnimationFrame` su `currentTime`), con entrata e uscita morbide; al loop tornano a zero col video.
-  Al computer stanno in basso al centro della parte visibile del film, al telefono sul fondo del video.
-- **YouTube**: logo rosso (lo stesso SVG dell'`index.html` attuale), «Guarda il nostro canale YouTube.», «Le
-  nostre avventure a funghi e tartufi.», pillola «Guarda il canale». Quiz e piede invariati.
+### Il punto d'arrivo (si cambia con un parametro)
+**43,869 N 11,809 E, zoom 15,6**: la faggeta, con macchie di abete bianco, sul crinale fra Campigna e Sasso Fratino,
+nel Parco nazionale delle Foreste Casentinesi, Monte Falterona e Campigna. Perché: è uno dei boschi più grandi e
+compatti dell'Appennino (nelle tessere dei boschi della mappa è faggeta piena per più dei 4 x 2,4 km inquadrati alla
+fine), e Sasso Fratino è riserva integrale dal 1959 e patrimonio UNESCO: lì non entra nessuno, tanto meno a
+raccogliere. Generico, mai un posto di raccolta. A zoom 15,6 un pixel è circa 2 m: si vedono le chiome.
+Per cambiarlo: `--bosco lat,lon,zoom` sia a `scarica-satellite.js` sia a `film.js` (lo stesso valore), oppure
+`BOSCO_PREDEFINITO` in `tools/racconto.js`.
 
-## Cosa va lanciato dal PC (rete aperta)
-Una volta, per preparare (Windows: al posto di `/tmp/mappa` una cartella qualsiasi, la stessa nei tre comandi):
+## Il satellite
+- **Dal cloud non si raggiunge** (il proxy chiude `server.arcgisonline.com`, anche EOX): nel cloud il film si fa col
+  **segnaposto**, una foto aerea finta disegnata dal motore (campi fra oliva e ocra, boschi verde scuro dove la mappa
+  ha bosco, chiome da vicino, ombre del rilievo della mappa), scura, con la scritta piccola «segnaposto satellite» in
+  basso a destra. Serve solo a giudicare i tempi.
+- **Dal PC**: `scarica-satellite.js` scarica UNA volta le tessere Esri World Imagery (le stesse della mappa) in
+  `cache/satellite/<z>/<y>/<x>.jpg`: sono **1.417 tessere, circa 30 MB** (z6-z16), solo quelle che il film chiede
+  davvero, fotogramma per fotogramma, e solo dove c'è l'Italia. Stampa numero e MB prima di partire; se si
+  interrompe si rilancia e riparte da dov'era. Poi `film.js --satellite` le legge solo da lì: se ne manca anche una
+  si ferma prima di cominciare e dice di rilanciare lo scaricatore. **Le tessere non vanno mai nel repo** (sono di
+  Esri; `cache/` è in `.gitignore`).
+- Provato nel cloud con tessere finte numerate al posto di quelle Esri: il film le legge da `cache/satellite`, sfuma
+  fra i livelli, ritaglia sull'Italia, nessuna tessera mancante.
+
+## Dal PC
+Windows, PowerShell o Prompt dei comandi. Serve: Git, Node 18 o più recente, Python 3 (con `python` nel PATH), Chrome,
+ffmpeg (quello di CapCut va bene se ha un codificatore H.264, vedi sotto). Circa 5 GB liberi per i fotogrammi PNG.
+
+**Una volta sola (circa 5 minuti):**
 ```
-git clone --depth 1 --filter=blob:none https://github.com/AvventureMicologiche/Mappa-Precipitazioni-Nord /tmp/mappa
-cd /tmp/mappa && python3 -m http.server 8899 --bind 127.0.0.1        # in un'altra finestra, resta aperto
-pip install numpy scipy shapely pillow matplotlib                    # una volta
-python3 studio-apple/film/tools/griglie.py --mappa /tmp/mappa --da 2026-09-22 --giorni 30
+cd C:\percorso\home-page-sito
+git fetch origin
+git checkout claude/sweet-bell-rbe3jj
+git pull
+git clone --depth 1 --filter=blob:none https://github.com/AvventureMicologiche/Mappa-Precipitazioni-Nord C:\mappa
+npm install --prefix studio-apple/film
+python -m pip install numpy scipy shapely pillow matplotlib
 ```
-Poi, dalla radice del repo, **un comando per il film e uno per le immagini**:
+(`npm install --prefix studio-apple/film` installa solo `playwright-core` in `studio-apple/film/node_modules`: non
+scarica nessun Chromium, si usa il Chrome già installato.)
+
+**Il satellite (circa 2-5 minuti, 30 MB):**
 ```
-node studio-apple/film/tools/film.js --satellite --previsioni          # film col satellite vero e le previsioni di oggi
-node studio-apple/film/tools/foto.js satellite previsioni --satellite --previsioni   # le due immagini
-node studio-apple/verify.js --v2                                       # controlli e screenshot
+node studio-apple/film/tools/scarica-satellite.js --mappa C:\mappa
 ```
-Il film rifà tutti i fotogrammi (circa 15-20 minuti: le tessere del satellite si scaricano la prima volta), poi
-codifica, stills, `fluidita.png`. Se il satellite o le previsioni non rispondono lo dice e lascia il segnaposto.
-Le previsioni sono quelle del giorno in cui si lancia: per aggiornarle basta rilanciare (`--previsioni` riscarica).
-Serve Playwright con Chromium (`npm i -D playwright && npx playwright install chromium`) e ffmpeg con ffprobe.
+Se si interrompe, si rilancia uguale.
+
+**Il film (circa 25-40 minuti):**
+```
+node studio-apple/film/tools/film.js --satellite --mappa C:\mappa --chrome "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe" --ffmpeg "C:/Users/admin/AppData/Local/CapCut2/Apps/1.5.0.230/ffmpeg.exe"
+```
+Fa tutto: la griglia della pioggia la prima volta (`griglie.py`, 30 s), i 1.440 fotogrammi in `film/frames/`
+(stampa ogni secondo di film quanto manca), poi `apertura-1080.mp4`, `apertura-720.mp4`, `apertura-poster.webp`,
+gli stills, `fluidita.png` e `uniformita.png`. Se si interrompe, rilanciare lo stesso comando: salta i fotogrammi già
+fatti (con la stessa fonte del satellite e lo stesso bosco).
+
+**Controllo e consegna (2 minuti):**
+```
+node studio-apple/verify.js --v2
+git add studio-apple/film
+git commit -m "film: satellite vero dal PC"
+git push
+```
+`git add studio-apple/film` non prende né `cache/` (le tessere Esri) né `frames/`: sono in `.gitignore`.
+
+**Se ffmpeg non ha libx264** (le versioni dentro i programmi a volte non ce l'hanno): `film.js` lo dice e usa il primo
+codificatore H.264 che trova (`h264_mf` di Windows, `h264_nvenc`, `h264_qsv`, `h264_amf`, `libopenh264`) in una
+passata. Per vedere cosa ha: `"C:/Users/admin/AppData/Local/CapCut2/Apps/1.5.0.230/ffmpeg.exe" -hide_banner -encoders | findstr 264`.
+Per la qualità migliore: ffmpeg «essentials» da https://www.gyan.dev/ffmpeg/builds/ (ha libx264), poi solo la codifica:
+`node studio-apple/film/tools/film.js --solo-codifica --ffmpeg C:/ffmpeg/bin/ffmpeg.exe`.
+Se Python non si chiama `python`: `--python "C:/.../python.exe"` (vale anche per le misure).
 
 Altri comandi:
 ```
-node studio-apple/film/tools/film.js --prova 0,6,13,18   # qualche fotogramma, in film/prova/
-node studio-apple/film/tools/film.js --da 300 --a 420    # riprende un render interrotto (salta i fotogrammi fatti)
-node studio-apple/film/tools/film.js --solo-codifica     # rifà mp4, poster, stills e misura dai fotogrammi
-node studio-apple/film/tools/foto.js                     # tutte le immagini (anche la scheda della stazione)
+node studio-apple/film/tools/film.js --mappa C:\mappa --prova 0,5,10,16        qualche fotogramma, in film/prova/
+node studio-apple/film/tools/film.js --mappa C:\mappa --da 300 --a 420         solo quei fotogrammi
+node studio-apple/film/tools/film.js --solo-codifica                          rifà mp4, poster, stills e misure
+node studio-apple/film/tools/scarica-satellite.js --solo-conta                 quante tessere servono, senza scaricare
 ```
-`cache/`, `frames/` e `prova/` non vanno nel repo (`.gitignore`): si rifanno.
 
-## Come si prova la pagina
-```
-python -m http.server 8000        # dalla radice del repo
-```
-poi `http://localhost:8000/studio-apple/home-v2/`.
+## Come è fatto (file in `tools/`)
+- `racconto.js`: la sceneggiatura (tempi `T`), la telecamera (van Wijk e Nuij), la lista delle tessere che il film
+  chiede (la usano sia `film.js` sia `scarica-satellite.js`, così sono la stessa), l'Italia in tessere dello z12.
+- `motore.js`: apre la mappa vera in Chrome senza interfaccia e disegna una scena (come nelle sessioni prima: la
+  `drawGrid()` della mappa, le sue tessere di boschi e rilievo, niente arrotondamenti al pixel). Nuovo: satellite da
+  `cache/satellite`, ritaglio sull'Italia, segnaposto, la griglia ridisegnata solo quando cambia, e `scena()` dice
+  quali immagini non sono arrivate: `film.js` riprova una volta e poi si ferma, mai un fotogramma con un buco.
+- `film.js`: prima di scattare scarica tutte le tessere di boschi e rilievo che servono e controlla il satellite;
+  poi i fotogrammi, la codifica (libx264 in due passate come prima, 2,6 Mbit/s di media), le misure.
+- `comune.js`: parametri, rete (`fetch` di Node, niente `curl`/`sleep`), il server della cartella della mappa
+  (niente più `python -m http.server` in un'altra finestra), Chrome, ffmpeg, la griglia se manca.
+- `scarica-satellite.js`, `griglie.py` (ora con `--liscia` e i file aperti in UTF-8, se no su Windows i nomi accentati
+  delle stazioni lo fermavano), `fluidita.py`, `uniformita.py`, `foto.js` (le immagini HD: non rifatte; adattato solo
+  al motore nuovo).
+- Nel cloud, dietro il proxy, i comandi con rete vanno lanciati con `NODE_USE_ENV_PROXY=1` (dal PC non serve).
+
+## Misure
+_(dal render nel cloud, col segnaposto: vedi sotto)_
+
+## Storia (sessioni precedenti, in breve)
+- **Rete dal cloud** (provata il 22/10/2026): Esri, EOX, previsioni di produzione, Open-Meteo, OpenStreetMap, Google,
+  jsDelivr chiusi; `raw.githubusercontent.com` e `github.com` aperti (dati delle stazioni, tessere boschi e rilievo).
+- **I puntini neri nella pioggia** (seconda sessione), tutti risolti in `griglie.py`: le esclusioni a mano della
+  mappa (`LOMB_ESCLUSE`, `PIEMONTE_ESCLUSE`, `LIGURIA_ESCLUSE`, `EMILIA_ESCLUSE`, `TOSCANA_ESCLUSE`, `MH_ESCLUSE`)
+  e i doppioni MeteoHub del Friuli; 32 pluviometri sordi nel periodo (sotto il 15% della mediana dei cinque vicini,
+  soprattutto in Sicilia); San Marino, che era un buco nel contorno.
+- **Fluidità** (seconda sessione): tessere composte solo quando sono arrivate tutte, dissolvenza continua fra i
+  livelli, niente arrotondamenti al pixel (costa e confini compresi).
+- **Immagini HD** (`foto/`) e **pagina** (`home-v2/`): vedi la cronologia del ramo `claude/intelligent-babbage-ckzf3g`.
+  Non toccate in questa sessione. ⚠️ `foto.js` ora vuole anche lui `--mappa <cartella>` (il motore accende da solo il
+  server della mappa).
 
 ## Da fare / da decidere
-- [ ] **Dal PC**: satellite e previsioni (i due comandi sopra). Fino ad allora film e immagini hanno i segnaposto.
+- [ ] **Dal PC**: il satellite vero (i comandi sopra). Fino ad allora il film ha il segnaposto.
+- [ ] Le previsioni nel film: fuori per ora.
 - [ ] Telefono: il film è 16:9 e al telefono l'Italia viene piccola. Se piace l'idea, una versione 4:5.
-- [ ] Colore d'azione (blu, verde, oro: un blocco in cima al CSS del v2) e testi definitivi.
-
-## Fedeltà alla mappa
-- La pioggia è disegnata dalla `drawGrid()` della mappa (sua scala di colori, opacità 0,7, sfumatura, fasce di
-  Mercatore, ritaglio sul confine). Per raggiungerla, durante il render si aggiunge una riga a `index.html` **nella
-  risposta del server locale** (`window.__film = {...}` dopo `window._mapDebug=map;`): il repo resta intatto.
-- La griglia è quella di `buildGrid()`: IDW 1/d², raggio 0,35°, veto locale, copertura 60%, più le esclusioni della
-  mappa. Passo 0,01°. Aggiunte solo per l'immagine, scritte in testa a `griglie.py`: le sorde nel periodo, lo
-  sfumato a 0,8° dove la stazione più vicina è lontana (interno dell'Abruzzo), la griglia che sborda di 0,04° in mare.
-- Boschi e rilievo: le tessere della mappa (stesso commit), opacità dei boschi 0,7 come nella mappa.
-- Le targhette delle previsioni: la classe `.pv-m` della mappa e la sua tabella delle icone, ingrandite 1,9 volte.
-
-## Misure (render del 22/10/2026, dal cloud: satellite e previsioni segnaposto)
-- **Pesi**: `apertura-1080.mp4` **7,92 MB** (2,77 Mbit/s medi), `apertura-720.mp4` **2,26 MB** (0,79 Mbit/s),
-  poster 13 KB. Pagina senza il film: 312 KB a 1440, 368 KB a 390.
-- **Qualità della codifica** (PSNR contro i fotogrammi PNG): media 38,3 dB, minimo 32,5 dB (nella discesa sui boschi).
-- **Fluidità** (`fluidita.png`, `fluidita.csv`, fatto da `tools/fluidita.py` a ogni render): differenza media fra
-  fotogrammi consecutivi, su 1440 fotogrammi. Curva liscia, **0 picchi** (un picco = sopra 1,6 volte la mediana dei
-  9 fotogrammi intorno e almeno +0,5 livelli), massimo 12,2 livelli su 255 a 16 s (la dissolvenza pioggia → boschi
-  mentre si scende), media 2,1. **Ultimo fotogramma contro il primo: 0,00** (loop senza scatto). Sotto, nel grafico,
-  la velocità della telecamera: una curva continua, mai ferma. Per confronto: la prima versione di questa sessione,
-  con la discesa sopra i boschi, aveva un massimo di 22,5.
-  Resta un'oscillazione minuscola (0,01-0,2 livelli) dove la telecamera scorre di frazioni di pixel: c'è anche con
-  la sola terra, uguale in tutti gli strati, ed è la fase dell'interpolazione sotto-pixel, non uno scatto.
-- **Immagini HD**: pioggia-nord 116 e 52 KB, boschi-nord 392 e 148, satellite 113 e 56, previsioni 109 e 46,
-  scheda-stazione 127 e 63 (2880 e 1440; limiti 600 e 250 KB).
-- **`node studio-apple/verify.js --v2`**: 28/28. L'intero `verify.js`: 76/76. Screenshot di ogni capitolo a 1440 e
-  390 in `film/screenshot/` (nello screenshot il film è uno still: il Chromium di Playwright non decodifica H.264).
