@@ -49,8 +49,12 @@ nel film e nelle due immagini), e dal PC basta un comando (vedi «Cosa va lancia
 - [x] **Passo 3, la pagina `home-v2/index.html`**: vedi «La pagina» sotto. `verify.js --v2` esteso.
 
 ## Il film (`apertura-1080.mp4`, `apertura-720.mp4`, `apertura-poster.webp`, `stills/` uno al secondo)
-1920x1080, 60 fps veri, **24 s**, 1440 fotogrammi, muto, H.264 High, CRF 17 (720: CRF 18), preset slow, tune film,
-yuv420p, BT.709, range TV, faststart. Pesi e misure: vedi «Misure» in fondo.
+1920x1080, 60 fps veri, **24 s**, 1440 fotogrammi, muto, H.264 High, preset slow, tune film, yuv420p, BT.709, range TV,
+faststart, **in due passate** (1080: media 2,6 Mbit/s, picchi fino a 7; 720: media 0,74, picchi fino a 2). Pesi e misure:
+vedi «Misure» in fondo.
+⚠️ Due passate e non CRF 16-18 come chiesto, perché misurato: con CRF 17 e un tetto di banda i bit finivano nella
+pioggia sull'Italia (2-5 s: 3-4 Mbit/s per un PSNR di 45-51 dB, più del necessario) e la discesa sui boschi restava
+strozzata a 29 dB, impastata. In due passate, a parità di peso, il punto peggiore sale a 32,5 dB.
 
 **Il racconto** (una sola curva di telecamera, che non si ferma mai):
 
@@ -58,11 +62,11 @@ yuv420p, BT.709, range TV, faststart. Pesi e misure: vedi «Misure» in fondo.
 |---|---|
 | 0-2,6 | l'Italia scura; compaiono, scaglionati e morbidi, i pallini di un pluviometro ogni cinque (649 su 3.373, diradati perché stiano distanti: si capisce che sotto ci sono misure vere) |
 | 2,2-11 | i 30 giorni di pioggia. La prima pioggia (25/9) **nasce dai pallini**: si vede solo entro un raggio dai pallini che cresce, poi copre tutto; i pallini sfumano con la pioggia grande del 7-10 ottobre |
-| 9,2-12,6 | la telecamera parte verso la Liguria e ci arriva senza fermarsi |
-| 12-15 | **dissolvenza incrociata pioggia → boschi**: i boschi si accendono prima dove è piovuto di più (soglia da 320 a 25 mm), la pioggia sfuma; il rilievo sale quando la pioggia è quasi andata (regola della mappa) |
-| 14,6-18,2 | **sotto i boschi sfuma dentro il satellite**, e si scende fino alle chiome (zoom 15,1 sopra Santo Stefano d'Aveto); vicino i boschi si fanno un po' più trasparenti perché sotto si vedano gli alberi |
-| 18,2-21,9 | si torna larghi sulla Liguria; boschi e satellite sfumano, resta il rilievo scuro |
-| 20-22,6 | le **previsioni** dei capoluoghi compaiono una dopo l'altra, da ovest a est |
+| 9,2-15 | la telecamera parte verso la Liguria e, senza fermarsi, scende verso il bosco ancora sotto la pioggia |
+| 13,7-16,4 | **dissolvenza incrociata pioggia → boschi** (a zoom 11-12): i boschi si accendono prima dove è piovuto di più (soglia da 320 a 25 mm), la pioggia sfuma; il rilievo sale quando la pioggia è quasi andata (regola della mappa) |
+| 15,8-18,6 | **sotto i boschi sfuma dentro il satellite**, e si scende fino alle chiome (zoom 14,3 sopra Santo Stefano d'Aveto); vicino i boschi si fanno un po' più trasparenti perché sotto si vedano gli alberi |
+| 18,6-22 | si torna larghi sulla Liguria; boschi e satellite sfumano, resta il rilievo scuro |
+| 20,2-22,8 | le **previsioni** dei capoluoghi compaiono una dopo l'altra, da ovest a est (se due si toccano resta la più importante) |
 | 23,2-24 | dissolvenza sul primo fotogramma: il loop si richiude senza scatto |
 
 Le **scritte** non sono nel video: le mette la pagina (vedi «La pagina»).
@@ -83,6 +87,17 @@ Le **scritte** non sono nel video: le mette la pagina (vedi «La pagina»).
   nella velocità); il centro scivola verso il bersaglio in proporzione a quanto si stringe la vista (niente
   sbandate a zoom alto), lisciato con una gaussiana di 0,35 s dove il bersaglio cambia; in cima, dove lo zoom si
   ferma e torna indietro, la telecamera continua a scorrere di lato (16 px/s).
+- **Si scende verso il bosco sotto la pioggia, non sopra i boschi.** I boschi fra lo zoom 9 e l'11 sono migliaia
+  di poligoni minuscoli: in movimento servivano 19 Mbit/s per tenerli nitidi e l'H.264 li impastava. Visti da
+  zoom 11-12 in su sono macchie grandi. In più, quando lo zoom corre, le tessere hanno un mosso leggerissimo (al
+  massimo 1,4 px), come una cinepresa vera.
+- **La costa non trema più.** Il renderer SVG di Leaflet, a ogni `setView`, si riposizionava annullando la
+  correzione sotto-pixel: la terra e i confini restavano agganciati al pixel intero mentre pioggia e tessere
+  scorrevano lisce (mezzo pixel di tremolio sulla costa). Ora si rimette al suo posto (`motore.js`). Provato con
+  una panoramica uniforme di 0,37 px a fotogramma: spostamento costante.
+- **Le targhette delle previsioni sono immagini**, non HTML: Chromium aggancia il testo al pixel intero e con la
+  deriva lenta della fine ogni nome avanzava a scatti. Si disegnano una volta (stile `.pv-m` della mappa) e si
+  posano a coordinate frazionarie.
 - Restano le correzioni sotto-pixel della prima sessione (niente arrotondamenti di Leaflet).
 
 ## Le immagini (`foto/`, 2880 e 1440)
@@ -165,5 +180,19 @@ poi `http://localhost:8000/studio-apple/home-v2/`.
 - Boschi e rilievo: le tessere della mappa (stesso commit), opacità dei boschi 0,7 come nella mappa.
 - Le targhette delle previsioni: la classe `.pv-m` della mappa e la sua tabella delle icone, ingrandite 1,9 volte.
 
-## Misure
-(si aggiornano a ogni render)
+## Misure (render del 22/10/2026, dal cloud: satellite e previsioni segnaposto)
+- **Pesi**: `apertura-1080.mp4` **7,92 MB** (2,77 Mbit/s medi), `apertura-720.mp4` **2,26 MB** (0,79 Mbit/s),
+  poster 13 KB. Pagina senza il film: 312 KB a 1440, 368 KB a 390.
+- **Qualità della codifica** (PSNR contro i fotogrammi PNG): media 38,3 dB, minimo 32,5 dB (nella discesa sui boschi).
+- **Fluidità** (`fluidita.png`, `fluidita.csv`, fatto da `tools/fluidita.py` a ogni render): differenza media fra
+  fotogrammi consecutivi, su 1440 fotogrammi. Curva liscia, **0 picchi** (un picco = sopra 1,6 volte la mediana dei
+  9 fotogrammi intorno e almeno +0,5 livelli), massimo 12,2 livelli su 255 a 16 s (la dissolvenza pioggia → boschi
+  mentre si scende), media 2,1. **Ultimo fotogramma contro il primo: 0,00** (loop senza scatto). Sotto, nel grafico,
+  la velocità della telecamera: una curva continua, mai ferma. Per confronto: la prima versione di questa sessione,
+  con la discesa sopra i boschi, aveva un massimo di 22,5.
+  Resta un'oscillazione minuscola (0,01-0,2 livelli) dove la telecamera scorre di frazioni di pixel: c'è anche con
+  la sola terra, uguale in tutti gli strati, ed è la fase dell'interpolazione sotto-pixel, non uno scatto.
+- **Immagini HD**: pioggia-nord 116 e 52 KB, boschi-nord 392 e 148, satellite 113 e 56, previsioni 109 e 46,
+  scheda-stazione 127 e 63 (2880 e 1440; limiti 600 e 250 KB).
+- **`node studio-apple/verify.js --v2`**: 28/28. L'intero `verify.js`: 76/76. Screenshot di ogni capitolo a 1440 e
+  390 in `film/screenshot/` (nello screenshot il film è uno still: il Chromium di Playwright non decodifica H.264).

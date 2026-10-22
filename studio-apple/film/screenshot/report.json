@@ -1,15 +1,15 @@
 {
-  "when": "2026-10-22T10:33:08.589Z",
+  "when": "2026-10-22T13:07:33.415Z",
   "results": [
     {
-      "name": "apertura-1080.mp4 fra 3 e 5 MB",
+      "name": "apertura-1080.mp4 sotto 9 MB (nitido prima che leggero)",
       "ok": true,
-      "detail": "4.31 MB"
+      "detail": "7.92 MB"
     },
     {
-      "name": "apertura-720.mp4 sotto 1,5 MB",
+      "name": "apertura-720.mp4 sotto 2,5 MB",
       "ok": true,
-      "detail": "1.43 MB"
+      "detail": "2.26 MB"
     },
     {
       "name": "apertura-poster.webp presente",
@@ -17,14 +17,19 @@
       "detail": ""
     },
     {
-      "name": "immagini HD: 2880 sotto 600 KB, 1440 sotto 250 KB",
+      "name": "film: H.264, yuv420p, BT.709, 60 fps, fra 18 e 24 s",
       "ok": true,
-      "detail": "boschi-vicino-1440 184, boschi-vicino-2880 394, finestra-funghi-1440 34, finestra-funghi-2880 76, pioggia-italia-1440 27, pioggia-italia-2880 61, scheda-stazione-1440 63, scheda-stazione-2880 127"
+      "detail": "h264 High yuv420p bt709 60/1 24.00 s"
+    },
+    {
+      "name": "immagini HD: le cinque dei capitoli, 2880 sotto 600 KB, 1440 sotto 250 KB, niente finestra funghi",
+      "ok": true,
+      "detail": "boschi-nord-1440 148, boschi-nord-2880 392, pioggia-nord-1440 52, pioggia-nord-2880 116, previsioni-1440 46, previsioni-2880 109, satellite-1440 56, satellite-2880 113, scheda-stazione-1440 63, scheda-stazione-2880 127"
     },
     {
       "name": "home v2 @1440: apertura senza il film sotto 1 MB",
       "ok": true,
-      "detail": "288 KB (+ film 4.31 MB)"
+      "detail": "310 KB (+ film 7.92 MB)"
     },
     {
       "name": "home v2 @1440: il film e' apertura-1080.mp4, muto, in loop, playsinline, autoplay, col poster, e gira",
@@ -44,7 +49,7 @@
     {
       "name": "home v2 @1440: capitoli con srcset e sizes, lazy tranne la prima",
       "ok": true,
-      "detail": "[false,true,true,true]"
+      "detail": "[false,true,true,true,true]"
     },
     {
       "name": "home v2 @1440: tutti i blocchi comparsi dopo lo scorrimento",
@@ -62,9 +67,19 @@
       "detail": ""
     },
     {
-      "name": "home v2 @1440: «Apri la mappa» e «Le località più bagnate» due volte, YouTube, quiz, 8 regioni, social, mail",
+      "name": "home v2 @1440: pillole «Storico piogge» e «Previsioni», link per capitolo, /funghi/ testuale nella pioggia, YouTube, quiz, 8 regioni, social, mail",
       "ok": true,
-      "detail": "{\"mappa\":2,\"funghi\":2,\"yt\":true,\"quiz\":true,\"regioni\":8,\"mail\":true,\"social\":4}"
+      "detail": "tutti"
+    },
+    {
+      "name": "home v2 @1440: niente capitolo della finestra funghi né «Il bosco, ogni mese»",
+      "ok": true,
+      "detail": "{\"finestra\":false,\"testo\":false}"
+    },
+    {
+      "name": "home v2 @1440: scritte del film dalla pagina (SCRITTE_FILM), in ordine, senza sovrapporsi, dentro i 24 s",
+      "ok": true,
+      "detail": "La pioggia caduta davvero. / Sui boschi giusti. / Come sono davvero, dal satellite. / E i prossimi giorni."
     },
     {
       "name": "home v2 @1440: niente trattini lunghi, punti esclamativi, Lei o voi",
@@ -74,7 +89,7 @@
     {
       "name": "home v2 @1440: i cinque capitoli, in ordine",
       "ok": true,
-      "detail": "È piovuto qui. / Sui boschi giusti. / Tra 13 e 20 giorni, nascono. / Ogni stazione, giorno per giorno. / E domani."
+      "detail": "È piovuto qui. / Ogni stazione, giorno per giorno. / Sui boschi giusti. / Come sono davvero. / E i prossimi giorni."
     },
     {
       "name": "home v2 @1440: con «riduci animazioni» il film resta fermo sul poster",
@@ -84,7 +99,7 @@
     {
       "name": "home v2 @390: apertura senza il film sotto 1 MB",
       "ok": true,
-      "detail": "351 KB (+ film 1.43 MB)"
+      "detail": "365 KB (+ film 2.26 MB)"
     },
     {
       "name": "home v2 @390: il film e' apertura-720.mp4, muto, in loop, playsinline, autoplay, col poster, e gira",
@@ -104,7 +119,7 @@
     {
       "name": "home v2 @390: capitoli con srcset e sizes, lazy tranne la prima",
       "ok": true,
-      "detail": "[false,true,true,true]"
+      "detail": "[false,true,true,true,true]"
     },
     {
       "name": "home v2 @390: tutti i blocchi comparsi dopo lo scorrimento",
