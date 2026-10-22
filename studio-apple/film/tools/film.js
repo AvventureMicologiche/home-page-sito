@@ -1,254 +1,235 @@
 #!/usr/bin/env node
 /* Il film d'apertura, fotogramma per fotogramma, dalla mappa vera senza interfaccia.
+   La sceneggiatura e i tempi sono in racconto.js. Dalla radice del repo (Windows o Linux):
 
-   Prima:  python3 studio-apple/film/tools/griglie.py --mappa /tmp/mappa --da 2026-09-22 --giorni 30
-           (cd /tmp/mappa && python3 -m http.server 8899 --bind 127.0.0.1)
-   Poi, dalla radice del repo:
-     node studio-apple/film/tools/film.js                     tutti i fotogrammi in film/frames/, poi codifica, stills, misura
-     node studio-apple/film/tools/film.js --satellite --previsioni   DAL PC: la foto aerea vera e le previsioni di oggi
-     node studio-apple/film/tools/film.js --da 300 --a 420    solo quei fotogrammi (riprende un render interrotto)
-     node studio-apple/film/tools/film.js --prova 0,6,9,13    un fotogramma per ognuno di quei secondi, in film/prova/
-     node studio-apple/film/tools/film.js --solo-codifica     rifa' mp4, poster e stills dai fotogrammi gia' fatti
-     node studio-apple/film/tools/film.js --camera            solo il grafico della velocita' della telecamera
-   Opzioni: --mappa http://127.0.0.1:8899/  --griglia pioggia-2026-09-22-30g  --rifai (riscrive i fotogrammi gia' fatti)
-   Con --satellite o --previsioni i fotogrammi si rifanno tutti (--rifai implicito): cambiano le scene.
+     node studio-apple/film/tools/film.js --mappa <cartella clone mappa> [--satellite] [--chrome <chrome.exe>] [--ffmpeg <ffmpeg.exe>]
 
-   Racconto (24 s a 60 fotogrammi, una sola curva di telecamera che non si ferma mai):
-   l'Italia scura; compaiono i pallini di una parte dei pluviometri; la pioggia vera dei 30 giorni nasce da li' e
-   si accumula in modo continuo, i pallini sfumano; volo sulla Liguria; la pioggia sfuma mentre si accendono i
-   boschi, prima dove e' piovuto di piu'; sotto i boschi sfuma dentro il satellite e ci si avvicina fino alle
-   chiome; si torna larghi sulla regione e compaiono, una dopo l'altra, le previsioni dei capoluoghi;
-   dissolvenza sul primo fotogramma per il loop. Le scritte le mette la pagina (TEMPI in home-v2/index.html). */
+   fa tutto: la griglia della pioggia se manca (griglie.py), i fotogrammi in film/frames/, la codifica (mp4 1080 e
+   720, poster, stills), le misure (fluidita.png, uniformita.png). Senza --satellite la foto aerea e' il SEGNAPOSTO
+   (il cloud); con --satellite si leggono le tessere Esri da cache/satellite/, che deve averle tutte: prima
+     node studio-apple/film/tools/scarica-satellite.js
+   Altre opzioni:
+     --prova 0,3,10.5      un fotogramma per ognuno di quei secondi, in film/prova/
+     --da 300 --a 420      solo quei fotogrammi (riprende un render interrotto: salta quelli gia' fatti)
+     --rifai               riscrive anche i fotogrammi gia' fatti
+     --solo-codifica       rifa' mp4, poster, stills e misure dai fotogrammi gia' fatti
+     --bosco lat,lon,zoom  il punto d'arrivo dello zoom (predefinito: Foreste Casentinesi, vedi racconto.js)
+     --python <comando>    per griglie.py e le misure (predefinito: python)
+     --codificatore <nome> forza il codificatore H.264 di ffmpeg (predefinito: libx264, se c'e')
+   Le scritte le mette la pagina (SCRITTE_FILM in home-v2/index.html). */
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { execFileSync } = require('child_process');
-const { apri, scena, capoluoghi, previsioni, satelliteRaggiungibile, FILM, CACHE } = require('./motore');
+const { FILM, CACHE, arg, scarica, scaricaTutti, serverMappa, lanciaChrome, ffmpeg, codificatori, esegui, preparaGriglia } = require('./comune');
+const { apri, scena, mascheraRegioni, satFile, SAT, RAW } = require('./motore');
+const RC = require('./racconto');
+const { FPS, DUR, N, W, H, T } = RC;
 
-const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i < 0 ? d : (process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : true); };
-const URLMAPPA = arg('mappa', 'http://127.0.0.1:8899/');
-const GRIGLIA = arg('griglia', 'pioggia-2026-09-22-30g');
-const FPS = 60, DUR = 24, N = FPS * DUR;
-const W = 1920, H = 1080;
 const FRAMES = path.join(FILM, 'frames');
-const AREA = 'liguria';
 
-// ── il racconto ─────────────────────────────────────────────────────────────
-const ITALIA = { centro: [41.85, 12.5], zoom: 6.62 };     // l'Italia intera in 1920x1080, con margine
-const LIGURIA = { centro: [44.27, 8.95], zoom: 9.12 };     // la regione intera, il mare sotto
-const BOSCO = { centro: [44.5395, 9.4566], zoom: 14.3 };   // faggete e castagneti sopra Santo Stefano d'Aveto
-const PREVISIONI = { centro: [44.16, 8.66], zoom: 9.42 };  // i capoluoghi della Liguria, da Sanremo alla Spezia (a sinistra la pagina sfuma il video)
-const GIORNI = 30, MORBIDO = 2.5;                          // MORBIDO: ogni giorno entra nel cumulato in 2,5 «giorni»
-const TERRA_BUIA = [0x1b, 0x1b, 0x1d], TERRA_RILIEVO = [0x3c, 0x3c, 0x3f], TERRA_FINE = [0x2e, 0x2e, 0x31];
-
-const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
-const liscia = x => { x = clamp(x); return x * x * x * (x * (x * 6 - 15) + 10); };      // smootherstep
-const tratto = (t, a, b) => liscia((t - a) / (b - a));
-const mix = (a, b, u) => a + (b - a) * u;
-const mixc = (a, b, u) => a.map((v, i) => mix(v, b[i], u));
-const hex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
-
-// ── la telecamera ───────────────────────────────────────────────────────────
-const proj = ([lat, lon]) => { const y = Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)); return [(lon + 180) / 360, (1 - y / Math.PI) / 2]; };
-const unproj = ([x, y]) => [360 / Math.PI * Math.atan(Math.exp(Math.PI * (1 - 2 * y))) - 90, x * 360 - 180];
-
-/* avvicinamento verso un punto: il centro scivola sul punto in proporzione a quanto si stringe la vista,
-   cosi' il punto arriva al centro senza sbandate (a zoom alto un tratto di mondo piccolo e' tanto schermo).
-   Vale anche all'indietro: allontanandosi, il centro scivola dal punto verso la vista larga. */
-function verso(da, a) {
-  const pa = proj(da.centro), pb = proj(a.centro), wa = 2 ** -da.zoom, wb = 2 ** -a.zoom;
-  return zoom => { const f = clamp((wa - 2 ** -zoom) / (wa - wb)); return [mix(pa[0], pb[0], f), mix(pa[1], pb[1], f)]; };
+function leggiBosco() {
+  const b = arg('bosco', null);
+  if (!b || b === true) return RC.BOSCO_PREDEFINITO;
+  const [lat, lon, zoom] = String(b).split(',').map(Number);
+  if (![lat, lon].every(Number.isFinite)) { console.error('--bosco lat,lon[,zoom], per esempio --bosco 43.869,11.809,15.6'); process.exit(2); }
+  return { centro: [lat, lon], zoom: Number.isFinite(zoom) ? zoom : RC.BOSCO_PREDEFINITO.zoom };
 }
-/* LO ZOOM E' UNA CURVA SOLA (Hermite cubica a tratti, con le velocita' scelte a ogni nodo: continua anche nella
-   velocita'). [t, zoom, velocita' in livelli al secondo]. Non si ferma mai: in cima, vicino alle chiome, la velocita'
-   dello zoom passa per zero ma la telecamera continua a scorrere di lato (DERIVA). */
-const NODI = [
-  [0.0, 6.62, 0.016],     // l'Italia, ci si avvicina appena
-  [9.2, 6.79, 0.03],      // parte il volo sulla Liguria
-  [12.6, 9.12, 0.95],     // la Liguria, senza fermarsi: si continua a scendere, ancora sotto la pioggia
-  [15.2, 12.0, 0.45],     // i boschi entrano qui, dove sono macchie grandi (vedi sotto, «perche' cosi'»)
-  [18.6, 14.3, 0],        // le chiome (14,3: le tessere dei boschi sono quasi al loro dettaglio vero)
-  [22.0, 9.42, -0.07],    // di nuovo la regione intera, per le previsioni
-  [24.0, 9.34, -0.03],    // e ci si allontana appena
-];
-function zoomAl(t) {
-  let i = 0; while (i < NODI.length - 2 && t > NODI[i + 1][0]) i++;
-  const [t0, z0, v0] = NODI[i], [t1, z1, v1] = NODI[i + 1], h = t1 - t0, u = (t - t0) / h;
-  const u2 = u * u, u3 = u2 * u;
-  return (2 * u3 - 3 * u2 + 1) * z0 + (u3 - 2 * u2 + u) * h * v0 + (-2 * u3 + 3 * u2) * z1 + (u3 - u2) * h * v1;
-}
-const ITALIA2 = { centro: ITALIA.centro, zoom: NODI[1][1] };
-const VERSO1 = verso(ITALIA2, LIGURIA), VERSO2 = verso(LIGURIA, BOSCO), VERSO3 = verso(PREVISIONI, BOSCO);
-/* deriva di lato attorno alle chiome: 16 px al secondo a schermo, in salita e in discesa morbide */
-const DERIVA = (() => {
-  const dt = 1 / 600, out = [[0, 0]]; let ex = 0, ey = 0;
-  for (let t = dt; t <= DUR + 1e-9; t += dt) {
-    const v = 16 * liscia((t - 16.4) / 1.6) * (1 - liscia((t - 19.8) / 1.6)), sc = 256 * 2 ** zoomAl(t);
-    ex += 0.94 * v / sc * dt; ey += -0.34 * v / sc * dt; out.push([ex, ey]);
-  }
-  return t => out[Math.min(out.length - 1, Math.round(t * 600))];
-})();
-function cameraGrezza(t) {
-  const zoom = zoomAl(t);
-  const m = t < 9.2 ? proj(ITALIA.centro) : t < 12.6 ? VERSO1(zoom) : t < 18.6 ? VERSO2(zoom) : t < 22.0 ? VERSO3(zoom)
-    : (() => { const p = proj(PREVISIONI.centro), u = t - 22.0; return [p[0] + 0.0000016 * u, p[1] - 0.0000006 * u]; })();
-  const d = DERIVA(t);
-  return { m: [m[0] + d[0], m[1] + d[1]], zoom };
-}
-/* Liscia il centro: media gaussiana (sigma 0,35 s) dove il bersaglio cambia (9,2 s e 12,6 s: il centro cambia
-   direzione). Il centro si media in coordinate del mondo pesate con la scala dello zoom, cosi' a zoom alto non si
-   mescolano posizioni lontane. Lo zoom no: e' gia' liscio. Ai bordi si prolunga in linea retta. */
-const CAMERA = (() => {
-  const passo = 1 / FPS, sig = 0.35 * FPS, K = Math.round(3 * sig);
-  const g = Array.from({ length: 2 * K + 1 }, (_, i) => Math.exp(-0.5 * ((i - K) / sig) ** 2));
-  const raw = i => {
-    if (i >= 0 && i <= N) return cameraGrezza(i * passo);
-    const fuori = i < 0, a = cameraGrezza(fuori ? 0 : DUR), b = cameraGrezza(fuori ? passo : DUR - passo), k = fuori ? -i : i - N;
-    return { m: [a.m[0] + k * (a.m[0] - b.m[0]), a.m[1] + k * (a.m[1] - b.m[1])], zoom: zoomAl(i * passo) };
-  };
-  const R = Array.from({ length: N + 2 * K + 1 }, (_, j) => raw(j - K));
-  return Array.from({ length: N + 1 }, (_, i) => {
-    const z = R[i + K].zoom; let x = 0, y = 0, sw = 0;
-    for (let j = -K; j <= K; j++) { const r = R[i + j + K], w = g[j + K] * 2 ** (r.zoom - z); x += w * r.m[0]; y += w * r.m[1]; sw += w; }
-    return { centro: unproj([x / sw, y / sw]), zoom: z };
-  });
-})();
+const R = RC.crea({ bosco: leggiBosco() });
 
-/* il tempo della pioggia: piu' lento dove piove di piu', veloce nei giorni asciutti, con partenza e arrivo morbidi.
-   g va da 0 a GIORNI - 1 + MORBIDO (il cumulato vero alla fine). Il peso viene dalla pioggia media sull'Italia. */
-let TEMPO_PIOGGIA = null;
-function preparaTempo(medie) {
-  const G = GIORNI - 1 + MORBIDO, M = 2000, pesi = [];
-  const media = g => { let s = 0; for (let d = 0; d < GIORNI; d++) s += (medie[d + 1] - medie[d]) * liscia((g - d) / MORBIDO); return s; };
-  let prec = 0; const cum = [0];
-  for (let i = 1; i <= M; i++) { const g = G * i / M, v = media(g); pesi.push(v - prec); prec = v; }
-  const mr = pesi.reduce((a, b) => a + b) / M;
-  for (let i = 0; i < M; i++) cum.push(cum[i] + 1 + 1.3 * pesi[i] / mr);
-  const tot = cum[M];
-  TEMPO_PIOGGIA = u => {   // u 0..1 (tempo) -> g (giorni)
-    const q = clamp(u) * tot; let lo = 0, hi = M;
-    while (hi - lo > 1) { const md = (lo + hi) >> 1; if (cum[md] <= q) lo = md; else hi = md; }
-    return G * (lo + (q - cum[lo]) / Math.max(1e-9, cum[hi] - cum[lo])) / M;
-  };
-}
-
-const velZoom = i => { const a = CAMERA[Math.max(0, i - 1)], b = CAMERA[Math.min(N, i + 1)]; return Math.abs(b.zoom - a.zoom) * FPS / 2; };   // livelli al secondo
-function statoAl(t, { sat, prev }) {
-  const i = Math.round(t * FPS), c = CAMERA[Math.min(N, Math.max(0, i))];
-  // la pioggia: 2,2-11 s, con una partenza e un arrivo morbidi (meta' lineare, meta' smootherstep)
-  const u = clamp((t - 2.2) / 8.8), ue = 0.5 * u + 0.5 * liscia(u);
-  const g = TEMPO_PIOGGIA ? TEMPO_PIOGGIA(ue) : (GIORNI - 1 + MORBIDO) * ue;
-  const nascita = g < 10 ? 0.02 + 0.33 * liscia((g - 2.6) / 5) + 0.8 * liscia((g - 7) / 3) : null;   // la prima pioggia (25/9) nasce dai pallini
-  const terraU = tratto(t, 13.6, 15.6), terraFine = tratto(t, 19.4, 21.4);
-  /* PERCHE' COSI' (seconda sessione): i boschi visti fra lo zoom 9 e l'11 sono migliaia di poligoni minuscoli, e
-     in movimento l'H.264 li impasta (servivano 19 Mbit/s per tenerli nitidi). Allora si scende verso il bosco ancora
-     sotto la pioggia, che e' liscia, e i boschi entrano in dissolvenza a zoom 11-12, dove sono macchie grandi. */
+/* gli indici del repo delle tessere: quali tessere di boschi e rilievo esistono */
+async function indici() {
+  const b = JSON.parse(await scarica(RAW + 'boschi/indice.json', path.join(CACHE, 'tessere', 'boschi', 'indice.json')));
+  const r = JSON.parse(await scarica(RAW + 'rilievo/indice.json', path.join(CACHE, 'tessere', 'rilievo', 'indice.json')));
+  const esB = new Set(); Object.keys(b.tessere).forEach(z => b.tessere[z].forEach(([x, y]) => esB.add(z + '/' + x + '/' + y)));
   return {
-    centro: c.centro, zoom: c.zoom,
-    giorno: g, morbido: MORBIDO, nascita,
-    pallini: clamp((t - 0.4) / 2.2) * 1.0001, pallinoVia: clamp((g - 15) / 4.5),                   // i pallini sfumano con la pioggia grande (7-10 ottobre)
-    // la pioggia sfuma mentre i boschi si accendono (dissolvenza incrociata), poi se ne va del tutto
-    pioggia: 1 - tratto(t, 13.8, 16.0),
-    linee: 0.10 * (1 - tratto(t, 9.4, 11.2)),
-    terra: hex(mixc(mixc(TERRA_BUIA, TERRA_RILIEVO, terraU), TERRA_FINE, terraFine)),
-    // il rilievo sale solo quando la pioggia e' quasi andata (regola della mappa), e alla fine resta morbido
-    rilievo: tratto(t, 15.2, 16.6) * (1 - 0.6 * tratto(t, 18.9, 20.2)),   // nel ritorno veloce il rilievo si abbassa: costa banda
-    // vicino alle chiome i boschi si fanno un po' piu' trasparenti: sotto si vede il satellite
-    boschi: tratto(t, 13.7, 14.1) * (1 - tratto(t, 18.7, 19.8)) * (1 - 0.4 * tratto(t, 16.8, 18.0)),
-    soglia: mix(320, 25, tratto(t, 13.8, 16.4)),                 // prima dove e' piovuto di piu'
-    morbidoBoschi: 30,
-    sat: tratto(t, 15.8, 17.6) * (1 - tratto(t, 19.0, 20.6)),    // il satellite sfuma dentro SOTTO i boschi
-    prev: clamp((t - 20.2) / 2.6) * 1.0001, prevGiorno: 1, prevZoomRif: 9.38,
-    /* MOSSO: quando lo zoom corre, le tessere si sfumano appena (al massimo 1,4 px), come una cinepresa vera. */
-    mosso: Math.min(1.4, 0.7 * Math.max(0, velZoom(i) - 0.5)),
-    nota: !sat && t > 15.6 && t < 20.9 ? 'segnaposto: il satellite si rifà dal PC' : !prev && t > 20.0 ? 'segnaposto: le previsioni si rifanno dal PC' : null,
-    notaOpacita: !sat && t < 20.9 ? tratto(t, 15.6, 16.4) * (1 - tratto(t, 20.2, 20.9)) : tratto(t, 20.0, 20.8),
-    loop: tratto(t, DUR - 0.8, DUR)                              // dissolvenza sul primo fotogramma
+    boschi: { zmin: b.z_min, zmax: b.z_max, esiste: (z, x, y) => esB.has(z + '/' + x + '/' + y) },
+    rilievo: { zmin: 5, zmax: 13, esiste: (z, x, y) => { const pz = r[z]; const iv = pz && pz[x]; return !!iv && iv.some(v => typeof v === 'number' ? v === y : (y >= v[0] && y <= v[1])); } },
   };
+}
+
+function italia() {
+  const set = RC.italiaZ12(JSON.parse(fs.readFileSync(path.join(CACHE, 'italia-contorno.json'))));
+  return { set, inItalia: RC.inItaliaFatto(set) };
 }
 
 async function main() {
   fs.mkdirSync(FRAMES, { recursive: true });
   if (arg('camera', false)) return graficoCamera();
   const prova = arg('prova', null);
-  const soloCod = arg('solo-codifica', false);
-  const vuoleSat = !!arg('satellite', false), vuolePrev = !!arg('previsioni', false);
-  if (!soloCod) {
-    const sat = vuoleSat && satelliteRaggiungibile();
-    if (vuoleSat && !sat) console.log('⚠️ satellite chiesto ma server.arcgisonline.com non risponde: resta il segnaposto');
-    const datiPrev = previsioni(AREA, vuolePrev);
-    if (vuolePrev && !datiPrev) console.log('⚠️ previsioni chieste ma la produzione non risponde: resta il segnaposto');
-    const rifai = !!arg('rifai', false) || vuoleSat || vuolePrev;
-    const { browser, page, errori } = await apri({ url: URLMAPPA, larghezza: W, altezza: H, griglia: GRIGLIA, satellite: sat, prev: AREA });
-    await capoluoghi(page, AREA);
-    preparaTempo(await page.evaluate(() => { const G = window.__griglia, n = G.n, out = [];
-      for (let d = 0; d < G.meta.fotogrammi; d++) { let s = 0; for (let k = 0; k < n; k++) s += G.val[d * n + k]; out.push(s / n / 10); } return out; }));
+  if (!arg('solo-codifica', false)) {
+    // ffmpeg si controlla SUBITO (che parta e che sappia fare H.264), non dopo mezz'ora di fotogrammi
+    if (!prova) codificatore(ffmpeg());
+    const griglia = preparaGriglia(arg('mappa', null));
+    const vuoleSat = !!arg('satellite', false);
+    const IT = italia();
+    // ── prima di scattare: TUTTE le tessere sul disco (nessuna tessera che arriva in ritardo) ──
+    if (vuoleSat) {
+      const lista = RC.tessereFilm(R, 'sat', { inItalia: IT.inItalia });
+      const mancano = lista.filter(([z, x, y]) => !fs.existsSync(satFile(z, x, y)));
+      if (mancano.length) {
+        console.error(`⚠️ --satellite: in cache/satellite mancano ${mancano.length} tessere su ${lista.length}.\n` +
+          '   Prima: node studio-apple/film/tools/scarica-satellite.js' + (arg('bosco', null) ? ' --bosco ' + arg('bosco') : ''));
+        process.exit(1);
+      }
+      console.log(`satellite: tutte le ${lista.length} tessere sono in cache/satellite`);
+    }
+    const ind = await indici();
+    const lista = [];
+    for (const q of ['boschi', 'rilievo']) for (const [z, x, y] of RC.tessereFilm(R, q, ind[q])) {
+      const rel = `${q}/${z}/${x}/${y}.png`;
+      lista.push([RAW + rel, path.join(CACHE, 'tessere', rel)]);
+    }
+    const daScaricare = lista.filter(([, f]) => !fs.existsSync(f));
+    if (daScaricare.length) {
+      console.log(`tessere di boschi e rilievo: ${daScaricare.length} da scaricare (su ${lista.length})`);
+      const { errori } = await scaricaTutti(daScaricare, { etichetta: 'boschi e rilievo', quanti: 8 });
+      if (errori.length) { console.error('⚠️ non arrivate:', errori.slice(0, 5).join('\n')); process.exit(1); }
+    }
+
+    const srv = await serverMappa(arg('mappa', null));
+    const { browser, page, errori } = await apri({ url: srv.url, larghezza: W, altezza: H, griglia,
+      satellite: vuoleSat ? 'cache' : false, segnaposto: !vuoleSat, italia: [...IT.set] });
     const primo = path.join(FRAMES, 'f00000.png');
-    const lista = prova ? String(prova).split(',').map(s => Math.round(parseFloat(s) * FPS))
-                        : Array.from({ length: N }, (_, i) => i).filter(i => i >= +arg('da', 0) && i <= +arg('a', N - 1));
+    const lista2 = prova ? String(prova).split(',').map(s => Math.round(parseFloat(s) * FPS))
+                         : Array.from({ length: N }, (_, i) => i).filter(i => i >= +arg('da', 0) && i <= +arg('a', N - 1));
     const dir = prova ? path.join(FILM, 'prova') : FRAMES;
     fs.mkdirSync(dir, { recursive: true });
-    if (!prova && rifai && lista.includes(0)) { try { fs.unlinkSync(primo); } catch (e) {} }
+    /* i fotogrammi gia' fatti valgono solo se fatti con la stessa fonte del satellite e lo stesso bosco (frames/fonte.json):
+       se no si buttano tutti, cosi' un film non mescola mai segnaposto e foto vera; un render interrotto riparte da dov'era */
+    const fonte = JSON.stringify({ satellite: vuoleSat ? 'esri' : 'segnaposto', bosco: R.bosco });
+    const marca = path.join(FRAMES, 'fonte.json');
+    if (!prova && (!fs.existsSync(marca) || fs.readFileSync(marca, 'utf8') !== fonte)) {
+      fs.readdirSync(FRAMES).filter(f => /^f\d{5}\.png$/.test(f)).forEach(f => fs.unlinkSync(path.join(FRAMES, f)));
+      fs.writeFileSync(marca, fonte);
+    }
+    const rifai = !!arg('rifai', false);
+    if (!prova && rifai && lista2.includes(0)) { try { fs.unlinkSync(primo); } catch (e) {} }
     const t0 = Date.now();
-    for (const i of lista) {
+    let fatti = 0, tavolo = null;
+    for (const i of lista2) {
       const f = path.join(dir, `f${String(i).padStart(5, '0')}.png`);
       if (!prova && !rifai && fs.existsSync(f)) continue;
-      const s = statoAl(i / FPS, { sat, prev: !!datiPrev });
-      await scena(page, s);
-      if (s.loop > 0) {   // il primo fotogramma sopra, sempre piu' pieno: il film si richiude su se stesso
-        if (!fs.existsSync(primo)) throw new Error('serve prima il fotogramma 0');
-        const b64 = fs.readFileSync(primo).toString('base64');
-        await page.evaluate(({ b64, a }) => new Promise(ok => {
-          let im = document.getElementById('film-loop');
-          if (!im) { im = document.createElement('img'); im.id = 'film-loop'; im.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:99999;pointer-events:none'; document.body.appendChild(im); }
-          im.style.opacity = a; im.style.display = 'block';
-          if (im.dataset.ok) return ok(); im.onload = () => { im.dataset.ok = 1; ok(); }; im.src = 'data:image/png;base64,' + b64;
-        }), { b64, a: s.loop });
-      } else await page.evaluate(() => { const im = document.getElementById('film-loop'); if (im) im.style.display = 'none'; });
-      await page.screenshot({ path: f, type: 'png' });
-      if (i % 60 === 0 || prova) console.log(`fotogramma ${i}/${N - 1}  t=${(i / FPS).toFixed(2)}s  zoom=${s.zoom.toFixed(3)}  giorno=${s.giorno.toFixed(2)}  ${((Date.now() - t0) / 1000).toFixed(0)}s`);
+      const s = R.statoAl(i / FPS, { segnaposto: !vuoleSat });
+      let r = await scena(page, s);
+      if (r.mancanti.length) {   // una seconda volta (un'immagine decodificata male), poi ci si ferma: niente buchi
+        await page.evaluate(m => m.forEach(u => window.__img.delete(u)), r.mancanti);
+        r = await scena(page, s);
+        if (r.mancanti.length) throw new Error(`fotogramma ${i}: ${r.mancanti.length} immagini non arrivate, per esempio ${r.mancanti[0]}`);
+      }
+      const png = await page.screenshot({ type: 'png' });
+      if (s.loop > 0) {
+        /* IL LOOP: il primo fotogramma sopra, sempre piu' pieno, cosi' il film si richiude su se stesso.
+           ⚠️ Non con un <img> sopra la mappa (com'era) ne' con globalAlpha su una tela: la fusione a 8 bit di Chrome
+           tronca, e appena l'opacita' arrivava a 1/255 TUTTO il fotogramma scendeva di un livello di colpo (misurato:
+           un picco a 23,07 s). Ora la mescola si fa pixel per pixel, (1 - a) x questo fotogramma + a x il primo,
+           arrotondata: con a quasi zero il fotogramma resta identico. */
+        const p0 = [path.join(dir, 'f00000.png'), primo].find(f => fs.existsSync(f));
+        if (!p0) throw new Error('serve prima il fotogramma 0');
+        if (!tavolo) { tavolo = await browser.newPage(); await tavolo.setContent('<canvas></canvas>'); }
+        const b64 = await tavolo.evaluate(async ({ io, primo, a }) => {
+          const carica = async src => { const im = new Image(); im.src = src; await im.decode(); return im; };
+          window.__primo = window.__primo || await carica(primo);
+          const im = await carica(io), c = document.querySelector('canvas');
+          c.width = im.width; c.height = im.height;
+          const g = c.getContext('2d', { willReadFrequently: true });
+          if (!window.__p0) { g.drawImage(window.__primo, 0, 0); window.__p0 = g.getImageData(0, 0, c.width, c.height).data; }
+          g.drawImage(im, 0, 0);
+          const d = g.getImageData(0, 0, c.width, c.height), p = d.data, q = window.__p0;
+          for (let k = 0; k < p.length; k += 4) for (let j = 0; j < 3; j++) p[k + j] = Math.round(p[k + j] + a * (q[k + j] - p[k + j]));
+          g.putImageData(d, 0, 0);
+          return c.toDataURL('image/png').split(',')[1];
+        }, { io: 'data:image/png;base64,' + png.toString('base64'), primo: 'data:image/png;base64,' + fs.readFileSync(p0).toString('base64'), a: s.loop });
+        fs.writeFileSync(f, Buffer.from(b64, 'base64'));
+      } else fs.writeFileSync(f, png);
+      fatti++;
+      if (i % 60 === 0 || prova) {
+        const al = (Date.now() - t0) / 1000 / fatti, resta = (lista2.length - fatti) * al;
+        console.log(`fotogramma ${i}/${N - 1}  t=${(i / FPS).toFixed(2)}s  zoom=${s.zoom.toFixed(3)}  ${al.toFixed(2)} s a fotogramma, mancano circa ${(resta / 60).toFixed(0)} min`);
+      }
     }
+    // le regioni a schermo, per la misura dell'uniformita' della pioggia
+    await scena(page, R.statoAl(0));
+    const nomi = await mascheraRegioni(page, path.join(CACHE, 'regioni.png'));
+    fs.writeFileSync(path.join(CACHE, 'regioni.json'), JSON.stringify(nomi));
     if (errori.length) console.log('errori della pagina:', errori);
-    await browser.close();
-    fs.writeFileSync(path.join(FILM, 'film-fonti.json'), JSON.stringify({ satellite: sat, previsioni: !!datiPrev,
-      previsioniAgg: datiPrev && datiPrev.agg || null, fatto: new Date().toISOString() }, null, 1));
+    await browser.close(); srv.chiudi();
     if (prova) return;
+    fs.writeFileSync(path.join(FILM, 'film-fonti.json'), JSON.stringify({ satellite: vuoleSat ? 'esri' : 'segnaposto', bosco: R.bosco, fatto: new Date().toISOString() }, null, 1));
   }
-  codifica();
+  await codifica();
   graficoCamera();
   misura();
 }
 
-function ffmpeg() {
-  try { execFileSync('ffmpeg', ['-version']); return 'ffmpeg'; } catch (e) {
-    return execFileSync('python3', ['-c', 'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())']).toString().trim(); }
+/* ── la codifica ── */
+const ATTIVI = (enc, n) => new RegExp('^\\s*V\\S*\\s+' + n + '\\s', 'm').test(enc);
+/* il codificatore H.264: --codificatore, o libx264, o il primo di Windows / della scheda video che c'e' */
+function codificatore(ff) {
+  const enc = codificatori(ff);
+  const scelto = arg('codificatore', null) || ['libx264', 'h264_mf', 'h264_nvenc', 'h264_qsv', 'h264_amf', 'libopenh264'].find(n => ATTIVI(enc, n));
+  if (!scelto || !ATTIVI(enc, scelto)) {
+    console.error(`⚠️ ${ff} non ha ${scelto || 'nessun codificatore H.264'}. Scarica ffmpeg da https://www.gyan.dev/ffmpeg/builds/ («essentials») e passa --ffmpeg <percorso>.`);
+    process.exit(1);
+  }
+  return scelto;
 }
-
-function codifica() {
+async function codifica() {
   const mancano = Array.from({ length: N }, (_, i) => i).filter(i => !fs.existsSync(path.join(FRAMES, `f${String(i).padStart(5, '0')}.png`)));
   if (mancano.length) { console.log('mancano', mancano.length, 'fotogrammi, per esempio', mancano.slice(0, 5)); process.exit(1); }
-  const ff = ffmpeg();
-  const colore = ['-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv'];
-  const comune = ['-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-tune', 'film', '-movflags', '+faststart', '-an', ...colore];
+  const ff = ffmpeg(), enc = codificatori(ff);
+  // il codificatore scelto e, se non parte (una scheda video che non c'e'), gli altri H.264 che ffmpeg dice di avere
+  const prima = codificatore(ff);
+  const candidati = [prima, ...['h264_mf', 'h264_nvenc', 'h264_qsv', 'h264_amf', 'libopenh264', 'libx264'].filter(n => n !== prima && ATTIVI(enc, n))];
+  const colore = ['-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv'];
   const ingresso = ['-y', '-hide_banner', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(FRAMES, 'f%05d.png')];
-  /* ⚠️ DUE PASSATE, NON CRF (seconda sessione, misurato). Con CRF 17 e un tetto di banda i bit finivano nella pioggia
-     sull'Italia (2-5 s: 3-4 Mbit/s per un PSNR di 45-51 dB, piu' del necessario) e la discesa sui boschi restava
-     strozzata dal tetto a 29 dB, impastata. In due passate, a parita' di peso, il codificatore sposta la banda dove
-     serve: il punto peggiore sale a 32,5 dB e la qualita' e' uniforme. Media 2,6 Mbit/s = circa 8 MB in 24 s. */
-  const duePassate = (vf, media, tetto, out) => {
-    const log = path.join(CACHE, 'passate-' + path.basename(out, '.mp4'));
-    const args = [...ingresso, '-vf', vf, ...comune, '-b:v', media, '-maxrate', tetto, '-bufsize', String(parseInt(tetto) * 2) + 'k', '-passlogfile', log];
-    execFileSync(ff, [...args, '-pass', '1', '-f', 'null', process.platform === 'win32' ? 'NUL' : '/dev/null'], { stdio: 'inherit' });
-    execFileSync(ff, [...args, '-pass', '2', out], { stdio: 'inherit' });
-  };
   fs.mkdirSync(CACHE, { recursive: true });
-  duePassate('scale=1920:1080:out_color_matrix=bt709:out_range=tv,format=yuv420p', process.env.MEDIA_1080 || '2600k', process.env.TETTO_1080 || '7000k', path.join(FILM, 'apertura-1080.mp4'));
-  duePassate('scale=1280:720:flags=lanczos:out_color_matrix=bt709:out_range=tv,format=yuv420p', process.env.MEDIA_720 || '740k', process.env.TETTO_720 || '2000k', path.join(FILM, 'apertura-720.mp4'));
-  execFileSync(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', path.join(FRAMES, 'f00000.png'), '-c:v', 'libwebp', '-quality', '82', path.join(FILM, 'apertura-poster.webp')], { stdio: 'inherit' });
+  /* ⚠️ DUE PASSATE, NON CRF (seconda sessione, misurato): a parita' di peso il codificatore sposta la banda dove
+     serve (qui: lo zoom sulle chiome) invece di sprecarla sulle parti ferme. */
+  const video = (scelto, vf, media, tetto, out) => {
+    if (scelto === 'libx264') {
+      const log = path.join(CACHE, 'passate-' + path.basename(out, '.mp4'));
+      const args = [...ingresso, '-vf', vf + ',format=yuv420p', '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-tune', 'film',
+        '-pix_fmt', 'yuv420p', ...colore, '-movflags', '+faststart', '-an', '-b:v', media, '-maxrate', tetto, '-bufsize', String(parseInt(tetto) * 2) + 'k', '-passlogfile', log];
+      esegui(ff, [...args, '-pass', '1', '-f', 'null', process.platform === 'win32' ? 'NUL' : '/dev/null']);
+      esegui(ff, [...args, '-pass', '2', out]);
+    } else {
+      const pf = /qsv|mf/.test(scelto) ? 'nv12' : 'yuv420p';
+      esegui(ff, [...ingresso, '-vf', vf + ',format=' + pf, '-c:v', scelto, '-b:v', String(Math.round(parseInt(media) * 1.25)) + 'k', '-maxrate', tetto,
+        '-bufsize', String(parseInt(tetto) * 2) + 'k', '-g', '120', ...colore, '-movflags', '+faststart', '-an', out]);
+    }
+  };
+  let fatto = false;
+  for (const scelto of candidati) {
+    console.log('codifica con', scelto, scelto === 'libx264' ? '(due passate)' : '(⚠️ senza libx264: una passata, qualita\' un po\' piu\' bassa; meglio un ffmpeg con libx264)');
+    try {
+      video(scelto, 'scale=1920:1080:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_1080 || '2600k', process.env.TETTO_1080 || '7000k', path.join(FILM, 'apertura-1080.mp4'));
+      video(scelto, 'scale=1280:720:flags=lanczos:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_720 || '740k', process.env.TETTO_720 || '2000k', path.join(FILM, 'apertura-720.mp4'));
+      fatto = true; break;
+    } catch (e) { console.log(`⚠️ ${scelto} non e' andato (${e.message.split('\n')[0]}), provo il prossimo`); }
+  }
+  if (!fatto) { console.error('⚠️ nessun codificatore H.264 ha funzionato: serve un ffmpeg con libx264 (https://www.gyan.dev/ffmpeg/builds/), poi --solo-codifica --ffmpeg <percorso>.'); process.exit(1); }
+  // il poster: il primo fotogramma in WebP (con ffmpeg se ha libwebp, se no lo codifica Chrome)
+  const poster = path.join(FILM, 'apertura-poster.webp'), f0 = path.join(FRAMES, 'f00000.png');
+  if (ATTIVI(enc, 'libwebp')) esegui(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', f0, '-c:v', 'libwebp', '-quality', '82', poster]);
+  else {
+    const browser = await lanciaChrome(), page = await browser.newPage();
+    const b64 = await page.evaluate(async src => { const im = new Image(); im.src = src; await im.decode();
+      const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0);
+      return c.toDataURL('image/webp', 0.82).split(',')[1]; }, 'data:image/png;base64,' + fs.readFileSync(f0).toString('base64'));
+    fs.writeFileSync(poster, Buffer.from(b64, 'base64')); await browser.close();
+  }
+  /* gli stills: uno al secondo, e uno ogni mezzo secondo nelle dissolvenze (pioggia, boschi, satellite, inizio
+     dello zoom, loop). still-09s.jpg serve anche a verify.js. */
   const stills = path.join(FILM, 'stills');
   fs.rmSync(stills, { recursive: true, force: true }); fs.mkdirSync(stills, { recursive: true });
-  for (let s = 0; s < DUR; s++) execFileSync(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', path.join(FRAMES, `f${String(s * FPS).padStart(5, '0')}.png`),
-    '-vf', 'scale=1280:-2', '-q:v', '4', path.join(stills, `still-${String(s).padStart(2, '0')}s.jpg`)]);
+  const dentro = t => [T.pioggia, [T.pioggiaVia[0], T.boschi[1]], T.satellite, [T.zoom[0], T.zoom[0] + 3], T.loop].some(([a, b]) => t >= a - 0.01 && t <= b + 0.01);
+  for (let k = 0; k < DUR * 2; k++) {
+    const t = k / 2;
+    if (k % 2 && !dentro(t)) continue;
+    const nome = k % 2 ? `still-${String(Math.floor(t)).padStart(2, '0')}.5s.jpg` : `still-${String(t).padStart(2, '0')}s.jpg`;
+    esegui(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', path.join(FRAMES, `f${String(Math.round(t * FPS)).padStart(5, '0')}.png`),
+      '-vf', 'scale=1280:-2', '-q:v', '4', path.join(stills, nome)]);
+  }
   for (const f of ['apertura-1080.mp4', 'apertura-720.mp4', 'apertura-poster.webp'])
     console.log(f, (fs.statSync(path.join(FILM, f)).size / 1048576).toFixed(2), 'MB');
 }
@@ -258,18 +239,29 @@ function codifica() {
 function graficoCamera() {
   const righe = ['t,pan_px,zoom_px'];
   for (let i = 1; i <= N; i++) {
-    const a = CAMERA[i - 1], b = CAMERA[i], pa = proj(a.centro), pb = proj(b.centro), sc = 256 * 2 ** b.zoom;
+    const a = R.CAMERA[i - 1], b = R.CAMERA[i], pa = RC.proj(a.centro), pb = RC.proj(b.centro), sc = 256 * 2 ** b.zoom;
     righe.push(`${(i / FPS).toFixed(4)},${(Math.hypot(pb[0] - pa[0], pb[1] - pa[1]) * sc).toFixed(4)},${(Math.abs(b.zoom - a.zoom) * Math.LN2 * Math.hypot(W, H) / 2).toFixed(4)}`);
   }
   fs.mkdirSync(CACHE, { recursive: true });
   fs.writeFileSync(path.join(CACHE, 'camera.csv'), righe.join('\n'));
 }
 
-/* differenza media fra fotogrammi consecutivi (e la velocita' della telecamera) -> film/fluidita.png */
+/* le misure, in Python (numpy, pillow, matplotlib): fluidita.png e uniformita.png. Se Python non c'e', lo dice e
+   il film resta fatto. */
 function misura() {
-  execFileSync('python3', [path.join(__dirname, 'fluidita.py'), '--frames', FRAMES, '--camera', path.join(CACHE, 'camera.csv'),
-    '--out', path.join(FILM, 'fluidita.png'), '--fps', String(FPS)], { stdio: 'inherit' });
+  const py = arg('python', 'python');
+  const fp = RC.fotogrammiPioggia();
+  const passi = [
+    ['fluidita.py', '--frames', FRAMES, '--camera', path.join(CACHE, 'camera.csv'), '--out', path.join(FILM, 'fluidita.png'), '--fps', String(FPS),
+      '--zone', JSON.stringify({ 'pioggia sale': T.pioggia, 'pioggia → boschi': [T.pioggiaVia[0], T.boschi[1]], 'satellite': T.satellite, 'zoom': T.zoom, 'loop': T.loop })],
+    ['uniformita.py', '--frames', FRAMES, '--regioni', path.join(CACHE, 'regioni.png'), '--nomi', path.join(CACHE, 'regioni.json'),
+      '--base', String(fp.base), '--pieno', String(fp.pieno), '--lista', fp.lista.join(','), '--fps', String(FPS), '--out', path.join(FILM, 'uniformita.png')],
+  ];
+  for (const [script, ...a] of passi) {
+    try { esegui(py, [path.join(__dirname, script), ...a]); }
+    catch (e) { console.log(`⚠️ ${script} non e' andato (${e.message.split('\n')[0]}): il film e' fatto, manca solo la misura.`); }
+  }
 }
 
-module.exports = { statoAl, CAMERA, ITALIA, LIGURIA, BOSCO, PREVISIONI, DUR, FPS };
+module.exports = { R };
 if (require.main === module) main().catch(e => { console.error(e); process.exit(1); });

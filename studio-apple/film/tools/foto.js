@@ -2,22 +2,22 @@
 /* Le immagini ad altissima definizione della home v2: la mappa vera senza interfaccia, 2880x1800
    (1440x900 a scala 2), esportate in WebP qualita' 82 a 2880 e 1440 px.
 
-   Prima, come per il film: il server della mappa su 8899 e la griglia
-     python3 studio-apple/film/tools/griglie.py --da 2026-09-22 --giorni 30
-   Poi, dalla radice del repo:
-     node studio-apple/film/tools/foto.js                          tutte
-     node studio-apple/film/tools/foto.js pioggia-nord boschi-nord  solo quelle
-     node studio-apple/film/tools/foto.js satellite previsioni --satellite --previsioni   DAL PC: foto aerea vera e
-                                                                    previsioni di oggi (dal cloud sono segnaposto)
+   Dalla radice del repo (il server della mappa e la griglia li prepara il motore, come per il film):
+     node studio-apple/film/tools/foto.js --mappa <cartella clone mappa>                          tutte
+     node studio-apple/film/tools/foto.js pioggia-nord boschi-nord --mappa <cartella>              solo quelle
+     node studio-apple/film/tools/foto.js satellite previsioni --satellite --previsioni --mappa <cartella>   DAL PC:
+                                                     foto aerea vera e previsioni di oggi (dal cloud sono segnaposto)
+   Come film.js accetta --chrome e --ffmpeg.
    Escono in studio-apple/film/foto/<nome>-2880.webp e <nome>-1440.webp, piu' il PNG grande in cache/foto/. */
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { apri, scena, capoluoghi, previsioni, satelliteRaggiungibile, FILM, CACHE } = require('./motore');
+const { serverMappa, preparaGriglia, ffmpeg } = require('./comune');
 
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i < 0 ? d : (process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : true); };
-const URLMAPPA = arg('mappa', 'http://127.0.0.1:8899/');
+let URLMAPPA = null;
 const OUT = path.join(FILM, 'foto');
 const PNG = path.join(CACHE, 'foto');
 const W = 1440, H = 900;
@@ -39,10 +39,12 @@ const SCENE = {
 
 async function main() {
   fs.mkdirSync(OUT, { recursive: true }); fs.mkdirSync(PNG, { recursive: true });
+  preparaGriglia(arg('mappa', null));
+  const srv = await serverMappa(arg('mappa', null)); URLMAPPA = srv.url;
   const solo = process.argv.slice(2).filter(a => !a.startsWith('--') && (SCENE[a] || a === 'scheda-stazione'));
   const nomi = solo.length ? solo : [...Object.keys(SCENE), 'scheda-stazione'];
   const vuoleSat = !!arg('satellite', false), vuolePrev = !!arg('previsioni', false);
-  const sat = vuoleSat && satelliteRaggiungibile();
+  const sat = vuoleSat && await satelliteRaggiungibile();
   if (vuoleSat && !sat) console.log('⚠️ satellite chiesto ma server.arcgisonline.com non risponde: resta il segnaposto');
   for (const nome of nomi) {
     const png = path.join(PNG, nome + '.png');
@@ -50,8 +52,8 @@ async function main() {
     else {
       const sc = SCENE[nome];
       let datiPrev = null;
-      if (sc.prev) { datiPrev = previsioni(sc.prev, vuolePrev); if (!datiPrev) console.log('⚠️ previsioni: la produzione non risponde, resta il segnaposto'); }
-      const { browser, page, errori } = await apri({ url: URLMAPPA, larghezza: W, altezza: H, scala: 2, griglia: GRIGLIA, satellite: sc.sat && sat, prev: sc.prev || null });
+      if (sc.prev) { datiPrev = await previsioni(sc.prev, vuolePrev); if (!datiPrev) console.log('⚠️ previsioni: la produzione non risponde, resta il segnaposto'); }
+      const { browser, page, errori } = await apri({ url: URLMAPPA, larghezza: W, altezza: H, scala: 2, griglia: GRIGLIA, satellite: sc.sat && sat ? 'rete' : false, prev: sc.prev || null });
       if (sc.prev) await capoluoghi(page, sc.prev);
       const nota = sc.sat && !sat ? 'segnaposto: il satellite si rifà dal PC (foto.js satellite --satellite)'
         : sc.prev && !datiPrev ? 'segnaposto: le previsioni si rifanno dal PC (foto.js previsioni --previsioni)' : null;
@@ -62,6 +64,7 @@ async function main() {
     }
     esporta(nome, png);
   }
+  srv.chiudi();
 }
 
 /* (4) la scheda di una stazione col suo grafico: qui l'interfaccia c'e', ma solo la scheda, grande e pulita.
@@ -98,7 +101,7 @@ async function schedaStazione(png) {
 }
 
 function esporta(nome, png) {
-  const ff = 'ffmpeg';
+  const ff = ffmpeg();
   for (const larg of [2880, 1440]) {
     const out = path.join(OUT, `${nome}-${larg}.webp`);
     let q = 82;

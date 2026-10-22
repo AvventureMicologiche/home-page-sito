@@ -1,0 +1,8 @@
+{
+  "name": "film-apertura",
+  "private": true,
+  "description": "Il film d'apertura della home v2: serve solo playwright-core (usa il Chrome gia' installato, non scarica Chromium). npm install --prefix studio-apple/film",
+  "dependencies": {
+    "playwright-core": "1.56.1"
+  }
+}

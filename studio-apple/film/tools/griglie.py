@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Griglie della pioggia per il film: la stessa interpolazione della mappa, giorno per giorno.
 
 Legge i file giornalieri delle stazioni dal clone della mappa (sola lettura) e scrive in
@@ -24,7 +24,8 @@ Tre aggiunte, tutte solo per l'immagine:
   - la griglia sborda di 0,04 gradi in mare, cosi' il ritaglio sul confine taglia colore pieno
     e la costa resta netta anche da vicino (la mappa sfuma l'ultima mezza cella).
 
-Uso:  python3 griglie.py --mappa /tmp/mappa --da 2026-09-22 --giorni 30 [--passo 0.01]
+Uso:  python griglie.py --mappa <cartella del clone della mappa> --da 2026-09-22 --giorni 30 [--passo 0.01] [--liscia 0.03]
+      (di solito non serve lanciarlo a mano: lo fa film.js la prima volta)
 Serve: numpy, scipy, shapely (pip install numpy scipy shapely).
 """
 import argparse, json, os, re, sys, datetime as dt
@@ -92,7 +93,7 @@ def stazioni(mappa, giorni, escl):
             f = os.path.join(mappa, 'data', rete, g + '.json')
             if not os.path.exists(f):
                 continue
-            for s in json.load(open(f)).get('stations', []):
+            for s in json.load(open(f, encoding='utf-8')).get('stations', []):
                 if s.get('lat') is None or s.get('lon') is None:
                     continue
                 if esclusa(rete, s, escl):
@@ -136,10 +137,11 @@ def stazioni(mappa, giorni, escl):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--mappa', default='/tmp/mappa')
+    ap.add_argument('--mappa', required=True, help='la cartella del clone della mappa')
     ap.add_argument('--da', default='2026-09-22')
     ap.add_argument('--giorni', type=int, default=30)
     ap.add_argument('--passo', type=float, default=0.01)
+    ap.add_argument('--liscia', type=float, default=0.03, help='gradi della gaussiana della griglia unica del film (0 = niente)')
     a = ap.parse_args()
     d0 = dt.date.fromisoformat(a.da)
     giorni = [(d0 + dt.timedelta(i)).isoformat() for i in range(a.giorni)]
@@ -147,7 +149,7 @@ def main():
     os.makedirs(CACHE, exist_ok=True)
 
     # contorno dell'Italia: unione delle 20 regioni (serve alla griglia, alla terra e al ritaglio)
-    reg = json.load(open(os.path.join(a.mappa, 'italia-regioni-confine.geojson')))
+    reg = json.load(open(os.path.join(a.mappa, 'italia-regioni-confine.geojson'), encoding='utf-8'))
     italia = unary_union([shape(f['geometry']).buffer(0) for f in reg['features']])
     italia = italia.simplify(0.0008, preserve_topology=True)
     # ⚠️ SENZA BUCHI: San Marino (e il Vaticano) non sono regioni italiane, e nel contorno erano un buco. Col ritaglio
@@ -157,12 +159,12 @@ def main():
     parti = italia.geoms if italia.geom_type == 'MultiPolygon' else [italia]
     italia = MultiPolygon([Polygon(p.exterior) for p in parti])
     json.dump({'type': 'Feature', 'properties': {}, 'geometry': mapping(italia)},
-              open(os.path.join(CACHE, 'italia-contorno.json'), 'w'), separators=(',', ':'))
+              open(os.path.join(CACHE, 'italia-contorno.json'), 'w', encoding='utf-8'), separators=(',', ':'))
     # confini fra regioni (linee), per un filo appena visibile se lo si vuole
     linee = unary_union([shape(f['geometry']).boundary for f in reg['features']]).difference(italia.boundary.buffer(0.002))
     linee = linee.simplify(0.0008)
     json.dump({'type': 'Feature', 'properties': {}, 'geometry': mapping(linee)},
-              open(os.path.join(CACHE, 'italia-regioni-linee.json'), 'w'), separators=(',', ':'))
+              open(os.path.join(CACHE, 'italia-regioni-linee.json'), 'w', encoding='utf-8'), separators=(',', ':'))
 
     la, lo, cum = stazioni(a.mappa, giorni, esclusioni(a.mappa))
     print('stazioni in tutto', len(la))
@@ -241,13 +243,40 @@ def main():
     presi = np.array(presi)
     pal = [[round(float(y), 4), round(float(x / c0), 4), round(float(r), 3)]
            for (y, x), r in zip(presi, rng.random(len(presi)))]
-    json.dump(pal, open(os.path.join(CACHE, nome + '-pallini.json'), 'w'), separators=(',', ':'))
+    json.dump(pal, open(os.path.join(CACHE, nome + '-pallini.json'), 'w', encoding='utf-8'), separators=(',', ':'))
     dpal, _ = cKDTree(presi).query(np.c_[plat, plon * c0])
     np.clip(np.round(dpal / 0.004), 0, 255).astype(np.uint8).tofile(os.path.join(CACHE, nome + '.dist'))
     meta['pallini'] = len(pal)
     print(f'pallini: {len(pal)} su {len(la)} stazioni (uno ogni {len(la) / len(pal):.1f})')
-    json.dump(meta, open(os.path.join(CACHE, nome + '.json'), 'w'), indent=1)
+    json.dump(meta, open(os.path.join(CACHE, nome + '.json'), 'w', encoding='utf-8'), indent=1)
     print(json.dumps({k: v for k, v in meta.items() if k != 'giorni'}))
+
+    # LA GRIGLIA UNICA DEL FILM (terza sessione): il cumulato finale dei 30 giorni, levigato. Lui: «non mi interessa
+    # una heatmap giorno per giorno di giorni veri, mi interessa che SEMBRI reale». L'IDW 1/d^2 lascia attorno a ogni
+    # stazione un occhio di bue (un pallino di colore piu' scuro o piu' chiaro): una gaussiana di --liscia gradi li
+    # scioglie, e i valori restano quelli veri a scala di qualche chilometro. La gaussiana e' NORMALIZZATA sulla terra
+    # (somma pesata dei valori / somma dei pesi, solo celle della griglia): il mare non entra e la costa non sbiadisce.
+    if a.liscia > 0:
+        from scipy.ndimage import gaussian_filter
+        ras = np.zeros((len(lats), len(lons)), np.float64)
+        msk = np.zeros_like(ras)
+        ras[iy, ix] = out[-1]
+        msk[iy, ix] = 1
+        sy = a.liscia / GR
+        sx = sy / np.cos(np.radians(42))      # in gradi di longitudine la stessa distanza e' piu' larga
+        num = gaussian_filter(ras, (sy, sx), mode='constant', truncate=3)
+        den = gaussian_filter(msk, (sy, sx), mode='constant', truncate=3)
+        lisc = (num / np.maximum(den, 1e-9))[iy, ix]
+        nl = nome + '-liscia'
+        np.clip(np.round(np.r_[np.zeros_like(lisc), lisc][None, :] * 10), 0, 65535).astype(np.uint16).tofile(os.path.join(CACHE, nl + '.u16'))
+        for est in ('.idx', '.dist', '-pallini.json'):
+            with open(os.path.join(CACHE, nome + est), 'rb') as f, open(os.path.join(CACHE, nl + est), 'wb') as g:
+                g.write(f.read())
+        ml = dict(meta, fotogrammi=2, liscia_gradi=a.liscia, massimo_finale_mm=float(lisc.max()), mediana_finale_mm=float(np.median(lisc)))
+        json.dump(ml, open(os.path.join(CACHE, nl + '.json'), 'w', encoding='utf-8'), indent=1)
+        d = np.abs(lisc - out[-1])
+        print(f'griglia levigata {nl}: gaussiana {a.liscia} gradi, scarto medio {d.mean():.1f} mm, '
+              f'95% delle celle entro {np.percentile(d, 95):.1f} mm, massimo {lisc.max():.0f} mm (era {out[-1].max():.0f})')
 
 
 if __name__ == '__main__':
