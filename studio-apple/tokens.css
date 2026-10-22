@@ -1,0 +1,36 @@
+/* apple.com, token misurati (Unofficial analysis).
+   Not affiliated with or endorsed by Apple. Trademarks belong to their owners.
+   Misurati con Chrome senza finestra su apple.com (home a 1440 e 390, /mac/, /ipad/, /watch/, /business/).
+   I font qui sono solo nomi nella pila: nessun file di font viene caricato. */
+:root {
+  --font-display: "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text: "SF Pro Text", "Myriad Set Pro", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --type-display-size: clamp(2rem, 1.443rem + 2.286vw, 3.5rem); --type-display-weight: 600; --type-display-leading: 1.071; --type-display-tracking: -0.005em;
+  --type-h1-size: 3rem; --type-h1-weight: 600; --type-h1-leading: 1.084; --type-h1-tracking: -0.003em;
+  --type-h2-size: clamp(2rem, 1.814rem + 0.762vw, 2.5rem); --type-h2-weight: 600; --type-h2-leading: 1; --type-h2-tracking: 0.004em;
+  --type-h3-size: 2rem; --type-h3-weight: 600; --type-h3-leading: 1.125; --type-h3-tracking: 0.004em;
+  --type-h4-size: clamp(1.1875rem, 0.979rem + 0.857vw, 1.75rem); --type-h4-weight: 600; --type-h4-leading: 1.143; --type-h4-tracking: 0.007em;
+  --type-lead-size: clamp(1.0625rem, 0.97rem + 0.381vw, 1.3125rem); --type-lead-weight: 600; --type-lead-leading: 1.381; --type-lead-tracking: 0.011em;
+  --type-body-size: clamp(0.875rem, 0.805rem + 0.286vw, 1.0625rem); --type-body-weight: 400; --type-body-leading: 1.471; --type-body-tracking: -0.022em;
+  --type-small-size: 0.75rem; --type-small-weight: 400; --type-small-leading: 1.333; --type-small-tracking: -0.01em;
+  --color-background: #ffffff; /* oklch(100% 0 0) */
+  --color-surface: #f5f5f7; /* oklch(97.1% 0.003 286.4) */
+  --color-surface-inverse: #000000; /* oklch(0% 0 0) */
+  --color-text: #1d1d1f; /* oklch(23.2% 0.004 286.1) */
+  --color-text-muted: #707070; /* oklch(54.5% 0 0) */
+  --color-text-inverse: #ffffff;
+  --color-action: #0071e3; /* oklch(56.3% 0.193 256.2) */
+  --color-on-action: #ffffff;
+  --color-action-alt: #2997ff; /* oklch(66.9% 0.181 251.8), link su fondo nero */
+  --color-accent: #0066cc; /* oklch(52.2% 0.177 255.8), bottone contorno su chiaro */
+  --color-border: #d2d2d7; /* oklch(86.5% 0.007 286.3) */
+  --gradient-brand: radial-gradient(100% 33% at 0% 100%, rgba(0,0,0,0.5) 0%, rgba(255,255,255,0));
+  --space-base: 2px; --space-4: 4px; --space-8: 8px; --space-10: 10px; --space-12: 12px; --space-14: 14px; --space-20: 20px; --space-22: 22px; --space-24: 24px; --space-28: 28px; --space-32: 32px; --space-34: 34px; --space-40: 40px; --space-90: 90px; --space-144: 144px;
+  --layout-container: 1260px; --layout-columns: 2; --layout-gutter: 20px;
+  --radius-28: 28px; --radius-round: 50%; --radius-pill: 980px; --radius-36: 36px; --radius-6: 6px;
+  --button-height: 44px; --button-padding: 11px 21px 11px 21px; --button-radius: 980px; --button-font-size: 17px; --button-weight: 400; --button-tracking: -0.37px; --button-bg: #0071e3; --button-fg: #ffffff;
+  --card-radius: 28px; --card-padding: 0px; --card-bg: #ffffff;
+  --input-height: 44px; --input-radius: 12px; --input-border: 1px solid #d2d2d7; --input-font-size: 17px; /* input INFERITO: nessun campo trovato */
+  --nav-height: 44px; --nav-bg: rgba(255,255,255,0.80); --nav-blur: saturate(1.8) blur(20px); --nav-link-size: 12px;
+  --ease-brand: cubic-bezier(0, 0, 0.5, 1); /* anche cubic-bezier(0.4,0,0.6,1) 0.24-0.32s sul menu */
+}
