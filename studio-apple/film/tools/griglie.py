@@ -9,7 +9,15 @@ La matematica e' quella di buildGrid() nell'index.html della mappa:
   - veto locale: se la stazione piu' vicina e' entro 6 km e ha meno di 1 mm, il punto vale 0;
   - una stazione entra nel periodo se ha consegnato almeno il 60% dei giorni della sua rete
     (copFiltro), e il suo totale e' la somma dei giorni che ha.
-Due aggiunte, tutte e due solo per l'immagine:
+Le ESCLUSIONI della mappa valgono anche qui (dal 22/10/2026): i pluviometri guasti che la mappa tiene fuori
+a mano (LOMB_ESCLUSE, PIEMONTE_ESCLUSE, LIGURIA_ESCLUSE, EMILIA_ESCLUSE, TOSCANA_ESCLUSE, MH_ESCLUSE) si leggono
+dal suo index.html e si tolgono; i doppioni del Friuli (MeteoHub entro 1 km da OSMER) pure, vince OSMER.
+Prima non si toglievano, e i pluviometri fermi a zero facevano col veto i «puntini neri» nella pioggia del film.
+Tre aggiunte, tutte solo per l'immagine:
+  - una stazione SORDA NEL PERIODO (totale sotto il 15% della mediana dei cinque vicini, con i vicini ad almeno
+    20 mm) non entra: e' la regola del controllo automatico della mappa (check-stazioni-ferme.js, 15% dei cinque
+    vicini), con la soglia dei vicini piu' bassa perche' in Sicilia l'autunno e' piovuto 25-40 mm. Sono i
+    pluviometri che hanno consegnato zeri mentre intorno pioveva, o che mancano proprio i giorni di pioggia;
   - dove la stazione piu' vicina e' lontana (l'interno dell'Abruzzo, che la mappa copre con
     Open-Meteo dal vivo, irraggiungibile da qui) il valore sfuma verso un'IDW a 0,8 gradi,
     sempre e solo su stazioni vere: niente buchi e niente cuciture nette;
@@ -19,7 +27,7 @@ Due aggiunte, tutte e due solo per l'immagine:
 Uso:  python3 griglie.py --mappa /tmp/mappa --da 2026-09-22 --giorni 30 [--passo 0.01]
 Serve: numpy, scipy, shapely (pip install numpy scipy shapely).
 """
-import argparse, json, os, sys, datetime as dt
+import argparse, json, os, re, sys, datetime as dt
 import numpy as np
 from scipy.spatial import cKDTree
 import shapely
@@ -41,9 +49,43 @@ VETO_MM = 1
 COPERTURA_MIN = 0.6
 
 
-def stazioni(mappa, giorni):
-    """(lat, lon, cumulati[giorni+1]) per ogni stazione che passa la copertura."""
-    lat, lon, cum = [], [], []
+def esclusioni(mappa):
+    """Le liste dei pluviometri guasti scritte a mano nell'index.html della mappa: {rete: set di chiavi}."""
+    src = open(os.path.join(mappa, 'index.html'), encoding='utf-8').read()
+    def blocco(nome):
+        i = src.index('var ' + nome + '={') + len('var ' + nome + '=')
+        d = 0
+        for k in range(i, len(src)):
+            d += {'{': 1, '}': -1}.get(src[k], 0)
+            if d == 0:
+                return re.sub(r'//[^\n]*', '', src[i:k + 1])
+    chiavi = lambda b: set(re.findall(r"'([^']+)'\s*:", b))
+    out = {'lombardia': chiavi(blocco('LOMB_ESCLUSE')), 'piemonte': chiavi(blocco('PIEMONTE_ESCLUSE')),
+           'liguria': chiavi(blocco('LIGURIA_ESCLUSE')), 'emilia': chiavi(blocco('EMILIA_ESCLUSE')),
+           'toscana': chiavi(blocco('TOSCANA_ESCLUSE'))}
+    for reg, corpo in re.findall(r'([a-z]+)\s*:\s*\{([^}]*)\}', blocco('MH_ESCLUSE')):
+        out['meteohub-' + reg] = chiavi(corpo)
+    return out
+
+
+def esclusa(rete, s, escl):
+    """Le stesse chiavi della mappa: per NOME il Piemonte, per id o nome la Toscana, per id le altre."""
+    e = escl.get(rete)
+    if rete == 'lombardia' and not s.get('id'):
+        return True   # coordinate corrotte, come nella mappa
+    if not e:
+        return False
+    if rete == 'piemonte':
+        return s.get('n') in e
+    if rete == 'toscana':
+        return (s.get('id') or s.get('n')) in e
+    return str(s.get('id')) in e
+
+
+def stazioni(mappa, giorni, escl):
+    """(lat, lon, cumulati[giorni+1], reti) per ogni stazione che passa la copertura e non e' esclusa."""
+    lat, lon, cum, reti = [], [], [], []
+    tolte = 0
     for rete in RETI:
         mm, cop, meta = {}, {}, {}
         for i, g in enumerate(giorni):
@@ -52,6 +94,9 @@ def stazioni(mappa, giorni):
                 continue
             for s in json.load(open(f)).get('stations', []):
                 if s.get('lat') is None or s.get('lon') is None:
+                    continue
+                if esclusa(rete, s, escl):
+                    tolte += 1
                     continue
                 k = s.get('id') or s.get('n')
                 meta.setdefault(k, (s['lat'], s['lon']))
@@ -63,10 +108,30 @@ def stazioni(mappa, giorni):
         massimo = max(cop.values())
         tenute = [k for k in cop if cop[k] >= massimo * COPERTURA_MIN]
         for k in tenute:
-            lat.append(meta[k][0]); lon.append(meta[k][1])
+            lat.append(meta[k][0]); lon.append(meta[k][1]); reti.append(rete)
             cum.append(np.concatenate([[0], np.cumsum(mm[k])]))
         print(f'  {rete:20s} {len(tenute):4d} stazioni')
-    return np.array(lat), np.array(lon), np.array(cum)   # cum: (n_stazioni, giorni+1)
+    print('  righe tolte dalle liste della mappa (stazione x giorno):', tolte)
+    la, lo, cu, re_ = np.array(lat), np.array(lon), np.array(cum), np.array(reti)
+    # doppioni del Friuli: MeteoHub entro 1 km da una stazione OSMER si scarta, vince OSMER (come la mappa)
+    os_ = re_ == 'friuli-osmer'
+    if os_.any():
+        t = cKDTree(np.c_[la[os_], lo[os_] * np.cos(np.radians(46))])
+        d, _ = t.query(np.c_[la, lo * np.cos(np.radians(46))])
+        via = (re_ == 'meteohub-friuli') & (d < 1 / 111)
+        print('  doppioni MeteoHub del Friuli tolti:', int(via.sum()))
+        la, lo, cu, re_ = la[~via], lo[~via], cu[~via], re_[~via]
+    # sorde nel periodo: sotto il 15% della mediana dei cinque vicini, con i vicini ad almeno 20 mm
+    c0 = np.cos(np.radians(42))
+    t = cKDTree(np.c_[la, lo * c0])
+    _, vv = t.query(np.c_[la, lo * c0], k=6)
+    tot = cu[:, -1]
+    med = np.median(tot[vv[:, 1:]], axis=1)
+    sorde = ((med >= 20) & (tot < 0.15 * med)) | ((med >= 5) & (tot < 1.5) & (tot < 0.2 * med))
+    print('  sorde nel periodo, tolte:', int(sorde.sum()))
+    for i in np.nonzero(sorde)[0]:
+        print(f'    {re_[i]:18s} {la[i]:.4f},{lo[i]:.4f}  {tot[i]:.1f} mm contro {med[i]:.0f} dei vicini')
+    return la[~sorde], lo[~sorde], cu[~sorde]   # cum: (n_stazioni, giorni+1)
 
 
 def main():
@@ -85,6 +150,12 @@ def main():
     reg = json.load(open(os.path.join(a.mappa, 'italia-regioni-confine.geojson')))
     italia = unary_union([shape(f['geometry']).buffer(0) for f in reg['features']])
     italia = italia.simplify(0.0008, preserve_topology=True)
+    # ⚠️ SENZA BUCHI: San Marino (e il Vaticano) non sono regioni italiane, e nel contorno erano un buco. Col ritaglio
+    # «evenodd» della mappa il buco restava nero in mezzo alla pioggia: era il puntino nero vicino a Rimini.
+    # Qui si tengono solo i bordi esterni: la pioggia li' e' l'interpolazione delle stazioni intorno.
+    from shapely.geometry import Polygon, MultiPolygon
+    parti = italia.geoms if italia.geom_type == 'MultiPolygon' else [italia]
+    italia = MultiPolygon([Polygon(p.exterior) for p in parti])
     json.dump({'type': 'Feature', 'properties': {}, 'geometry': mapping(italia)},
               open(os.path.join(CACHE, 'italia-contorno.json'), 'w'), separators=(',', ':'))
     # confini fra regioni (linee), per un filo appena visibile se lo si vuole
@@ -93,7 +164,7 @@ def main():
     json.dump({'type': 'Feature', 'properties': {}, 'geometry': mapping(linee)},
               open(os.path.join(CACHE, 'italia-regioni-linee.json'), 'w'), separators=(',', ':'))
 
-    la, lo, cum = stazioni(a.mappa, giorni)
+    la, lo, cum = stazioni(a.mappa, giorni, esclusioni(a.mappa))
     print('stazioni in tutto', len(la))
 
     GR = a.passo
@@ -153,6 +224,28 @@ def main():
             'nx': len(lons), 'ny': len(lats), 'celle': int(len(plat)), 'fotogrammi': n_g,
             'stazioni': int(len(la)), 'raggio_largo': int(largo),
             'massimo_finale_mm': float(out[-1].max()), 'mediana_finale_mm': float(np.median(out[-1]))}
+    # I PALLINI DEI PLUVIOMETRI, diradati: uno ogni cinque circa, scelti perche' stiano distanti fra loro
+    # (a caso, con un seme fisso, si tiene una stazione solo se non ce n'e' gia' una piu' vicina di DIRADA gradi).
+    # Ognuno ha il suo ritardo di comparsa (0..1). Accanto, per ogni cella, la distanza dal pallino piu' vicino:
+    # serve al film per far «nascere» la pioggia dai pallini.
+    rng = np.random.default_rng(22)
+    ordine = rng.permutation(len(la))
+    DIRADA = 0.145
+    presi = []
+    alb_p = None
+    for i in ordine:
+        q = np.array([la[i], lo[i] * c0])
+        if presi and min(np.hypot(*(np.array(presi) - q).T)) < DIRADA:
+            continue
+        presi.append(q)
+    presi = np.array(presi)
+    pal = [[round(float(y), 4), round(float(x / c0), 4), round(float(r), 3)]
+           for (y, x), r in zip(presi, rng.random(len(presi)))]
+    json.dump(pal, open(os.path.join(CACHE, nome + '-pallini.json'), 'w'), separators=(',', ':'))
+    dpal, _ = cKDTree(presi).query(np.c_[plat, plon * c0])
+    np.clip(np.round(dpal / 0.004), 0, 255).astype(np.uint8).tofile(os.path.join(CACHE, nome + '.dist'))
+    meta['pallini'] = len(pal)
+    print(f'pallini: {len(pal)} su {len(la)} stazioni (uno ogni {len(la) / len(pal):.1f})')
     json.dump(meta, open(os.path.join(CACHE, nome + '.json'), 'w'), indent=1)
     print(json.dumps({k: v for k, v in meta.items() if k != 'giorni'}))
 

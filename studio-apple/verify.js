@@ -37,8 +37,8 @@ const SECTIONS = ['cover', 'overview', 'contents', 'rebuild', 'typography', 'fon
   'components', 'imagery', 'voice', 'tokens', 'method'];
 const SOLO_V2 = process.argv.includes('--v2');
 const SHOTS_V2 = path.join(STUDIO, 'film', 'screenshot');
-const V2_SECTIONS = [['film', '.film'], ['1-piove', '#piove'], ['2-boschi', '#boschi'], ['3-finestra', '#finestra'],
-  ['4-stazione', '#stazione'], ['5-domani', '#domani'], ['chiusura', '.fine'], ['noi', '#noi'], ['piede', 'footer']];
+const V2_SECTIONS = [['film', '.film'], ['1-piove', '#piove'], ['2-stazione', '#stazione'], ['3-boschi', '#boschi'],
+  ['4-satellite', '#satellite'], ['5-domani', '#domani'], ['chiusura', '.fine'], ['noi', '#noi'], ['piede', 'footer']];
 const HOME_SECTIONS = ['.nav', '#mappa', '.tiles-sec', '.numbers', '#youtube', '#quiz', '#chi-siamo', 'footer'];
 
 const results = [];
@@ -265,32 +265,50 @@ async function v2Checks(browser, base, width) {
   const rotte = imgs.filter(i => !i.ok);
   check(`${tag}: tutte le immagini caricate dopo lo scorrimento`, imgs.length >= 6 && rotte.length === 0, `${imgs.length} immagini` + (rotte.length ? ', rotte: ' + rotte.map(i => i.s).join(' ') : ''));
   const capImgs = await page.evaluate(() => [...document.querySelectorAll('.cap img')].map(i => ({ lazy: i.loading === 'lazy', srcset: !!i.srcset && !!i.sizes })));
-  check(`${tag}: capitoli con srcset e sizes, lazy tranne la prima`, capImgs.length === 4 && capImgs.every(i => i.srcset) && !capImgs[0].lazy && capImgs.slice(1).every(i => i.lazy), JSON.stringify(capImgs.map(i => i.lazy)));
+  check(`${tag}: capitoli con srcset e sizes, lazy tranne la prima`, capImgs.length === 5 && capImgs.every(i => i.srcset) && !capImgs[0].lazy && capImgs.slice(1).every(i => i.lazy), JSON.stringify(capImgs.map(i => i.lazy)));
   const vis = await page.evaluate(() => [...document.querySelectorAll('.su')].filter(e => getComputedStyle(e).opacity !== '1').length);
   check(`${tag}: tutti i blocchi comparsi dopo lo scorrimento`, vis === 0, vis + ' ancora nascosti');
   check(`${tag}: zero errori in console`, errors.length === 0, errors.slice(0, 2).join(' | '));
   check(`${tag}: zero richieste esterne`, external.length === 0, external.slice(0, 3).join(', '));
   if (width === 1440) {
-    const links = await page.evaluate(() => {
-      const a = [...document.querySelectorAll('a')];
+    const M = 'https://precipitazioni.avventuremicologiche.it';
+    const links = await page.evaluate(M => {
+      const a = [...document.querySelectorAll('a')], t = x => x.textContent.trim();
+      const dentro = (sel, f) => [...document.querySelectorAll(sel + ' a')].some(f);
       return {
-        mappa: a.filter(x => x.href === 'https://precipitazioni.avventuremicologiche.it/' && x.textContent.trim() === 'Apri la mappa').length,
-        funghi: a.filter(x => x.href === 'https://precipitazioni.avventuremicologiche.it/funghi/' && x.textContent.trim() === 'Le località più bagnate').length,
-        yt: a.some(x => x.href === 'https://www.youtube.com/@avventuremicologiche' && x.textContent.includes('Guarda il canale')),
-        quiz: a.some(x => x.getAttribute('href') === '/esame-tartufi/' && x.textContent.trim() === 'Prova il quiz'),
+        storico: a.filter(x => x.href === M + '/' && t(x) === 'Storico piogge' && x.classList.contains('pill-fill')).length,
+        previsioni: a.filter(x => x.href === M + '/?r=liguria&m=prev' && t(x) === 'Previsioni' && x.classList.contains('pill-line')).length,
+        titoloDuePillole: document.querySelectorAll('.film .txt .pill').length === 2,
+        apriLaMappa: a.some(x => t(x) === 'Apri la mappa' || (t(x) === 'Le località più bagnate' && x.classList.contains('pill'))),
+        funghiInPioggia: dentro('#piove', x => x.href === M + '/funghi/' && !x.classList.contains('pill')),
+        linkPioggia: dentro('#piove', x => x.href.startsWith(M + '/?r=') && x.href.includes('&g=30')),
+        linkStazione: dentro('#stazione', x => x.href.startsWith(M + '/?r=')),
+        linkBoschi: dentro('#boschi', x => /\?boschi=1&r=[a-z]+$/.test(x.href)),
+        linkSatellite: dentro('#satellite', x => /\?boschi=1&sat=1&r=[a-z]+$/.test(x.href)),
+        linkPrevisioni: dentro('#domani', x => x.href.includes('m=prev')),
+        yt: a.some(x => x.href === 'https://www.youtube.com/@avventuremicologiche' && t(x) === 'Guarda il canale'),
+        ytTitolo: [...document.querySelectorAll('.riq h3')].some(h => t(h) === 'Guarda il nostro canale YouTube.'),
+        ytLogoRosso: !!document.querySelector('.riq .pic svg[fill="#FF0000"]'),
+        quiz: a.some(x => x.getAttribute('href') === '/esame-tartufi/' && t(x) === 'Prova il quiz'),
         regioni: ['lombardia', 'piemonte', 'emilia-romagna', 'liguria', 'campania', 'lazio', 'marche', 'toscana']
           .filter(r => a.some(x => x.getAttribute('href') === `/esame-tartufi/${r}/`)).length,
         mail: a.some(x => x.href === 'mailto:avventuremicologiche@gmail.com'),
         social: ['youtube.com', 'facebook.com', 'instagram.com', 'suno.com'].filter(s => a.some(x => x.href.includes(s))).length
       };
-    });
-    const bad = Object.entries(links).filter(([k, v]) => k === 'regioni' ? v !== 8 : k === 'social' ? v !== 4 : k === 'mappa' || k === 'funghi' ? v < 2 : !v).map(([k, v]) => k + '=' + v);
-    check(`${tag}: «Apri la mappa» e «Le località più bagnate» due volte, YouTube, quiz, 8 regioni, social, mail`, bad.length === 0, bad.join(', ') || JSON.stringify(links));
+    }, M);
+    const bad = Object.entries(links).filter(([k, v]) => k === 'regioni' ? v !== 8 : k === 'social' ? v !== 4 : k === 'storico' || k === 'previsioni' ? v < 2 : k === 'apriLaMappa' ? v : !v).map(([k, v]) => k + '=' + v);
+    check(`${tag}: pillole «Storico piogge» e «Previsioni», link per capitolo, /funghi/ testuale nella pioggia, YouTube, quiz, 8 regioni, social, mail`, bad.length === 0, bad.join(', ') || 'tutti');
+    const via = await page.evaluate(() => ({ finestra: !!document.getElementById('finestra'), testo: /13 e 20 giorni|finestra-funghi|Il bosco, ogni mese/.test(document.documentElement.outerHTML) }));
+    check(`${tag}: niente capitolo della finestra funghi né «Il bosco, ogni mese»`, !via.finestra && !via.testo, JSON.stringify(via));
+    const scr = await page.evaluate(() => { const S = window.SCRITTE_FILM, r = (S && S.righe) || [];
+      return { n: r.length, p: document.querySelectorAll('.film .scritte p').length, ordinate: r.every((x, i) => x.da < x.a && (!i || r[i - 1].a + 2 * S.sfuma <= x.da)),
+        dentro: r.every(x => x.da - S.sfuma >= 0 && x.a + S.sfuma <= 24), testi: r.map(x => x.testo) }; });
+    check(`${tag}: scritte del film dalla pagina (SCRITTE_FILM), in ordine, senza sovrapporsi, dentro i 24 s`, scr.n === 4 && scr.p === 4 && scr.ordinate && scr.dentro, scr.testi.join(' / '));
     const txt = await page.evaluate(() => ({ dash: (document.body.innerText.match(/—/g) || []).length, bang: (document.body.innerText.match(/!/g) || []).length,
       voi: (document.body.innerText.match(/\b(Lei|Voi|vostr[aoie])\b/g) || []).length }));
     check(`${tag}: niente trattini lunghi, punti esclamativi, Lei o voi`, txt.dash + txt.bang + txt.voi === 0, JSON.stringify(txt));
     const tit = await page.evaluate(() => [...document.querySelectorAll('.cap h2')].map(h => h.textContent.trim()));
-    const titWant = ['È piovuto qui.', 'Sui boschi giusti.', 'Tra 13 e 20 giorni, nascono.', 'Ogni stazione, giorno per giorno.', 'E domani.'];
+    const titWant = ['È piovuto qui.', 'Ogni stazione, giorno per giorno.', 'Sui boschi giusti.', 'Come sono davvero.', 'E i prossimi giorni.'];
     check(`${tag}: i cinque capitoli, in ordine`, JSON.stringify(tit) === JSON.stringify(titWant), tit.join(' / '));
   }
   if (DO_SHOTS) {
@@ -298,10 +316,12 @@ async function v2Checks(browser, base, width) {
     // il film fermo su un fotogramma pieno di pioggia, per lo screenshot
     await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
     // ⚠️ il Chromium di Playwright non decodifica H.264 (Chrome, Safari e Firefox veri si'): nello screenshot il
-    // film si vedrebbe solo col poster. Si mette al suo posto uno still del film, a 6 s, con la pioggia.
-    await page.evaluate(() => { const v = document.getElementById('film'); v.poster = '../film/stills/still-06s.jpg'; });
+    // film si vedrebbe solo col poster. Si mette al suo posto uno still del film, a 9 s, con la pioggia piena,
+    // e la prima scritta accesa a mano (le scritte seguono i fotogrammi del video, che qui non arrivano).
+    await page.evaluate(() => { const v = document.getElementById('film'); v.poster = '../film/stills/still-09s.jpg'; });
     await page.evaluate(() => new Promise(ok => { const v = document.getElementById('film'); v.pause(); v.dataset.fermato = '1';
-      v.addEventListener('seeked', () => setTimeout(ok, 400), { once: true }); v.currentTime = 6.9; setTimeout(ok, 4000); }));
+      v.addEventListener('seeked', () => setTimeout(ok, 400), { once: true }); v.currentTime = 9; setTimeout(ok, 4000); }));
+    await page.evaluate(() => { const p = document.querySelector('.film .scritte p'); if (p) { p.style.opacity = 1; p.style.transform = 'none'; } });
     for (const [nome, sel] of V2_SECTIONS) {
       const el = await page.$(sel); if (!el) continue;
       // il menu fisso si toglie dagli screenshot dei capitoli, se no copre il titolo dove la sezione e' piu' alta dello schermo
@@ -325,13 +345,22 @@ async function v2Checks(browser, base, width) {
 function v2Files() {
   const F = path.join(STUDIO, 'film');
   const mb = f => fs.statSync(path.join(F, f)).size / 1048576;
-  check('apertura-1080.mp4 fra 3 e 5 MB', mb('apertura-1080.mp4') >= 3 && mb('apertura-1080.mp4') <= 5, mb('apertura-1080.mp4').toFixed(2) + ' MB');
-  check('apertura-720.mp4 sotto 1,5 MB', mb('apertura-720.mp4') < 1.5, mb('apertura-720.mp4').toFixed(2) + ' MB');
+  check('apertura-1080.mp4 sotto 9 MB (nitido prima che leggero)', mb('apertura-1080.mp4') >= 3 && mb('apertura-1080.mp4') <= 9, mb('apertura-1080.mp4').toFixed(2) + ' MB');
+  check('apertura-720.mp4 sotto 2,5 MB', mb('apertura-720.mp4') < 2.5, mb('apertura-720.mp4').toFixed(2) + ' MB');
   check('apertura-poster.webp presente', fs.existsSync(path.join(F, 'apertura-poster.webp')));
+  try {
+    const pr = require('child_process').execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_name,profile,pix_fmt,color_space,avg_frame_rate:format=duration',
+      '-of', 'json', path.join(F, 'apertura-1080.mp4')]).toString();
+    const j = JSON.parse(pr), st = j.streams[0], dur = +j.format.duration;
+    check('film: H.264, yuv420p, BT.709, 60 fps, fra 18 e 24 s', st.codec_name === 'h264' && st.pix_fmt === 'yuv420p' && st.color_space === 'bt709' && st.avg_frame_rate === '60/1' && dur >= 18 && dur <= 24.1,
+      `${st.codec_name} ${st.profile} ${st.pix_fmt} ${st.color_space} ${st.avg_frame_rate} ${dur.toFixed(2)} s`);
+  } catch (e) { check('film: ffprobe', false, 'ffprobe non trovato'); }
   const foto = fs.readdirSync(path.join(F, 'foto')).filter(f => f.endsWith('.webp'));
   const troppo = foto.filter(f => fs.statSync(path.join(F, 'foto', f)).size > (f.includes('-2880') ? 600 : 250) * 1024);
-  check('immagini HD: 2880 sotto 600 KB, 1440 sotto 250 KB', foto.length >= 8 && troppo.length === 0,
-    foto.map(f => f.replace('.webp', '') + ' ' + (fs.statSync(path.join(F, 'foto', f)).size / 1024).toFixed(0)).join(', '));
+  const servono = ['pioggia-nord', 'scheda-stazione', 'boschi-nord', 'satellite', 'previsioni'].flatMap(n => [n + '-1440.webp', n + '-2880.webp']);
+  const mancano = servono.filter(f => !foto.includes(f));
+  check('immagini HD: le cinque dei capitoli, 2880 sotto 600 KB, 1440 sotto 250 KB, niente finestra funghi', mancano.length === 0 && troppo.length === 0 && !foto.some(f => f.startsWith('finestra')),
+    (mancano.length ? 'mancano ' + mancano.join(' ') + '; ' : '') + foto.map(f => f.replace('.webp', '') + ' ' + (fs.statSync(path.join(F, 'foto', f)).size / 1024).toFixed(0)).join(', '));
 }
 
 (async () => {

@@ -11,9 +11,25 @@
 <!-- MOCKUP v2 DI STUDIO (studio-apple/home-v2/), non e' la home vera e non e' pubblicato.
      Il v1 metteva in fila le funzioni della mappa come un catalogo: bocciato. Qui c'e' UNA storia sola:
      il film d'apertura (renderizzato fotogramma per fotogramma, ../film/), poi cinque capitoli, uno per
-     schermata, ognuno con UNA immagine ad alta definizione della mappa vera, poi la chiusura.
+     schermata, ognuno con UNA immagine ad alta definizione della mappa vera e il suo link che apre la mappa
+     gia' in quel modo: la pioggia del Nord coi pluviometri, la scheda di una stazione, i boschi del Nord (stessa
+     inquadratura della pioggia), il satellite, le previsioni. Poi la chiusura e «E poi ci siamo noi».
      Base tecnica: ../tokens.css e il CSS del v1. Niente font web, niente librerie, niente richieste esterne.
      I fatti vengono tutti dall'index.html attuale. -->
+<script>
+/* ── LE SCRITTE DEL FILM: si ritoccano qui ──
+   Secondi del video (24 s, in loop). `da` e `a` sono i momenti in cui la scritta e' piena; entra ed esce
+   con una dissolvenza di `sfuma` secondi prima e dopo. Le mette la pagina sopra il video, non sono nel video. */
+window.SCRITTE_FILM = {
+  sfuma: 0.6,
+  righe: [
+    { da: 1.2,  a: 12.6, testo: 'La pioggia caduta davvero.' },
+    { da: 14.4, a: 16.4, testo: 'Sui boschi giusti.' },
+    { da: 17.6, a: 19.6, testo: 'Come sono davvero, dal satellite.' },
+    { da: 20.8, a: 23.2, testo: 'E i prossimi giorni.' }
+  ]
+};
+</script>
 <link rel="stylesheet" href="../tokens.css">
 <style>
 :root {
@@ -102,6 +118,11 @@ a { color: var(--color-link-dark); }
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
 }
 .vbtn svg { width: 14px; height: 14px; }
+/* le scritte del film: sopra il video, in basso al centro della sua parte visibile, entrano e sfumano */
+.scritte { position: absolute; z-index: 2; right: 0; width: 60%; bottom: 13%; text-align: center; pointer-events: none; }
+.scritte p { position: absolute; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 22ch; opacity: 0;
+  font-family: var(--font-display); font-size: clamp(1.4rem, 0.9rem + 1.5vw, 2.4rem); line-height: 1.12; letter-spacing: -0.01em;
+  font-weight: 600; color: #fff; text-shadow: 0 1px 18px rgba(0, 0, 0, 0.75), 0 0 2px rgba(0, 0, 0, 0.6); will-change: opacity, transform; }
 .vbtn .i-play { display: none; }
 .vbtn.paused .i-play { display: block; }
 .vbtn.paused .i-pause { display: none; }
@@ -141,6 +162,9 @@ a { color: var(--color-link-dark); }
 .riq .pills { margin-top: 22px; }
 .riq .regioni { margin-top: 20px; font-size: 14px; line-height: 1.9; }
 .riq .regioni a { white-space: nowrap; }
+.riq .pic.yt { display: grid; place-items: center; background: #fff; }
+.riq .pic.yt svg { width: 34%; height: auto; }
+.cap .apri { margin-top: 22px; }
 
 /* ── PIEDE (dal v1) ── */
 footer { background: var(--color-surface); color: var(--muted); font-size: 12px; line-height: 1.5; padding: 70px 0 28px; }
@@ -169,6 +193,8 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   .film .txt { position: static; transform: none; max-width: none; padding: 28px 16px 8px; }
   .film .nota { position: static; padding: 16px 16px 36px; }
   .vbtn { top: calc(var(--nav-h) + 56.25vw - 48px); bottom: auto; right: 12px; }
+  .scritte { top: calc(var(--nav-h) + 56.25vw - 56px); bottom: auto; width: auto; left: 56px; right: 56px; height: 0; }
+  .scritte p { bottom: auto; top: 0; font-size: 1.15rem; }
   .pills { flex-direction: column; align-items: stretch; }
   .pill { width: 100%; }
   .cap { min-height: 0; padding: 72px 0 56px; }
@@ -209,7 +235,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 <!-- 1. IL FILM: la mappa vera, senza interfaccia. Il testo lo mette la pagina, non il video. -->
 <section class="film" aria-label="La mappa delle piogge">
   <video id="film" poster="../film/apertura-poster.webp" muted loop playsinline autoplay preload="auto" width="1920" height="1080"
-         aria-label="L'Italia al buio. La pioggia vera di trenta giorni compare e si accumula giorno per giorno, poi la telecamera scende sulla Liguria e lì si accendono i boschi dove è piovuto.">
+         aria-label="L'Italia al buio con i pallini dei pluviometri. Da lì nasce la pioggia vera di trenta giorni, che si accumula; poi la telecamera scende sulla Liguria, la pioggia lascia il posto ai boschi, sotto compare il satellite fino alle chiome, e alla fine le previsioni dei capoluoghi.">
     <source src="../film/apertura-720.mp4" type="video/mp4" media="(max-width: 734px)">
     <source src="../film/apertura-1080.mp4" type="video/mp4">
   </video>
@@ -236,55 +262,32 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <h1>Dove è piovuto davvero.</h1>
     <p class="lead sub">La mappa dei pluviometri veri, stazione per stazione.</p>
     <div class="pills">
-      <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Apri la mappa</a>
-      <!-- ⚠️ testo vero, non immagine: serve a Google per arrivare alla pagina delle localita' -->
-      <a class="pill pill-line" href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a>
+      <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Storico piogge</a>
+      <!-- ⚠️ nella mappa le previsioni partono solo con una regione: «?m=prev» da solo aspetta 15 s una regione
+           che non arriva e resta sullo storico (index.html della mappa, «link con ?m=prev»). Liguria come nel film. -->
+      <a class="pill pill-line" href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev" target="_blank" rel="noopener">Previsioni</a>
     </div>
   </div>
-  <p class="small nota">Nel film: la pioggia misurata dal 22 settembre al 21 ottobre 2026, poi i boschi della Liguria.</p>
+  <!-- le scritte del film: i tempi stanno in cima alla pagina (SCRITTE_FILM) -->
+  <div class="scritte" aria-hidden="true"></div>
+  <p class="small nota">Nel film: la pioggia misurata dal 22 settembre al 21 ottobre 2026, poi i boschi della Liguria e le sue previsioni.</p>
   <button class="vbtn" type="button" aria-label="Metti in pausa il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg></button>
 </section>
 
-<!-- 2. I CAPITOLI -->
+<!-- 2. I CAPITOLI: pioggia, scheda, boschi, satellite, previsioni. Ognuno ha il suo link alla mappa gia' in quel modo. -->
 <section class="cap" id="piove">
   <div class="wrap su">
     <h2 class="display">È piovuto qui.</h2>
     <p class="lead sub">I millimetri misurati dai pluviometri delle agenzie regionali. Più di 5000 stazioni, in 5 nazioni: Italia, Svizzera, Austria, Francia e Slovenia.</p>
+    <!-- ⚠️ testo vero, non immagine: serve a Google per arrivare alla pagina delle localita' -->
+    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=piemonte,valledaosta,lombardia,trentino,altoadige,veneto,friuli,liguria,emilia&amp;g=30" target="_blank" rel="noopener">Apri la pioggia del Nord, 30 giorni</a> · <a href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a></p>
   </div>
   <figure class="su dopo ritaglio">
-    <img src="../film/foto/pioggia-italia-1440.webp"
-         srcset="../film/foto/pioggia-italia-1440.webp 1440w, ../film/foto/pioggia-italia-2880.webp 2880w"
+    <img src="../film/foto/pioggia-nord-1440.webp"
+         srcset="../film/foto/pioggia-nord-1440.webp 1440w, ../film/foto/pioggia-nord-2880.webp 2880w"
          sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800"
-         alt="L'Italia sul nero, colorata dalla pioggia di trenta giorni: rosso e viola sulla Liguria, sulle Alpi e sulla Campania, azzurro e bianco sulla pianura emiliana.">
-    <figcaption class="small">Trenta giorni, dal 22 settembre al 21 ottobre 2026.</figcaption>
-  </figure>
-</section>
-
-<section class="cap" id="boschi">
-  <div class="wrap su">
-    <h2 class="display">Sui boschi giusti.</h2>
-    <p class="lead sub">Faggete, castagneti, querceti, abetaie, lariceti e pinete, dalle carte forestali delle Regioni. Con il satellite ti avvicini fino a vedere gli alberi.</p>
-  </div>
-  <figure class="su dopo">
-    <img src="../film/foto/boschi-vicino-1440.webp"
-         srcset="../film/foto/boschi-vicino-1440.webp 1440w, ../film/foto/boschi-vicino-2880.webp 2880w"
-         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy"
-         alt="I boschi da vicino sopra il rilievo delle montagne: grandi macchie verde scuro di faggeta, castagneti arancioni, querceti gialli e abetaie blu che seguono le valli.">
-    <figcaption class="small">La mappa boschi, da vicino.</figcaption>
-  </figure>
-</section>
-
-<section class="cap" id="finestra">
-  <div class="wrap su">
-    <h2 class="display">Tra 13 e 20 giorni, nascono.</h2>
-    <p class="lead sub">Con un tocco la finestra da 13 a 20 giorni fa, la pioggia che conta per le nascite di oggi.</p>
-  </div>
-  <figure class="su dopo">
-    <img src="../film/foto/finestra-funghi-1440.webp"
-         srcset="../film/foto/finestra-funghi-1440.webp 1440w, ../film/foto/finestra-funghi-2880.webp 2880w"
-         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy"
-         alt="La Toscana con le piogge di otto giorni: verde e giallo sull'Appennino verso la Liguria, azzurro all'interno, chiaro dove è piovuto poco.">
-    <figcaption class="small">La Toscana, piogge dal 2 al 9 ottobre 2026.</figcaption>
+         alt="Il Nord Italia sul nero, colorato dalla pioggia di trenta giorni, con i pallini bianchi di una parte dei pluviometri: rosso e viola sulla Liguria, sul Piemonte del nord e sul Friuli, azzurro e bianco sulla pianura emiliana.">
+    <figcaption class="small">Il Nord, trenta giorni dal 22 settembre al 21 ottobre 2026. I pallini sono una stazione ogni cinque.</figcaption>
   </figure>
 </section>
 
@@ -292,6 +295,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   <div class="wrap su">
     <h2 class="display">Ogni stazione, giorno per giorno.</h2>
     <p class="lead sub">Tocca un pallino: grafico della pioggia, della temperatura, del vento e dell'umidità.</p>
+    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;g=30" target="_blank" rel="noopener">Tocca i pallini della Liguria</a></p>
   </div>
   <figure class="su dopo alta">
     <img src="../film/foto/scheda-stazione-1440.webp"
@@ -301,15 +305,50 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   </figure>
 </section>
 
+<section class="cap" id="boschi">
+  <div class="wrap su">
+    <h2 class="display">Sui boschi giusti.</h2>
+    <p class="lead sub">La stessa terra, con i boschi: faggete, castagneti, querceti, abetaie, lariceti e pinete, dalle carte forestali delle Regioni.</p>
+    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?boschi=1&amp;r=liguria" target="_blank" rel="noopener">Apri la mappa dei boschi</a></p>
+  </div>
+  <figure class="su dopo ritaglio">
+    <img src="../film/foto/boschi-nord-1440.webp"
+         srcset="../film/foto/boschi-nord-1440.webp 1440w, ../film/foto/boschi-nord-2880.webp 2880w"
+         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy"
+         alt="Il Nord Italia con la stessa inquadratura della pioggia, coperto dai boschi sopra il rilievo: verde scuro di faggeta e blu di abetaia sulle Alpi, arancione di castagneto e giallo di querceto sull'Appennino, la pianura vuota nel mezzo.">
+    <figcaption class="small">Il Nord, la mappa dei boschi.</figcaption>
+  </figure>
+</section>
+
+<section class="cap" id="satellite">
+  <div class="wrap su">
+    <h2 class="display">Come sono davvero.</h2>
+    <p class="lead sub">Sotto i boschi, il satellite: ti avvicini fino a vedere le chiome degli alberi.</p>
+    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?boschi=1&amp;sat=1&amp;r=liguria" target="_blank" rel="noopener">Apri i boschi col satellite</a></p>
+  </div>
+  <!-- SEGNAPOSTO finche' non si rifa' dal PC: nel cloud il satellite (Esri) non si raggiunge. Vedi ../film/STATO.md. -->
+  <figure class="su dopo">
+    <img src="../film/foto/satellite-1440.webp"
+         srcset="../film/foto/satellite-1440.webp 1440w, ../film/foto/satellite-2880.webp 2880w"
+         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy"
+         alt="Da vicino, i boschi sopra la foto aerea: macchie di faggeta, castagneto e querceto sui versanti.">
+    <figcaption class="small">L'Appennino ligure sopra Santo Stefano d'Aveto.</figcaption>
+  </figure>
+</section>
+
 <section class="cap" id="domani">
   <div class="wrap su">
-    <h2 class="display">E domani.</h2>
-    <p class="lead sub">Il tempo dei prossimi sette giorni, ora per ora: temperatura, pioggia, probabilità e vento.</p>
+    <h2 class="display">E i prossimi giorni.</h2>
+    <p class="lead sub">Hai visto dove è piovuto e su quali boschi. Ora guarda il tempo dei prossimi sette giorni, ora per ora: temperatura, pioggia, probabilità e vento.</p>
+    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev" target="_blank" rel="noopener">Apri le previsioni</a></p>
   </div>
+  <!-- SEGNAPOSTO finche' non si rifa' dal PC: nel cloud /api/previsioni di produzione non si raggiunge. Vedi ../film/STATO.md. -->
   <figure class="su dopo">
-    <!-- SEGNAPOSTO: l'immagine delle previsioni si fa dal PC (nel cloud la fonte delle previsioni non si raggiunge).
-         Vedi ../film/STATO.md. -->
-    <div class="segnaposto small" role="img" aria-label="Spazio per l'immagine delle previsioni">Immagine delle previsioni, da fare dal PC</div>
+    <img src="../film/foto/previsioni-1440.webp"
+         srcset="../film/foto/previsioni-1440.webp 1440w, ../film/foto/previsioni-2880.webp 2880w"
+         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy"
+         alt="La Liguria al buio col rilievo e le targhette delle previsioni sui capoluoghi, da Sanremo alla Spezia.">
+    <figcaption class="small">Le previsioni dei capoluoghi della Liguria.</figcaption>
   </figure>
 </section>
 
@@ -318,9 +357,9 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   <div class="wrap su">
     <h2 class="display">Gratis.<br>Senza pubblicità.<br>Senza registrazione.</h2>
     <div class="pills">
-      <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Apri la mappa</a>
+      <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Storico piogge</a>
+      <a class="pill pill-line" href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev" target="_blank" rel="noopener">Previsioni</a>
     </div>
-    <p class="lead alt"><a href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a></p>
   </div>
 </section>
 
@@ -329,14 +368,15 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   <h2 class="su">E poi ci siamo noi.</h2>
   <div class="riquadri">
     <article class="riq su">
-      <a class="pic" href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
-        <img src="../../immagini/spugnole.jpg" width="1619" height="913" loading="lazy" alt="">
+      <a class="pic yt" href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+        <!-- il logo di YouTube, rosso, lo stesso dell'index.html attuale -->
+        <svg viewBox="0 0 24 24" width="48" height="34" fill="#FF0000" fill-rule="evenodd"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
       </a>
       <div class="txt">
-        <h3>Il bosco, ogni mese.</h3>
-        <p>Il nostro diario su YouTube, 12 mesi all'anno, in tempo reale: specie nuove, strani ritrovamenti, giornate epiche e disastrose. Sempre con Archie.</p>
+        <h3>Guarda il nostro canale YouTube.</h3>
+        <p>Le nostre avventure a funghi e tartufi.</p>
         <div class="pills">
-          <a class="pill pill-fill" href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>Guarda il canale</a>
+          <a class="pill pill-fill" href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener">Guarda il canale</a>
         </div>
       </div>
     </article>
@@ -395,6 +435,33 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     voci.forEach(function (v) { if (v.isIntersecting) { v.target.classList.add('in'); io.unobserve(v.target); } });
   }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
   els.forEach(function (e) { io.observe(e); });
+})();
+
+/* Le scritte del film (SCRITTE_FILM, in cima alla pagina): seguono il tempo VERO del video, fotogramma per
+   fotogramma (requestVideoFrameCallback; dove non c'e', requestAnimationFrame su currentTime). Ogni scritta entra
+   e sfuma con una curva morbida; al loop il video torna a 0 e le scritte con lui. Con «riduci animazioni» il
+   film non parte, resta il poster, e le scritte non ci sono. */
+(function () {
+  var v = document.getElementById('film'), box = document.querySelector('.film .scritte'), C = window.SCRITTE_FILM;
+  if (!v || !box || !C) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var ps = C.righe.map(function (r) { var p = document.createElement('p'); p.textContent = r.testo; box.appendChild(p); return p; });
+  function liscia(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+  function disegna(t) {
+    C.righe.forEach(function (r, i) {
+      var a = liscia((t - (r.da - C.sfuma)) / C.sfuma) * (1 - liscia((t - r.a) / C.sfuma));
+      ps[i].style.opacity = a.toFixed(3);
+      ps[i].style.transform = 'translateY(' + (10 * (1 - a)).toFixed(2) + 'px)';
+    });
+  }
+  disegna(v.currentTime || 0);
+  if ('requestVideoFrameCallback' in v) {
+    var giro = function (adesso, meta) { disegna(meta.mediaTime); v.requestVideoFrameCallback(giro); };
+    v.requestVideoFrameCallback(giro);
+    v.addEventListener('seeked', function () { disegna(v.currentTime); });
+  } else {
+    (function giro() { if (!v.paused) disegna(v.currentTime); requestAnimationFrame(giro); })();
+  }
 })();
 
 /* Il film: tondo pausa/play come su apple.com; fuori dallo schermo si ferma, rientrando riparte
