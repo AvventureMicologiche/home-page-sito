@@ -57,6 +57,8 @@ async function main() {
   if (arg('camera', false)) return graficoCamera();
   const prova = arg('prova', null);
   if (!arg('solo-codifica', false)) {
+    // ffmpeg si controlla SUBITO (che parta e che sappia fare H.264), non dopo mezz'ora di fotogrammi
+    if (!prova) codificatore(ffmpeg());
     const griglia = preparaGriglia(arg('mappa', null));
     const vuoleSat = !!arg('satellite', false);
     const IT = italia();
@@ -161,19 +163,29 @@ async function main() {
 
 /* ── la codifica ── */
 const ATTIVI = (enc, n) => new RegExp('^\\s*V\\S*\\s+' + n + '\\s', 'm').test(enc);
+/* il codificatore H.264: --codificatore, o libx264, o il primo di Windows / della scheda video che c'e' */
+function codificatore(ff) {
+  const enc = codificatori(ff);
+  const scelto = arg('codificatore', null) || ['libx264', 'h264_mf', 'h264_nvenc', 'h264_qsv', 'h264_amf', 'libopenh264'].find(n => ATTIVI(enc, n));
+  if (!scelto || !ATTIVI(enc, scelto)) {
+    console.error(`⚠️ ${ff} non ha ${scelto || 'nessun codificatore H.264'}. Scarica ffmpeg da https://www.gyan.dev/ffmpeg/builds/ («essentials») e passa --ffmpeg <percorso>.`);
+    process.exit(1);
+  }
+  return scelto;
+}
 async function codifica() {
   const mancano = Array.from({ length: N }, (_, i) => i).filter(i => !fs.existsSync(path.join(FRAMES, `f${String(i).padStart(5, '0')}.png`)));
   if (mancano.length) { console.log('mancano', mancano.length, 'fotogrammi, per esempio', mancano.slice(0, 5)); process.exit(1); }
   const ff = ffmpeg(), enc = codificatori(ff);
-  const scelto = arg('codificatore', null) || ['libx264', 'h264_mf', 'h264_nvenc', 'h264_qsv', 'h264_amf', 'libopenh264'].find(n => ATTIVI(enc, n));
-  if (!scelto) { console.error(`⚠️ ${ff} non ha nessun codificatore H.264. Scarica ffmpeg da https://www.gyan.dev/ffmpeg/builds/ («essentials») e passa --ffmpeg <percorso>.`); process.exit(1); }
-  console.log('codifica con', scelto, scelto === 'libx264' ? '(due passate)' : '(⚠️ senza libx264: una passata, qualita\' un po\' piu\' bassa; meglio un ffmpeg con libx264)');
+  // il codificatore scelto e, se non parte (una scheda video che non c'e'), gli altri H.264 che ffmpeg dice di avere
+  const prima = codificatore(ff);
+  const candidati = [prima, ...['h264_mf', 'h264_nvenc', 'h264_qsv', 'h264_amf', 'libopenh264', 'libx264'].filter(n => n !== prima && ATTIVI(enc, n))];
   const colore = ['-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv'];
   const ingresso = ['-y', '-hide_banner', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(FRAMES, 'f%05d.png')];
   fs.mkdirSync(CACHE, { recursive: true });
   /* ⚠️ DUE PASSATE, NON CRF (seconda sessione, misurato): a parita' di peso il codificatore sposta la banda dove
      serve (qui: lo zoom sulle chiome) invece di sprecarla sulle parti ferme. */
-  const video = (vf, media, tetto, out) => {
+  const video = (scelto, vf, media, tetto, out) => {
     if (scelto === 'libx264') {
       const log = path.join(CACHE, 'passate-' + path.basename(out, '.mp4'));
       const args = [...ingresso, '-vf', vf + ',format=yuv420p', '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-tune', 'film',
@@ -186,8 +198,16 @@ async function codifica() {
         '-bufsize', String(parseInt(tetto) * 2) + 'k', '-g', '120', ...colore, '-movflags', '+faststart', '-an', out]);
     }
   };
-  video('scale=1920:1080:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_1080 || '2600k', process.env.TETTO_1080 || '7000k', path.join(FILM, 'apertura-1080.mp4'));
-  video('scale=1280:720:flags=lanczos:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_720 || '740k', process.env.TETTO_720 || '2000k', path.join(FILM, 'apertura-720.mp4'));
+  let fatto = false;
+  for (const scelto of candidati) {
+    console.log('codifica con', scelto, scelto === 'libx264' ? '(due passate)' : '(⚠️ senza libx264: una passata, qualita\' un po\' piu\' bassa; meglio un ffmpeg con libx264)');
+    try {
+      video(scelto, 'scale=1920:1080:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_1080 || '2600k', process.env.TETTO_1080 || '7000k', path.join(FILM, 'apertura-1080.mp4'));
+      video(scelto, 'scale=1280:720:flags=lanczos:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_720 || '740k', process.env.TETTO_720 || '2000k', path.join(FILM, 'apertura-720.mp4'));
+      fatto = true; break;
+    } catch (e) { console.log(`⚠️ ${scelto} non e' andato (${e.message.split('\n')[0]}), provo il prossimo`); }
+  }
+  if (!fatto) { console.error('⚠️ nessun codificatore H.264 ha funzionato: serve un ffmpeg con libx264 (https://www.gyan.dev/ffmpeg/builds/), poi --solo-codifica --ffmpeg <percorso>.'); process.exit(1); }
   // il poster: il primo fotogramma in WebP (con ffmpeg se ha libwebp, se no lo codifica Chrome)
   const poster = path.join(FILM, 'apertura-poster.webp'), f0 = path.join(FRAMES, 'f00000.png');
   if (ATTIVI(enc, 'libwebp')) esegui(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', f0, '-c:v', 'libwebp', '-quality', '82', poster]);

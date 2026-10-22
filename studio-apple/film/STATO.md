@@ -98,6 +98,8 @@ python -m pip install numpy scipy shapely pillow matplotlib
 ```
 (`npm install --prefix studio-apple/film` installa solo `playwright-core` in `studio-apple/film/node_modules`: non
 scarica nessun Chromium, si usa il Chrome già installato.)
+Se Chrome non parte con un errore di protocollo (Chrome molto più nuovo di playwright-core 1.56.1):
+`npm install --prefix studio-apple/film playwright-core@latest`.
 
 **Il satellite (circa 2-5 minuti, 30 MB):**
 ```
@@ -123,9 +125,11 @@ git push
 ```
 `git add studio-apple/film` non prende né `cache/` (le tessere Esri) né `frames/`: sono in `.gitignore`.
 
-**Se ffmpeg non ha libx264** (le versioni dentro i programmi a volte non ce l'hanno): `film.js` lo dice e usa il primo
-codificatore H.264 che trova (`h264_mf` di Windows, `h264_nvenc`, `h264_qsv`, `h264_amf`, `libopenh264`) in una
-passata. Per vedere cosa ha: `"C:/Users/admin/AppData/Local/CapCut2/Apps/1.5.0.230/ffmpeg.exe" -hide_banner -encoders | findstr 264`.
+**ffmpeg si controlla all'inizio**, prima dei fotogrammi: se non parte o non sa fare H.264, `film.js` si ferma subito.
+**Se ffmpeg non ha libx264** (le versioni dentro i programmi a volte non ce l'hanno, e quella di CapCut da qui non si
+può provare): `film.js` lo dice e usa il primo codificatore H.264 che trova (`h264_mf` di Windows, `h264_nvenc`,
+`h264_qsv`, `h264_amf`, `libopenh264`) in una passata; se uno non parte (per esempio nvenc senza scheda NVIDIA) prova
+il successivo (provato nel cloud: nvenc e qsv falliscono, passa da solo a libx264). Per vedere cosa ha: `"C:/Users/admin/AppData/Local/CapCut2/Apps/1.5.0.230/ffmpeg.exe" -hide_banner -encoders | findstr 264`.
 Per la qualità migliore: ffmpeg «essentials» da https://www.gyan.dev/ffmpeg/builds/ (ha libx264), poi solo la codifica:
 `node studio-apple/film/tools/film.js --solo-codifica --ffmpeg C:/ffmpeg/bin/ffmpeg.exe`.
 Se Python non si chiama `python`: `--python "C:/.../python.exe"` (vale anche per le misure).
