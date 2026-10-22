@@ -9,9 +9,12 @@ La matematica e' quella di buildGrid() nell'index.html della mappa:
   - veto locale: se la stazione piu' vicina e' entro 6 km e ha meno di 1 mm, il punto vale 0;
   - una stazione entra nel periodo se ha consegnato almeno il 60% dei giorni della sua rete
     (copFiltro), e il suo totale e' la somma dei giorni che ha.
-Unica aggiunta: dove entro 0,35 gradi non c'e' nessuna stazione (l'Abruzzo, che la mappa
-copre con Open-Meteo dal vivo, irraggiungibile da qui) si allarga il raggio a 0,8 gradi,
-sempre e solo su stazioni vere. Cosi' nessun buco nel fotogramma.
+Due aggiunte, tutte e due solo per l'immagine:
+  - dove la stazione piu' vicina e' lontana (l'interno dell'Abruzzo, che la mappa copre con
+    Open-Meteo dal vivo, irraggiungibile da qui) il valore sfuma verso un'IDW a 0,8 gradi,
+    sempre e solo su stazioni vere: niente buchi e niente cuciture nette;
+  - la griglia sborda di 0,04 gradi in mare, cosi' il ritaglio sul confine taglia colore pieno
+    e la costa resta netta anche da vicino (la mappa sfuma l'ultima mezza cella).
 
 Uso:  python3 griglie.py --mappa /tmp/mappa --da 2026-09-22 --giorni 30 [--passo 0.01]
 Serve: numpy, scipy, shapely (pip install numpy scipy shapely).
@@ -31,6 +34,8 @@ RETI = ['lombardia', 'piemonte', 'veneto', 'liguria', 'emilia', 'toscana', 'tren
         'valledaosta-cf', 'friuli-osmer', 'meteohub-friuli'] + \
        ['meteohub-' + r for r in 'marche umbria lazio molise campania puglia basilicata calabria sicilia sardegna'.split()]
 RAD, RAD_LARGO = 0.35, 0.8
+SFUMA_DA = 0.22          # gradi: oltre questa distanza dalla stazione piu' vicina si comincia a sfumare
+BORDO = 0.04             # gradi di griglia oltre la costa
 VETO_D2 = (6 / 111) ** 2
 VETO_MM = 1
 COPERTURA_MIN = 0.6
@@ -96,7 +101,7 @@ def main():
     lats = np.round(np.arange(lat_min, lat_max + GR / 2, GR), 6)
     lons = np.round(np.arange(lon_min, lon_max + GR / 2, GR), 6)
     LON, LAT = np.meshgrid(lons, lats)
-    dentro = shapely.contains_xy(italia, LON.ravel(), LAT.ravel())
+    dentro = shapely.contains_xy(italia.buffer(BORDO), LON.ravel(), LAT.ravel())
     iy, ix = np.divmod(np.nonzero(dentro)[0], len(lons))
     plat, plon = lats[iy], lons[ix]
     print('celle in Italia', len(plat))
@@ -118,25 +123,27 @@ def main():
             dlat = pl[j] - la[v]
             dlon = (po[j] - lo[v]) * np.cos(np.radians(pl[j]))
             d2 = dlat * dlat + dlon * dlon
-            raggio = RAD
-            if not (d2 <= RAD * RAD).any():
-                raggio = RAD_LARGO; largo += 1
-            m = d2 <= raggio * raggio
-            if not m.any():
-                continue
-            v, d2 = v[m], d2[m]
             k = np.argmin(d2)
-            if d2[k] < 1e-6:
-                val = cum[v[k]]
+            dmin = np.sqrt(d2[k])
+            def idw(m):
+                if d2[k] < 1e-6:
+                    return cum[v[k]]
+                w = 1 / d2[m]
+                return (w[:, None] * cum[v[m]]).sum(0) / w.sum()
+            m_largo = d2 <= RAD_LARGO * RAD_LARGO
+            if dmin <= SFUMA_DA:
+                val = idw(d2 <= RAD * RAD)
             else:
-                w = 1 / d2
-                val = (w[:, None] * cum[v]).sum(0) / w.sum()
+                largo += 1
+                u = min(1.0, (dmin - SFUMA_DA) / (RAD - SFUMA_DA))
+                u = u * u * (3 - 2 * u)
+                val = idw(m_largo) if dmin > RAD else (1 - u) * idw(d2 <= RAD * RAD) + u * idw(m_largo)
             if d2[k] <= VETO_D2:
                 val = np.where(cum[v[k]] < VETO_MM, 0, val)
             out[:, b + j] = val
         print(f'\r  celle {min(b + BLOCCO, len(plat))}/{len(plat)}', end='', file=sys.stderr)
     print(file=sys.stderr)
-    print('celle col raggio largo (nessuna stazione entro 0,35 gradi):', largo)
+    print('celle sfumate verso il raggio largo (stazione piu\' vicina oltre 0,22 gradi):', largo)
 
     q = np.clip(np.round(out * 10), 0, 65535).astype(np.uint16)   # decimi di mm
     nome = f'pioggia-{giorni[0]}-{a.giorni}g'
