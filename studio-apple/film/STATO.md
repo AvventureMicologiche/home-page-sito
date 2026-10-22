@@ -200,3 +200,32 @@ node studio-apple/film/tools/scarica-satellite.js --solo-conta                 q
 - [ ] **Dal PC**: il satellite vero (i comandi sopra). Fino ad allora il film ha il segnaposto.
 - [ ] Le previsioni nel film: fuori per ora.
 - [ ] Telefono: il film è 16:9 e al telefono l'Italia viene piccola. Se piace l'idea, una versione 4:5.
+
+
+## 22/10/2026 sera, dal PC (versione che gli piace: «il video c'è»)
+Fatto sul PC perché il satellite (Esri) e OpenStreetMap dal cloud non si raggiungono. Tutte queste sono SUE richieste.
+- **Racconto** (`tools/racconto.js`, 22,5 s, 1350 fotogrammi): boschi e satellite entrano INSIEME (satellite 6,8-8,8 sotto
+  la pioggia che si spegne, boschi 7,3-9,1 sopra; niente terra grigia, niente rilievo); confini delle regioni con una sola
+  dissolvenza (0,15-0,9 s, opacità 0,17); zoom 10,0-21,2; loop 21,5-22,5. Retino dei boschi `boschiVia: [0.65, 0.95]`:
+  PIENO fino al 65% dello zoom (in livelli) e via fra 65 e 95% (l'ha chiesto tre volte «più tardi»: a ~16,5 s c'è
+  ancora tutto, a 19 s è sparito).
+- **Pallini** (`tools/griglie.py`, `tools/motore.js`): solo su penisola, Sicilia e Sardegna (le tre terre più grandi del
+  contorno, niente isole minori); 27 **pallini di riempimento** nei vuoti senza stazioni (l'Abruzzo, coperto in mappa da
+  Open-Meteo), solo grafica, la pioggia non cambia. **Filo della costa** sullo stesso tono dei confini, perché il profilo
+  adriatico dell'Abruzzo non si leggeva.
+- **Codifica**: i difetti «confine abruzzese che arriva in ritardo» e «rettangoli grandi nello zoom» erano la COMPRESSIONE
+  (h264_mf dell'ffmpeg di CapCut, l'unico H.264 che ha), non i fotogrammi. Ora libx264 in due passate con l'ffmpeg
+  essentials di gyan.dev (sul PC in `claudiofmpeg`): `MEDIA_1080=4500k TETTO_1080=16000k MEDIA_720=1800k TETTO_720=6000k`
+  → 13,2 MB e 5,3 MB. Lo zoom col retino è la parte più cara (15 Mbit/s a CRF 22): sotto i 4,5 Mbit/s di media si
+  impasta. h264_qsv sul PC funziona ma per la stessa pulizia pesa 18-36 MB ogni 4 s.
+- **Attenzione a `film.js`**: `--da/--a` NON rifà i fotogrammi già presenti (vanno cancellati prima) e a fine render prova
+  a codificare da solo (se ne mancano esce con 1). Se cambia l'inizio va rifatta anche la fine (1280-1349): il loop sfuma
+  sul primo fotogramma. `python -m http.server` non regge i salti nel video (niente Range): per controllare le scritte si
+  lascia girare il film.
+- **Pagina `home-v2`**: scritte del film da titoli di testa (occhiello maiuscolo spaziato con due fili + riga leggera, le
+  parole entrano dal mosso al nitido; `SCRITTE_FILM` con `occhiello` e `testo`); menu con il nome grande a sinistra e
+  Mappa pluviometrica, Previsioni, YouTube, Quiz, Contatti; pillole della prima schermata più grandi; la frase «Nel
+  film…» spostata nel piede; «È piovuto qui.» → «Millimetro per millimetro.» (era una ripetizione del titolo); sotto,
+  la **mappa vera** (`foto/mappa-vera-nord-*.webp`): scatto a 2880 px della mappa servita in locale coi dati veri, 30
+  giorni, tutto il Nord (`tools/scatta-mappa-vera.js`: alza il tetto delle 3 regioni solo nello scatto, blocca Google
+  Analytics, rimpicciolisce le etichette delle regioni; usa il puppeteer-core del PC, va rilanciato dal PC).

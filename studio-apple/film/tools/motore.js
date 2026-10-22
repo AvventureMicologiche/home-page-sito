@@ -188,7 +188,7 @@ async function apri({ url, larghezza, altezza, scala = 1, griglia, nonPulire = f
     window.__terra = L.geoJSON(contorno, { renderer: L.svg({ pane: 'film-terra', padding: 1 }), interactive: false, smoothFactor: 0,
       style: { stroke: false, fill: true, fillColor: '#1b1b1d', fillOpacity: 1 } }).addTo(m);
     window.__linee = L.geoJSON(linee, { renderer: L.svg({ pane: 'film-linee', padding: 1 }), interactive: false, smoothFactor: 0,
-      style: { color: '#ffffff', weight: 0.8, opacity: 0 } }).addTo(m);
+      style: { color: '#ffffff', weight: 1.1, opacity: 0, lineJoin: 'round', lineCap: 'round' } }).addTo(m);
     // 5. le sorgenti delle tessere: rilievo e boschi della mappa (solo quelle che esistono), satellite Esri o segnaposto
     const indB = await (await fetch(JSDELIVR + 'boschi/indice.json')).json();
     const indR = await (await fetch(JSDELIVR + 'rilievo/indice.json')).json();
@@ -259,7 +259,9 @@ async function scena(page, s) {
     /* ⚠️ E IL CONTORNO SVG. Il renderer SVG di Leaflet, all'evento «zoom» di setView, si sposta da solo di una frazione
        di pixel che annulla il resto qui sopra: si rimette il renderer al suo posto intero, il resto lo fa il pane. */
     [window.__terra, window.__linee].forEach(g => { const r = g.options.renderer; if (r && r._container && r._bounds) L.DomUtil.setPosition(r._container, r._bounds.min); });
-    window.__terra.setStyle({ fillColor: s.terra || '#1b1b1d', fillOpacity: s.terraOpacita == null ? 1 : s.terraOpacita });
+    /* la costa: lo stesso filo leggero dei confini, cosi' il profilo dell'Italia si legge anche dove non ci sono pallini */
+    window.__terra.setStyle({ fillColor: s.terra || '#1b1b1d', fillOpacity: s.terraOpacita == null ? 1 : s.terraOpacita,
+      stroke: (s.linee || 0) > 0, color: '#ffffff', weight: 1.1, opacity: 0.9 * (s.linee || 0), lineJoin: 'round' });
     window.__linee.setStyle({ opacity: s.linee || 0 });
     const size = m.getSize(), dpr = window.devicePixelRatio || 1, po = m.getPixelOrigin(), z = m.getZoom();
     // dentro le pane, un punto del mondo sta a project(punto) - pixelOrigin (il resto lo fa la translate del pane)
@@ -484,9 +486,18 @@ async function scena(page, s) {
 
     /* ── i pallini dei pluviometri (diradati), piccoli e discreti, con comparsa scaglionata ── */
     const gp = prepara(T['film-pallini']);
+    /* solo i pallini sulla penisola, in Sicilia e in Sardegna: le tre terre piu' grandi del contorno; niente isole
+       minori (Elba, Eolie, Capri...). Si calcola una volta sola. */
+    if (G && G.pallini.length && !G.palliniTerra) {
+      const area = r => { let a = 0; for (let k = 0, j = r.length - 1; k < r.length; j = k++) a += (r[j][0] + r[k][0]) * (r[j][1] - r[k][1]); return Math.abs(a / 2); };
+      const dentro = (x, y, r) => { let c = false; for (let k = 0, j = r.length - 1; k < r.length; j = k++) {
+        const [xi, yi] = r[k], [xj, yj] = r[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+      const grandi = window.__contorno.map(p => p[0]).sort((a, b) => area(b) - area(a)).slice(0, 3);
+      G.palliniTerra = G.pallini.filter(([la, lo]) => grandi.some(r => dentro(lo, la, r)));
+    }
     if (G && G.pallini.length && (s.pallini || 0) > 0) {
       const via = 1 - liscia(s.pallinoVia || 0), b = m.getBounds().pad(0.05), r = s.raggioPallino || 1.8;
-      for (const [la, lo, rit] of G.pallini) {
+      for (const [la, lo, rit] of G.palliniTerra) {
         if (!b.contains([la, lo])) continue;
         const a = liscia((s.pallini - rit * 0.75) / 0.25) * via; if (a <= 0.002) continue;
         const p = qui([la, lo]);

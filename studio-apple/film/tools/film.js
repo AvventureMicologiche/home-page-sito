@@ -223,7 +223,7 @@ async function codifica() {
   const stills = path.join(FILM, 'stills');
   fs.rmSync(stills, { recursive: true, force: true }); fs.mkdirSync(stills, { recursive: true });
   const dentro = t => [T.pioggia, [T.pioggiaVia[0], T.boschi[1]], T.satellite, [T.zoom[0], T.zoom[0] + 3], T.loop].some(([a, b]) => t >= a - 0.01 && t <= b + 0.01);
-  for (let k = 0; k < DUR * 2; k++) {
+  for (let k = 0; k < Math.floor(DUR * 2); k++) {
     const t = k / 2;
     if (k % 2 && !dentro(t)) continue;
     const nome = k % 2 ? `still-${String(Math.floor(t)).padStart(2, '0')}.5s.jpg` : `still-${String(t).padStart(2, '0')}s.jpg`;

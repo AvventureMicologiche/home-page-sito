@@ -21,12 +21,13 @@
    Secondi del video (24 s, in loop). `da` e `a` sono i momenti in cui la scritta e' piena; entra ed esce
    con una dissolvenza di `sfuma` secondi prima e dopo. Le mette la pagina sopra il video, non sono nel video. */
 window.SCRITTE_FILM = {
-  sfuma: 0.6,
+  sfuma: 0.7,          // secondi per entrare e per uscire
+  passoParola: 0.09,   // le parole della riga entrano una dopo l'altra
   righe: [
-    { da: 0.6,  a: 2.4,  testo: 'Migliaia di pluviometri veri.' },          // i pluviometri si accendono
-    { da: 3.6,  a: 6.0,  testo: 'La pioggia caduta davvero.' },             // la pioggia sale, pausa
-    { da: 7.6,  a: 9.4,  testo: 'Sui boschi giusti.' },                     // la pioggia lascia il posto ai boschi
-    { da: 10.7, a: 21.8, testo: 'Come sono davvero, dal satellite.' }       // il satellite, poi lo zoom sulle chiome
+    { da: 0.7,  a: 2.5,  occhiello: 'Misure vere',            testo: 'Ogni punto, un pluviometro.' },  // i pluviometri si accendono
+    { da: 3.5,  a: 6.1,  occhiello: 'Gli ultimi trenta giorni', testo: 'La pioggia caduta davvero.' },  // la pioggia sale, pausa
+    { da: 7.9,  a: 10.1, occhiello: 'Faggete · castagneti · abetaie', testo: 'Poi, i boschi.' },// boschi e satellite, telecamera ferma
+    { da: 14.2, a: 20.9, occhiello: 'Dal satellite',          testo: 'Fino alle chiome.' }            // lo zoom: il retino sparisce
   ]
 };
 </script>
@@ -51,7 +52,7 @@ window.SCRITTE_FILM = {
   --radius: var(--radius-28);
   --gap: var(--layout-gutter);
   --container: var(--layout-container);
-  --nav-h: var(--nav-height);
+  --nav-h: 56px;
   --t-hero: clamp(2.5rem, 1.5rem + 3.4vw, 4.5rem);
   --film-sx: clamp(22px, 6vw, 140px);   /* il testo del film sta sul mare a sinistra dell'Italia */
 }
@@ -86,6 +87,7 @@ a { color: var(--color-link-dark); }
 .light .pill-line { color: var(--color-link); border-color: var(--color-link); }
 .light .pill-line:hover { background: var(--color-link); color: #fff; }
 .pill svg { width: 18px; height: 18px; flex: none; }
+.film .pill { font-size: 19px; min-height: 52px; padding: 14px 28px; letter-spacing: -0.02em; }
 :focus-visible { outline: 2px solid var(--color-link-dark); outline-offset: 3px; }
 
 /* ── MENU: 44 px, fisso, scuro e sfocato (la pagina e' una storia al buio) ── */
@@ -94,10 +96,10 @@ a { color: var(--color-link-dark); }
   background: rgba(22, 22, 23, 0.8);
   -webkit-backdrop-filter: saturate(1.8) blur(20px); backdrop-filter: saturate(1.8) blur(20px);
 }
-.nav .in { max-width: 1024px; margin: 0 auto; padding: 0 22px; height: var(--nav-h); display: flex; align-items: center; gap: 32px; }
-.nav .brand { font-size: 14px; font-weight: 600; color: #f5f5f7; text-decoration: none; letter-spacing: -0.01em; white-space: nowrap; margin-right: auto; }
+.nav .in { max-width: 1200px; margin: 0 auto; padding: 0 22px; height: var(--nav-h); display: flex; align-items: center; gap: 30px; }
+.nav .brand { font-family: var(--font-display); font-size: 21px; font-weight: 600; color: #f5f5f7; text-decoration: none; letter-spacing: -0.015em; white-space: nowrap; margin-right: auto; }
 .nav .links { display: flex; gap: 32px; }
-.nav .links a { font-size: var(--nav-link-size); color: rgba(255, 255, 255, 0.8); text-decoration: none; white-space: nowrap; transition: color .24s cubic-bezier(0.4, 0, 0.6, 1); }
+.nav .links a { font-size: 13px; color: rgba(255, 255, 255, 0.8); text-decoration: none; white-space: nowrap; transition: color .24s cubic-bezier(0.4, 0, 0.6, 1); }
 .nav .links a:hover { color: #fff; }
 
 /* ── 1. IL FILM ── */
@@ -118,11 +120,23 @@ a { color: var(--color-link-dark); }
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
 }
 .vbtn svg { width: 14px; height: 14px; }
-/* le scritte del film: sopra il video, in basso al centro della sua parte visibile, entrano e sfumano */
-.scritte { position: absolute; z-index: 2; right: 0; width: 60%; bottom: 13%; text-align: center; pointer-events: none; }
-.scritte p { position: absolute; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 22ch; opacity: 0;
-  font-family: var(--font-display); font-size: clamp(1.4rem, 0.9rem + 1.5vw, 2.4rem); line-height: 1.12; letter-spacing: -0.01em;
-  font-weight: 600; color: #fff; text-shadow: 0 1px 18px rgba(0, 0, 0, 0.75), 0 0 2px rgba(0, 0, 0, 0.6); will-change: opacity, transform; }
+/* le scritte del film, da titoli di testa: un occhiello piccolo e spaziato con un filo che si allunga, sotto la riga
+   grande e leggera; le parole entrano una per una dal mosso al nitido, poi tutto se ne va salendo e sfocando */
+.scritte { position: absolute; z-index: 2; right: 0; width: 64%; bottom: 9%; pointer-events: none; }
+.scritta { position: absolute; left: 0; right: 0; bottom: 0; margin: 0 auto; text-align: center; opacity: 0;
+  will-change: opacity, transform, filter; }
+.scritta .occhiello { display: inline-flex; align-items: center; gap: 16px; font-family: var(--font-text); font-size: clamp(0.82rem, 0.6rem + 0.45vw, 1.05rem);
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.32em; color: rgba(255, 255, 255, 0.9); margin-bottom: 16px;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.7);
+  white-space: nowrap; }
+.scritta .occhiello::before, .scritta .occhiello::after { content: ""; width: 44px; height: 1px; background: rgba(255, 255, 255, 0.6);
+  transform: scaleX(var(--filo, 0)); }
+.scritta .occhiello::before { transform-origin: right center; }
+.scritta .occhiello::after { transform-origin: left center; }
+.scritta .riga { display: block; font-family: var(--font-display); font-size: clamp(1.9rem, 1rem + 2.6vw, 3.6rem); line-height: 1.04;
+  font-weight: 300; letter-spacing: -0.022em; color: #fff; max-width: 16em; margin: 0 auto; text-wrap: balance;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55), 0 0 1px rgba(0, 0, 0, 0.4); }
+.scritta .parola { display: inline-block; opacity: 0; will-change: opacity, transform, filter; }
 .vbtn .i-play { display: none; }
 .vbtn.paused .i-play { display: block; }
 .vbtn.paused .i-pause { display: none; }
@@ -171,6 +185,7 @@ footer { background: var(--color-surface); color: var(--muted); font-size: 12px;
 footer .row { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
 footer .name { color: var(--color-text); font-size: 17px; font-weight: 600; }
 footer .mail { margin-top: 6px; overflow-wrap: anywhere; }
+footer .fonte-film { margin-top: 10px; color: var(--muted-dark); }
 footer a { color: var(--color-link); }
 .socials { display: flex; gap: 12px; }
 .soc { width: 44px; height: 44px; border-radius: 50%; background: #e8e8ed; color: var(--color-text); display: grid; place-items: center; transition: color .24s var(--ease-brand), background-color .24s var(--ease-brand); }
@@ -180,12 +195,12 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 
 /* ── TELEFONO: una colonna; il film sta intero in 16:9 e il testo sotto, sul nero ── */
 @media (max-width: 734px) {
-  :root { --nav-h: 84px; }
+  :root { --nav-h: 92px; }
   html { scroll-padding-top: 96px; }
   .nav .in { height: auto; flex-wrap: wrap; gap: 0; padding: 0 16px; }
-  .nav .brand { height: 44px; display: flex; align-items: center; }
+  .nav .brand { height: 50px; display: flex; align-items: center; font-size: 19px; }
   .nav .links { flex-basis: 100%; justify-content: space-between; gap: 8px; height: 40px; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.1); }
-  .nav .links a { padding: 10px 0; }
+  .nav .links a { padding: 10px 0; font-size: 11.5px; }
   .wrap { padding: 0 16px; }
   .film { height: auto; min-height: 0; padding-top: var(--nav-h); }
   .film video { position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 16 / 9; -webkit-mask-image: none; mask-image: none; }
@@ -193,8 +208,11 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   .film .txt { position: static; transform: none; max-width: none; padding: 28px 16px 8px; }
   .film .nota { position: static; padding: 16px 16px 36px; }
   .vbtn { top: calc(var(--nav-h) + 56.25vw - 48px); bottom: auto; right: 12px; }
-  .scritte { top: calc(var(--nav-h) + 56.25vw - 56px); bottom: auto; width: auto; left: 56px; right: 56px; height: 0; }
-  .scritte p { bottom: auto; top: 0; font-size: 1.15rem; }
+  .scritte { top: calc(var(--nav-h) + 56.25vw - 64px); bottom: auto; width: auto; left: 48px; right: 48px; height: 0; }
+  .scritta { bottom: auto; top: 0; }
+  .scritta .riga { font-size: 1.2rem; white-space: nowrap; }
+  .scritta .occhiello { font-size: 0.66rem; margin-bottom: 6px; gap: 10px; }
+  .scritta .occhiello::before, .scritta .occhiello::after { width: 24px; }
   .pills { flex-direction: column; align-items: stretch; }
   .pill { width: 100%; }
   .cap { min-height: 0; padding: 72px 0 56px; }
@@ -221,8 +239,8 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   <div class="in">
     <a class="brand" href="#top">Avventure Micologiche</a>
     <nav class="links" aria-label="Menu">
-      <a href="https://precipitazioni.avventuremicologiche.it">Mappa</a>
-      <a href="https://precipitazioni.avventuremicologiche.it/funghi/">Funghi</a>
+      <a href="https://precipitazioni.avventuremicologiche.it">Mappa pluviometrica</a>
+      <a href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev">Previsioni</a>
       <a href="#noi">YouTube</a>
       <a href="/esame-tartufi/">Quiz</a>
       <a href="#piede">Contatti</a>
@@ -270,24 +288,25 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   </div>
   <!-- le scritte del film: i tempi stanno in cima alla pagina (SCRITTE_FILM) -->
   <div class="scritte" aria-hidden="true"></div>
-  <p class="small nota">Nel film: la pioggia misurata dal 22 settembre al 21 ottobre 2026, poi i boschi della Liguria e le sue previsioni.</p>
   <button class="vbtn" type="button" aria-label="Metti in pausa il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg></button>
 </section>
 
 <!-- 2. I CAPITOLI: pioggia, scheda, boschi, satellite, previsioni. Ognuno ha il suo link alla mappa gia' in quel modo. -->
 <section class="cap" id="piove">
   <div class="wrap su">
-    <h2 class="display">È piovuto qui.</h2>
+    <h2 class="display">Millimetro per millimetro.</h2>
     <p class="lead sub">I millimetri misurati dai pluviometri delle agenzie regionali. Più di 5000 stazioni, in 5 nazioni: Italia, Svizzera, Austria, Francia e Slovenia.</p>
     <!-- ⚠️ testo vero, non immagine: serve a Google per arrivare alla pagina delle localita' -->
     <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=piemonte,valledaosta,lombardia,trentino,altoadige,veneto,friuli,liguria,emilia&amp;g=30" target="_blank" rel="noopener">Apri la pioggia del Nord, 30 giorni</a> · <a href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a></p>
   </div>
   <figure class="su dopo ritaglio">
-    <img src="../film/foto/pioggia-nord-1440.webp"
-         srcset="../film/foto/pioggia-nord-1440.webp 1440w, ../film/foto/pioggia-nord-2880.webp 2880w"
-         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800"
-         alt="Il Nord Italia sul nero, colorato dalla pioggia di trenta giorni, con i pallini bianchi di una parte dei pluviometri: rosso e viola sulla Liguria, sul Piemonte del nord e sul Friuli, azzurro e bianco sulla pianura emiliana.">
-    <figcaption class="small">Il Nord, trenta giorni dal 22 settembre al 21 ottobre 2026. I pallini sono una stazione ogni cinque.</figcaption>
+    <!-- 22/10 sera, sua richiesta: la mappa VERA, com'e' sul sito (scatto a 2880 px della mappa servita in locale coi
+         dati veri, 30 giorni, tutto il Nord; il tetto delle 3 regioni alzato solo nello scatto) -->
+    <img src="../film/foto/mappa-vera-nord-1440.webp"
+         srcset="../film/foto/mappa-vera-nord-1440.webp 1440w, ../film/foto/mappa-vera-nord-2880.webp 2880w"
+         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" style="object-position: 64% 50%"
+         alt="La mappa pluviometrica com'è sul sito: il Nord Italia colorato dalla pioggia di trenta giorni su OpenStreetMap, con 1596 pluviometri bianchi, il pannello dei periodi a sinistra con 30 giorni scelto e la scala dei millimetri.">
+    <figcaption class="small">La mappa com'è sul sito: il Nord, trenta giorni, 1.596 pluviometri.</figcaption>
   </figure>
 </section>
 
@@ -404,6 +423,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
         <div class="name">Avventure Micologiche</div>
         <div>con Archie</div>
         <div class="mail">Scrivici: <a href="mailto:avventuremicologiche@gmail.com">avventuremicologiche@gmail.com</a></div>
+        <div class="small fonte-film">Il film in apertura usa la pioggia misurata dal 22 settembre al 21 ottobre 2026.</div>
       </div>
       <div class="socials">
         <a href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" aria-label="YouTube" class="soc soc-yt">
@@ -445,13 +465,39 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   var v = document.getElementById('film'), box = document.querySelector('.film .scritte'), C = window.SCRITTE_FILM;
   if (!v || !box || !C) return;
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var ps = C.righe.map(function (r) { var p = document.createElement('p'); p.textContent = r.testo; box.appendChild(p); return p; });
-  function liscia(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+  var blocchi = C.righe.map(function (r) {
+    var d = document.createElement('div'); d.className = 'scritta';
+    var o = document.createElement('span'); o.className = 'occhiello'; o.textContent = r.occhiello || ''; d.appendChild(o);
+    var g = document.createElement('span'); g.className = 'riga'; d.appendChild(g);
+    var parole = r.testo.split(' ').map(function (w, k) {
+      var s = document.createElement('span'); s.className = 'parola'; s.textContent = w; g.appendChild(s);
+      if (k < r.testo.split(' ').length - 1) g.appendChild(document.createTextNode(' '));
+      return s;
+    });
+    box.appendChild(d); return { d: d, o: o, parole: parole };
+  });
+  function liscia(x) { x = Math.max(0, Math.min(1, x)); return x * x * x * (x * (x * 6 - 15) + 10); }
   function disegna(t) {
     C.righe.forEach(function (r, i) {
-      var a = liscia((t - (r.da - C.sfuma)) / C.sfuma) * (1 - liscia((t - r.a) / C.sfuma));
-      ps[i].style.opacity = a.toFixed(3);
-      ps[i].style.transform = 'translateY(' + (10 * (1 - a)).toFixed(2) + 'px)';
+      var b = blocchi[i], ent = (t - (r.da - C.sfuma)) / C.sfuma, esce = liscia((t - r.a) / C.sfuma);
+      var vivo = ent > 0 && esce < 1;
+      b.d.style.opacity = vivo ? (1 - esce).toFixed(3) : '0';
+      if (!vivo) return;
+      // uscita: tutto sale appena e sfoca
+      b.d.style.transform = 'translateY(' + (-14 * esce).toFixed(2) + 'px)';
+      b.d.style.filter = esce > 0.001 ? 'blur(' + (6 * esce).toFixed(2) + 'px)' : 'none';
+      // occhiello: si stringe la spaziatura e i fili si allungano
+      var ao = liscia(ent);
+      b.o.style.opacity = ao.toFixed(3);
+      b.o.style.letterSpacing = (0.32 + 0.22 * (1 - ao)).toFixed(3) + 'em';
+      b.o.style.setProperty('--filo', liscia(ent - 0.25).toFixed(3));
+      // le parole, una dopo l'altra, dal mosso al nitido
+      b.parole.forEach(function (w, k) {
+        var a = liscia(ent - 0.35 - k * C.passoParola / C.sfuma);
+        w.style.opacity = a.toFixed(3);
+        w.style.transform = 'translateY(' + (18 * (1 - a)).toFixed(2) + 'px)';
+        w.style.filter = a < 0.999 ? 'blur(' + (10 * (1 - a)).toFixed(2) + 'px)' : 'none';
+      });
     });
   }
   disegna(v.currentTime || 0);

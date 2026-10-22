@@ -3,18 +3,20 @@
    scarica-satellite.js (che scarica in anticipo le tessere della foto aerea), cosi' le due liste sono la stessa.
 
    La telecamera resta FERMA sull'Italia intera finche' non c'e' il satellite. Poi un solo zoom.
-     0,0-2,6   l'Italia scura, i pluviometri si accendono (come prima: gli era piaciuto molto)
+   22/10 sera, dal PC (sue correzioni): boschi e satellite entrano INSIEME (niente terra grigia sotto i boschi, niente
+   rilievo), i confini delle regioni compaiono tutti insieme e piu' netti, i pallini solo su penisola, Sicilia e Sardegna.
+     0,0-2,6   l'Italia scura, i confini compaiono tutti insieme (0,15-0,9), i pluviometri si accendono
      2,4-5,0   la pioggia compare UNIFORME su tutta l'Italia: una griglia sola (il cumulato vero dei 30 giorni,
                levigato) che sale ovunque allo stesso ritmo; i pallini sfumano mentre sale
      5,0-6,2   pausa con la pioggia piena
-     6,2-9,0   la pioggia sfuma e compaiono i boschi (la pioggia e' a zero prima che i boschi passino meta')
-     9,4-11,4  sotto i boschi sfuma dentro il satellite
-     11,6-22,8 lo zoom: una curva sola di van Wijk e Nuij, tempo morbido, fino alle chiome di una faggeta delle
+     6,2-7,8   la pioggia sfuma a zero...
+     6,8-9,1   ...mentre sotto entra il satellite (6,8-8,8) e sopra i boschi (7,3-9,1): mai un attimo di Italia vuota
+     10,0-21,2 lo zoom: una curva sola di van Wijk e Nuij, tempo morbido, fino alle chiome di una faggeta delle
                Foreste Casentinesi; il retino dei boschi sparisce man mano (zero ai due terzi dello zoom)
-     23,0-24,0 dissolvenza sul primo fotogramma: il loop
+     21,5-22,5 dissolvenza sul primo fotogramma: il loop
    Per cambiare il punto d'arrivo: --bosco lat,lon,zoom (vedi STATO.md). */
 'use strict';
-const FPS = 60, DUR = 24, N = FPS * DUR;
+const FPS = 60, DUR = 22.5, N = FPS * DUR;
 const W = 1920, H = 1080;
 
 const ITALIA = { centro: [41.85, 12.5], zoom: 6.62 };   // l'Italia intera in 1920x1080, la stessa inquadratura di prima
@@ -25,16 +27,16 @@ const ITALIA = { centro: [41.85, 12.5], zoom: 6.62 };   // l'Italia intera in 19
 const BOSCO_PREDEFINITO = { centro: [43.869, 11.809], zoom: 15.6 };
 
 const T = {
+  linee: [0.15, 0.9],           // i confini delle regioni: tutti insieme, con una sola dissolvenza
   pallini: [0.4, 2.6],          // comparsa scaglionata dei pallini (come prima)
   pioggia: [2.4, 5.0],          // la pioggia sale, tutta insieme
   pallinoVia: [3.0, 5.0],       // i pallini sfumano mentre la pioggia sale
   pioggiaVia: [6.2, 7.8],       // la pioggia scende a zero...
-  boschi: [7.0, 9.0],           // ...mentre i boschi salgono: a meta' boschi (8,0 s) la pioggia e' gia' sotto il 4%
-  rilievo: [7.2, 9.0],          // la terra prende il rilievo coi boschi (regola della mappa: mai sotto la pioggia)
-  satellite: [9.4, 11.4],       // la foto aerea sfuma dentro, sotto i boschi; il rilievo se ne va
-  zoom: [11.6, 22.8],           // un solo volo
-  boschiVia: 0.67,              // i boschi sono a zero ai due terzi dello zoom (in livelli)
-  loop: [23.0, 24.0],
+  satellite: [6.8, 8.8],        // la foto aerea entra sotto la pioggia che si spegne: niente attimo di Italia vuota
+  boschi: [7.3, 9.1],           // ...e i boschi salgono sopra la foto quando la pioggia e' quasi a zero (niente fango)
+  zoom: [10.0, 21.2],           // un solo volo
+  boschiVia: [0.65, 0.95],      // il retino resta PIENO fino al 65% dello zoom (in livelli) e sparisce fra il 65 e il 95%: solo da vicino (sua richiesta, tre volte)
+  loop: [21.5, 22.5],
 };
 
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
@@ -79,7 +81,7 @@ function crea({ bosco = BOSCO_PREDEFINITO } = {}) {
   };
   const CAMERA = Array.from({ length: N + 1 }, (_, i) => camera(i / FPS));
   const velZoom = i => { const a = CAMERA[Math.max(0, i - 1)], b = CAMERA[Math.min(N, i + 1)]; return Math.abs(b.zoom - a.zoom) * FPS / 2; };
-  const TERRA_BUIA = [0x1b, 0x1b, 0x1d], TERRA_BOSCHI = [0x30, 0x30, 0x33];
+  const TERRA_BUIA = [0x1b, 0x1b, 0x1d];
 
   function statoAl(t, { segnaposto = false } = {}) {
     const i = Math.min(N, Math.max(0, Math.round(t * FPS))), c = CAMERA[i];
@@ -92,10 +94,10 @@ function crea({ bosco = BOSCO_PREDEFINITO } = {}) {
       pioggia: tratto(t, T.pioggia) * (1 - tratto(t, T.pioggiaVia)),     // opacita' GLOBALE: uguale ovunque
       pallini: clamp((t - T.pallini[0]) / (T.pallini[1] - T.pallini[0])) * 1.0001,
       pallinoVia: clamp((t - T.pallinoVia[0]) / (T.pallinoVia[1] - T.pallinoVia[0])),
-      linee: 0.10 * (1 - tratto(t, T.pioggiaVia)),
-      terra: hex(mixc(TERRA_BUIA, TERRA_BOSCHI, tratto(t, T.rilievo))),
-      rilievo: 0.8 * tratto(t, T.rilievo) * (1 - sat),
-      boschi: tratto(t, T.boschi) * (1 - liscia(fz / T.boschiVia)), soglia: null,
+      linee: 0.17 * tratto(t, T.linee) * (1 - tratto(t, T.pioggiaVia)),
+      terra: hex(TERRA_BUIA),
+      rilievo: 0,                                                         // niente rilievo: sotto i boschi c'e' subito il satellite
+      boschi: tratto(t, T.boschi) * (1 - liscia((fz - T.boschiVia[0]) / (T.boschiVia[1] - T.boschiVia[0]))), soglia: null,
       sat, satClip: true,
       /* MOSSO: quando lo zoom corre, le tessere si sfumano appena (al massimo 1,2 px), come una cinepresa vera */
       mosso: Math.min(1.2, 0.6 * Math.max(0, velZoom(i) - 0.6)),

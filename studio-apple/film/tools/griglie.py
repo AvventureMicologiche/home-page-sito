@@ -241,6 +241,27 @@ def main():
             continue
         presi.append(q)
     presi = np.array(presi)
+    # PALLINI DI RIEMPIMENTO (22/10 sera, sua richiesta): dove non ci sono stazioni (l'Abruzzo, che la mappa copre con
+    # Open-Meteo) il film restava senza pallini e la costa non si leggeva. Solo nel video, solo come segno grafico: si
+    # riempiono i vuoti su penisola, Sicilia e Sardegna con la stessa spaziatura dei pallini veri. La pioggia NON cambia.
+    from shapely.prepared import prep
+    from shapely.geometry import Point
+    tre = sorted(italia.geoms, key=lambda g: g.area, reverse=True)[:3]
+    dentro = [prep(g) for g in tre]
+    xmin, ymin, xmax, ymax = unary_union(tre).bounds
+    cand = [(y, x) for y in np.arange(ymin, ymax, DIRADA * 0.35) for x in np.arange(xmin, xmax, DIRADA * 0.35 / c0)]
+    cand = [cand[i] for i in rng.permutation(len(cand))]
+    riempiti = []
+    albero = cKDTree(presi)
+    for y, x in cand:
+        y2, x2 = y + (rng.random() - 0.5) * DIRADA * 0.3, x + (rng.random() - 0.5) * DIRADA * 0.3 / c0
+        q = np.array([y2, x2 * c0])
+        if albero.query(q)[0] < DIRADA * 1.25: continue
+        if riempiti and min(np.hypot(*(np.array(riempiti) - q).T)) < DIRADA * 1.25: continue
+        if not any(d.contains(Point(x2, y2)) for d in dentro): continue
+        riempiti.append(q)
+    print(f'pallini di riempimento (vuoti senza stazioni, solo grafica): {len(riempiti)}')
+    if riempiti: presi = np.vstack([presi, np.array(riempiti)])
     pal = [[round(float(y), 4), round(float(x / c0), 4), round(float(r), 3)]
            for (y, x), r in zip(presi, rng.random(len(presi)))]
     json.dump(pal, open(os.path.join(CACHE, nome + '-pallini.json'), 'w', encoding='utf-8'), separators=(',', ':'))
