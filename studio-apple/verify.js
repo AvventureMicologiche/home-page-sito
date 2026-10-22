@@ -2,8 +2,9 @@
 /* Verifica della guida e del mockup della home, con screenshot di ogni sezione.
 
    Uso, dalla radice del repo:
-     node studio-apple/verify.js            controlli + screenshot in studio-apple/screenshot/
+     node studio-apple/verify.js            controlli + screenshot in studio-apple/screenshot/ (e del v2 in film/screenshot/)
      node studio-apple/verify.js --no-shots solo i controlli
+     node studio-apple/verify.js --v2       solo il mockup v2 (home-v2/, film e immagini HD)
 
    Serve Playwright con Chromium. Se manca:  npm i -D playwright  e poi  npx playwright install chromium
    (non serve un server: lo script ne apre uno suo sulla radice del repo, porta libera a caso).
@@ -34,6 +35,10 @@ const HERO = path.join(STUDIO, 'brand-guide-hero.html');
 const DISC = 'Not affiliated with or endorsed by Apple. Trademarks belong to their owners.';
 const SECTIONS = ['cover', 'overview', 'contents', 'rebuild', 'typography', 'fonts', 'colour', 'layout',
   'components', 'imagery', 'voice', 'tokens', 'method'];
+const SOLO_V2 = process.argv.includes('--v2');
+const SHOTS_V2 = path.join(STUDIO, 'film', 'screenshot');
+const V2_SECTIONS = [['film', '.film'], ['1-piove', '#piove'], ['2-boschi', '#boschi'], ['3-finestra', '#finestra'],
+  ['4-stazione', '#stazione'], ['5-domani', '#domani'], ['chiusura', '.fine'], ['noi', '#noi'], ['piede', 'footer']];
 const HOME_SECTIONS = ['.nav', '#mappa', '.tiles-sec', '.numbers', '#youtube', '#quiz', '#chi-siamo', 'footer'];
 
 const results = [];
@@ -223,9 +228,116 @@ async function homeChecks(browser, base, width) {
   await ctx.close();
 }
 
+/* ── Mockup v2: il film, i capitoli con le immagini HD, la chiusura ── */
+async function v2Checks(browser, base, width) {
+  const ctx = await browser.newContext({ viewport: { width, height: width > 500 ? 900 : 844 } });
+  const page = await ctx.newPage();
+  const external = [], errors = [];
+  let bytes = 0, bytesFilm = 0;
+  page.on('request', r => { const u = r.url(); if (!u.startsWith(base) && !/^(data|blob|about):/.test(u)) external.push(u); });
+  page.on('response', async r => {
+    let n = 0; try { n = (await r.body()).length; } catch (e) { n = +(r.headers()['content-length'] || 0); }
+    if (/\.mp4(\?|$)/.test(r.url())) bytesFilm += n; else bytes += n;
+  });
+  page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(base + '/studio-apple/home-v2/', { waitUntil: 'load' });
+  await page.waitForTimeout(2500);
+  const tag = `home v2 @${width}`;
+  check(`${tag}: apertura senza il film sotto 1 MB`, bytes < 1024 * 1024, (bytes / 1024).toFixed(0) + ' KB (+ film ' + (bytesFilm / 1048576).toFixed(2) + ' MB)');
+  const film = await page.evaluate(() => { const v = document.getElementById('film');
+    return { src: v.currentSrc.split('/').pop(), muted: v.muted, loop: v.loop, inline: v.playsInline, auto: v.autoplay, poster: !!v.poster, playing: !v.paused }; });
+  const want = width < 735 ? 'apertura-720.mp4' : 'apertura-1080.mp4';
+  check(`${tag}: il film e' ${want}, muto, in loop, playsinline, autoplay, col poster, e gira`,
+    film.src === want && film.muted && film.loop && film.inline && film.auto && film.poster && film.playing, JSON.stringify(film));
+  const sw = await page.evaluate(() => document.documentElement.scrollWidth);
+  check(`${tag}: niente scorrimento orizzontale`, sw <= width, `scrollWidth ${sw}`);
+  // ⚠️ la pagina ha scroll-behavior:smooth: qui si scorre a scatti veri, se no non si arriva mai in fondo
+  await page.evaluate(async () => {
+    const h = () => document.documentElement.scrollHeight;
+    for (let y = 0; y < h(); y += Math.round(innerHeight * 0.6)) { scrollTo({ top: y, behavior: 'instant' }); await new Promise(r => setTimeout(r, 120)); }
+    scrollTo({ top: h(), behavior: 'instant' });
+    await Promise.race([new Promise(r => setTimeout(r, 6000)),
+      Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.addEventListener('load', r); i.addEventListener('error', r); })))]);
+  });
+  await page.waitForTimeout(1800);   // le comparse durano 1,4 s
+  const imgs = await page.evaluate(() => [...document.images].map(i => ({ s: (i.currentSrc || i.src).split('/').pop(), ok: i.complete && i.naturalWidth > 0, lazy: i.loading === 'lazy' })));
+  const rotte = imgs.filter(i => !i.ok);
+  check(`${tag}: tutte le immagini caricate dopo lo scorrimento`, imgs.length >= 6 && rotte.length === 0, `${imgs.length} immagini` + (rotte.length ? ', rotte: ' + rotte.map(i => i.s).join(' ') : ''));
+  const capImgs = await page.evaluate(() => [...document.querySelectorAll('.cap img')].map(i => ({ lazy: i.loading === 'lazy', srcset: !!i.srcset && !!i.sizes })));
+  check(`${tag}: capitoli con srcset e sizes, lazy tranne la prima`, capImgs.length === 4 && capImgs.every(i => i.srcset) && !capImgs[0].lazy && capImgs.slice(1).every(i => i.lazy), JSON.stringify(capImgs.map(i => i.lazy)));
+  const vis = await page.evaluate(() => [...document.querySelectorAll('.su')].filter(e => getComputedStyle(e).opacity !== '1').length);
+  check(`${tag}: tutti i blocchi comparsi dopo lo scorrimento`, vis === 0, vis + ' ancora nascosti');
+  check(`${tag}: zero errori in console`, errors.length === 0, errors.slice(0, 2).join(' | '));
+  check(`${tag}: zero richieste esterne`, external.length === 0, external.slice(0, 3).join(', '));
+  if (width === 1440) {
+    const links = await page.evaluate(() => {
+      const a = [...document.querySelectorAll('a')];
+      return {
+        mappa: a.filter(x => x.href === 'https://precipitazioni.avventuremicologiche.it/' && x.textContent.trim() === 'Apri la mappa').length,
+        funghi: a.filter(x => x.href === 'https://precipitazioni.avventuremicologiche.it/funghi/' && x.textContent.trim() === 'Le località più bagnate').length,
+        yt: a.some(x => x.href === 'https://www.youtube.com/@avventuremicologiche' && x.textContent.includes('Guarda il canale')),
+        quiz: a.some(x => x.getAttribute('href') === '/esame-tartufi/' && x.textContent.trim() === 'Prova il quiz'),
+        regioni: ['lombardia', 'piemonte', 'emilia-romagna', 'liguria', 'campania', 'lazio', 'marche', 'toscana']
+          .filter(r => a.some(x => x.getAttribute('href') === `/esame-tartufi/${r}/`)).length,
+        mail: a.some(x => x.href === 'mailto:avventuremicologiche@gmail.com'),
+        social: ['youtube.com', 'facebook.com', 'instagram.com', 'suno.com'].filter(s => a.some(x => x.href.includes(s))).length
+      };
+    });
+    const bad = Object.entries(links).filter(([k, v]) => k === 'regioni' ? v !== 8 : k === 'social' ? v !== 4 : k === 'mappa' || k === 'funghi' ? v < 2 : !v).map(([k, v]) => k + '=' + v);
+    check(`${tag}: «Apri la mappa» e «Le località più bagnate» due volte, YouTube, quiz, 8 regioni, social, mail`, bad.length === 0, bad.join(', ') || JSON.stringify(links));
+    const txt = await page.evaluate(() => ({ dash: (document.body.innerText.match(/—/g) || []).length, bang: (document.body.innerText.match(/!/g) || []).length,
+      voi: (document.body.innerText.match(/\b(Lei|Voi|vostr[aoie])\b/g) || []).length }));
+    check(`${tag}: niente trattini lunghi, punti esclamativi, Lei o voi`, txt.dash + txt.bang + txt.voi === 0, JSON.stringify(txt));
+    const tit = await page.evaluate(() => [...document.querySelectorAll('.cap h2')].map(h => h.textContent.trim()));
+    const titWant = ['È piovuto qui.', 'Sui boschi giusti.', 'Tra 13 e 20 giorni, nascono.', 'Ogni stazione, giorno per giorno.', 'E domani.'];
+    check(`${tag}: i cinque capitoli, in ordine`, JSON.stringify(tit) === JSON.stringify(titWant), tit.join(' / '));
+  }
+  if (DO_SHOTS) {
+    fs.mkdirSync(SHOTS_V2, { recursive: true });
+    // il film fermo su un fotogramma pieno di pioggia, per lo screenshot
+    await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+    // ⚠️ il Chromium di Playwright non decodifica H.264 (Chrome, Safari e Firefox veri si'): nello screenshot il
+    // film si vedrebbe solo col poster. Si mette al suo posto uno still del film, a 6 s, con la pioggia.
+    await page.evaluate(() => { const v = document.getElementById('film'); v.poster = '../film/stills/still-06s.jpg'; });
+    await page.evaluate(() => new Promise(ok => { const v = document.getElementById('film'); v.pause(); v.dataset.fermato = '1';
+      v.addEventListener('seeked', () => setTimeout(ok, 400), { once: true }); v.currentTime = 6.9; setTimeout(ok, 4000); }));
+    for (const [nome, sel] of V2_SECTIONS) {
+      const el = await page.$(sel); if (!el) continue;
+      // il menu fisso si toglie dagli screenshot dei capitoli, se no copre il titolo dove la sezione e' piu' alta dello schermo
+      await page.evaluate(n => { document.querySelector('.nav').style.visibility = n === 'film' ? '' : 'hidden'; }, nome);
+      await el.scrollIntoViewIfNeeded(); await page.waitForTimeout(150);
+      await el.screenshot({ path: path.join(SHOTS_V2, `v2-${width}-${nome}.jpg`), type: 'jpeg', quality: 78 });
+    }
+  }
+  await ctx.close();
+
+  // «riduci animazioni»: resta il poster
+  const ctx2 = await browser.newContext({ viewport: { width, height: width > 500 ? 900 : 844 }, reducedMotion: 'reduce' });
+  const p2 = await ctx2.newPage();
+  await p2.goto(base + '/studio-apple/home-v2/', { waitUntil: 'load' });
+  await p2.waitForTimeout(1500);
+  const r = await p2.evaluate(() => { const v = document.getElementById('film'); return { paused: v.paused, t: v.currentTime, poster: v.poster.split('/').pop() }; });
+  check(`${tag}: con «riduci animazioni» il film resta fermo sul poster`, r.paused && r.t === 0 && r.poster === 'apertura-poster.webp', JSON.stringify(r));
+  await ctx2.close();
+}
+
+function v2Files() {
+  const F = path.join(STUDIO, 'film');
+  const mb = f => fs.statSync(path.join(F, f)).size / 1048576;
+  check('apertura-1080.mp4 fra 3 e 5 MB', mb('apertura-1080.mp4') >= 3 && mb('apertura-1080.mp4') <= 5, mb('apertura-1080.mp4').toFixed(2) + ' MB');
+  check('apertura-720.mp4 sotto 1,5 MB', mb('apertura-720.mp4') < 1.5, mb('apertura-720.mp4').toFixed(2) + ' MB');
+  check('apertura-poster.webp presente', fs.existsSync(path.join(F, 'apertura-poster.webp')));
+  const foto = fs.readdirSync(path.join(F, 'foto')).filter(f => f.endsWith('.webp'));
+  const troppo = foto.filter(f => fs.statSync(path.join(F, 'foto', f)).size > (f.includes('-2880') ? 600 : 250) * 1024);
+  check('immagini HD: 2880 sotto 600 KB, 1440 sotto 250 KB', foto.length >= 8 && troppo.length === 0,
+    foto.map(f => f.replace('.webp', '') + ' ' + (fs.statSync(path.join(F, 'foto', f)).size / 1024).toFixed(0)).join(', '));
+}
+
 (async () => {
   const t0 = Date.now();
   if (DO_SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
+  if (SOLO_V2) return soloV2(t0);
   console.log('File');
   const kb = f => fs.statSync(f).size / 1024;
   check('brand-guide.html sotto 150 KB', kb(GUIDE) <= 150, kb(GUIDE).toFixed(1) + ' KB');
@@ -250,7 +362,10 @@ async function homeChecks(browser, base, width) {
       await guideChecks(browser, HERO, 'guida-hero', w);
       console.log(`\nMockup home @${w}`);
       await homeChecks(browser, base, w);
+      console.log(`\nMockup home v2 @${w}`);
+      await v2Checks(browser, base, w);
     }
+    console.log('\nFile del v2'); v2Files();
   } finally {
     await browser.close();
     srv.close();
@@ -261,3 +376,17 @@ async function homeChecks(browser, base, width) {
   if (DO_SHOTS) fs.writeFileSync(path.join(SHOTS, 'report.json'), JSON.stringify({ when: new Date().toISOString(), results }, null, 2));
   process.exit(bad.length ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });
+
+async function soloV2(t0) {
+  console.log('File del v2'); v2Files();
+  const srv = await serve();
+  const base = 'http://127.0.0.1:' + srv.address().port;
+  const browser = await chromium.launch();
+  try { for (const w of [1440, 390]) { console.log(`\nMockup home v2 @${w}`); await v2Checks(browser, base, w); } }
+  finally { await browser.close(); srv.close(); }
+  const bad = results.filter(r => !r.ok);
+  console.log(`\n${results.length - bad.length}/${results.length} controlli passati in ${((Date.now() - t0) / 1000).toFixed(1)} s` +
+    (DO_SHOTS ? `, screenshot in ${path.relative(REPO, SHOTS_V2)}/` : ''));
+  if (DO_SHOTS) fs.writeFileSync(path.join(SHOTS_V2, 'report.json'), JSON.stringify({ when: new Date().toISOString(), results }, null, 2));
+  process.exit(bad.length ? 1 : 0);
+}
