@@ -314,6 +314,8 @@ async function scena(page, s) {
       g.restore();
     }
     const T = window.__tele, S = window.__sorgenti;
+    // il mosso (solo nel film, quando lo zoom corre): una sfumatura leggera sulle tessere
+    ['film-sat', 'film-rilievo', 'film-boschi-tela'].forEach(n => { T[n].style.filter = (s.mosso || 0) > 0.03 ? `blur(${s.mosso.toFixed(2)}px)` : 'none'; });
     // satellite: dal PC la foto aerea vera; senza (cloud) il segnaposto e' il rilievo scuro
     const satVero = window.__satellite && (s.sat || 0) > 0;
     const gs = prepara(T['film-sat']);

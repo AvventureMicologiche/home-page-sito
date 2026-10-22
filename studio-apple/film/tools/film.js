@@ -36,7 +36,7 @@ const AREA = 'liguria';
 // ── il racconto ─────────────────────────────────────────────────────────────
 const ITALIA = { centro: [41.85, 12.5], zoom: 6.62 };     // l'Italia intera in 1920x1080, con margine
 const LIGURIA = { centro: [44.27, 8.95], zoom: 9.12 };     // la regione intera, il mare sotto
-const BOSCO = { centro: [44.5395, 9.4566], zoom: 15.1 };   // faggete e castagneti sopra Santo Stefano d'Aveto
+const BOSCO = { centro: [44.5395, 9.4566], zoom: 14.3 };   // faggete e castagneti sopra Santo Stefano d'Aveto
 const PREVISIONI = { centro: [44.17, 8.83], zoom: 9.05 };  // i capoluoghi della Liguria, da Sanremo alla Spezia
 const GIORNI = 30, MORBIDO = 2.5;                          // MORBIDO: ogni giorno entra nel cumulato in 2,5 «giorni»
 const TERRA_BUIA = [0x1b, 0x1b, 0x1d], TERRA_RILIEVO = [0x3c, 0x3c, 0x3f], TERRA_FINE = [0x2e, 0x2e, 0x31];
@@ -65,8 +65,8 @@ function verso(da, a) {
 const NODI = [
   [0.0, 6.62, 0.016],     // l'Italia, ci si avvicina appena
   [9.2, 6.79, 0.03],      // parte il volo sulla Liguria
-  [12.6, 9.12, 0.9],      // la Liguria, senza fermarsi: si continua a scendere
-  [18.2, 15.1, 0],        // le chiome
+  [12.6, 9.12, 0.72],     // la Liguria, senza fermarsi: si continua a scendere
+  [18.3, 14.3, 0],        // le chiome (14,3: le tessere dei boschi sono quasi al loro dettaglio vero)
   [21.9, 9.05, -0.07],    // di nuovo la regione intera, per le previsioni
   [24.0, 8.97, -0.03],    // e ci si allontana appena
 ];
@@ -89,7 +89,7 @@ const DERIVA = (() => {
 })();
 function cameraGrezza(t) {
   const zoom = zoomAl(t);
-  const m = t < 9.2 ? proj(ITALIA.centro) : t < 12.6 ? VERSO1(zoom) : t < 18.2 ? VERSO2(zoom) : t < 21.9 ? VERSO3(zoom)
+  const m = t < 9.2 ? proj(ITALIA.centro) : t < 12.6 ? VERSO1(zoom) : t < 18.3 ? VERSO2(zoom) : t < 21.9 ? VERSO3(zoom)
     : (() => { const p = proj(PREVISIONI.centro), u = t - 21.9; return [p[0] + 0.0000016 * u, p[1] - 0.0000006 * u]; })();
   const d = DERIVA(t);
   return { m: [m[0] + d[0], m[1] + d[1]], zoom };
@@ -131,6 +131,7 @@ function preparaTempo(medie) {
   };
 }
 
+const velZoom = i => { const a = CAMERA[Math.max(0, i - 1)], b = CAMERA[Math.min(N, i + 1)]; return Math.abs(b.zoom - a.zoom) * FPS / 2; };   // livelli al secondo
 function statoAl(t, { sat, prev }) {
   const i = Math.round(t * FPS), c = CAMERA[Math.min(N, Math.max(0, i))];
   // la pioggia: 2,2-11 s, con una partenza e un arrivo morbidi (meta' lineare, meta' smootherstep)
@@ -154,6 +155,9 @@ function statoAl(t, { sat, prev }) {
     morbidoBoschi: 30,
     sat: tratto(t, 14.6, 16.8) * (1 - tratto(t, 18.7, 20.6)),    // il satellite sfuma dentro SOTTO i boschi
     prev: clamp((t - 20.0) / 2.6) * 1.0001, prevGiorno: 1,
+    /* MOSSO: quando lo zoom corre, le tessere si sfumano appena (al massimo 0,9 px), come una cinepresa vera.
+       Senza, la discesa sui boschi chiedeva 19 Mbit/s per restare nitida e l'H.264 la impastava. */
+    mosso: Math.min(0.9, 0.45 * Math.max(0, velZoom(i) - 0.35)),
     nota: !sat && t > 14.4 && t < 20.9 ? 'segnaposto: il satellite si rifà dal PC' : !prev && t > 19.8 ? 'segnaposto: le previsioni si rifanno dal PC' : null,
     notaOpacita: !sat && t < 20.9 ? tratto(t, 14.4, 15.2) * (1 - tratto(t, 20.2, 20.9)) : tratto(t, 19.8, 20.6),
     loop: tratto(t, DUR - 0.8, DUR)                              // dissolvenza sul primo fotogramma
@@ -227,9 +231,9 @@ function codifica() {
   /* La qualita' la decide il CRF; il tetto di banda c'e' solo per stare nei pesi (1080 sui 7-8 MB, 720 sotto i 2,5).
      Si alza se i boschi da vicino si impastano: meglio qualche MB in piu' che il dettaglio sgranato. */
   execFileSync(ff, [...ingresso, '-vf', 'scale=1920:1080:out_color_matrix=bt709:out_range=tv,format=yuv420p',
-    ...comune(process.env.CRF_1080 || 17), '-maxrate', process.env.TETTO_1080 || '4200k', '-bufsize', '8400k', path.join(FILM, 'apertura-1080.mp4')], { stdio: 'inherit' });
+    ...comune(process.env.CRF_1080 || 17), '-maxrate', process.env.TETTO_1080 || '3000k', '-bufsize', '6000k', path.join(FILM, 'apertura-1080.mp4')], { stdio: 'inherit' });
   execFileSync(ff, [...ingresso, '-vf', 'scale=1280:720:flags=lanczos:out_color_matrix=bt709:out_range=tv,format=yuv420p',
-    ...comune(process.env.CRF_720 || 18), '-maxrate', process.env.TETTO_720 || '1050k', '-bufsize', '2100k', path.join(FILM, 'apertura-720.mp4')], { stdio: 'inherit' });
+    ...comune(process.env.CRF_720 || 18), '-maxrate', process.env.TETTO_720 || '800k', '-bufsize', '1600k', path.join(FILM, 'apertura-720.mp4')], { stdio: 'inherit' });
   execFileSync(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', path.join(FRAMES, 'f00000.png'), '-c:v', 'libwebp', '-quality', '82', path.join(FILM, 'apertura-poster.webp')], { stdio: 'inherit' });
   const stills = path.join(FILM, 'stills');
   fs.rmSync(stills, { recursive: true, force: true }); fs.mkdirSync(stills, { recursive: true });
