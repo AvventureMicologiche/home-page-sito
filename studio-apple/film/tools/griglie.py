@@ -127,7 +127,7 @@ def stazioni(mappa, giorni, escl):
     _, vv = t.query(np.c_[la, lo * c0], k=6)
     tot = cu[:, -1]
     med = np.median(tot[vv[:, 1:]], axis=1)
-    sorde = (med >= 20) & (tot < 0.15 * med)
+    sorde = ((med >= 20) & (tot < 0.15 * med)) | ((med >= 5) & (tot < 1.5) & (tot < 0.2 * med))
     print('  sorde nel periodo, tolte:', int(sorde.sum()))
     for i in np.nonzero(sorde)[0]:
         print(f'    {re_[i]:18s} {la[i]:.4f},{lo[i]:.4f}  {tot[i]:.1f} mm contro {med[i]:.0f} dei vicini')
@@ -150,6 +150,12 @@ def main():
     reg = json.load(open(os.path.join(a.mappa, 'italia-regioni-confine.geojson')))
     italia = unary_union([shape(f['geometry']).buffer(0) for f in reg['features']])
     italia = italia.simplify(0.0008, preserve_topology=True)
+    # ⚠️ SENZA BUCHI: San Marino (e il Vaticano) non sono regioni italiane, e nel contorno erano un buco. Col ritaglio
+    # «evenodd» della mappa il buco restava nero in mezzo alla pioggia: era il puntino nero vicino a Rimini.
+    # Qui si tengono solo i bordi esterni: la pioggia li' e' l'interpolazione delle stazioni intorno.
+    from shapely.geometry import Polygon, MultiPolygon
+    parti = italia.geoms if italia.geom_type == 'MultiPolygon' else [italia]
+    italia = MultiPolygon([Polygon(p.exterior) for p in parti])
     json.dump({'type': 'Feature', 'properties': {}, 'geometry': mapping(italia)},
               open(os.path.join(CACHE, 'italia-contorno.json'), 'w'), separators=(',', ':'))
     # confini fra regioni (linee), per un filo appena visibile se lo si vuole
