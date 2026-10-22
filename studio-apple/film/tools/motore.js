@@ -54,7 +54,7 @@ const GANCIO = `window.__film={drawGrid:drawGrid,initCanvas:initCanvas,
 const CSS_PULITO = `
   *,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}
   html,body{background:#000!important;margin:0!important;overflow:hidden!important}
-  body>*:not(#map-wrap){display:none!important}
+  body>*:not(#map-wrap):not(#film-loop){display:none!important}
   #map-wrap{position:fixed!important;inset:0!important;margin:0!important;padding:0!important;z-index:1!important}
   #map-wrap>*:not(#map){display:none!important}
   #map{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:#000!important}
@@ -66,7 +66,7 @@ const CSS_PULITO = `
 `;
 
 /* Pagina pronta: la mappa vera, senza niente sopra. */
-async function apri({ url, larghezza, altezza, scala = 1, griglia }) {
+async function apri({ url, larghezza, altezza, scala = 1, griglia, nonPulire = false, satellite = false }) {
   const browser = await chromium.launch({ args: ['--disable-gpu', '--hide-scrollbars', '--font-render-hinting=none'] });
   const ctx = await browser.newContext({ viewport: { width: larghezza, height: altezza }, deviceScaleFactor: scala, reducedMotion: 'reduce' });
   const page = await ctx.newPage();
@@ -100,6 +100,7 @@ async function apri({ url, larghezza, altezza, scala = 1, griglia }) {
       return r.fulfill({ response: resp, body: html });
     }
     if (u.startsWith(base.origin)) return r.continue();
+    if (satellite && u.includes('arcgisonline.com')) return r.continue();   // la foto aerea, solo se la rete la lascia passare (dal PC)
     // il resto del mondo: una risposta vuota, cosi' la pagina non resta appesa e la console non si riempie
     if (/\.(png|jpe?g|webp)(\?|$)/.test(u) || /tile/.test(u)) return r.fulfill({ status: 200, body: PNG_VUOTO, contentType: 'image/png' });
     return r.fulfill({ status: 204, body: '' });
@@ -107,8 +108,9 @@ async function apri({ url, larghezza, altezza, scala = 1, griglia }) {
   await page.goto(url + (url.includes('?') ? '&' : '?') + 'novita=0', { waitUntil: 'load' });
   await page.waitForFunction(() => window._mapDebug && window.__film);
   await page.waitForTimeout(2500);   // la pagina finisce di sistemarsi da sola, poi la si ferma
+  if (nonPulire) return { browser, page, errori };   // la scheda della stazione: la pagina resta com'e', viva
   await page.addStyleTag({ content: CSS_PULITO });
-  await page.evaluate(async ({ griglia, JSDELIVR }) => {
+  await page.evaluate(async ({ griglia, JSDELIVR, satellite }) => {
     // 1. ferma timer e intervalli della pagina; da qui in poi la pagina non ne programma piu'
     window.__timer.forEach(id => { window.__ct(id); window.__ci(id); });
     window.setTimeout = () => 0; window.setInterval = () => 0;
@@ -119,6 +121,15 @@ async function apri({ url, larghezza, altezza, scala = 1, griglia }) {
     m._fadeAnimated = false; m._zoomAnimated = false;
     m.getContainer().classList.remove('leaflet-fade-anim', 'leaflet-zoom-anim');
     m.invalidateSize({ pan: false });
+    /* ⚠️ NIENTE ARROTONDAMENTI AL PIXEL. Leaflet arrotonda le coordinate dei vettori (latLngToLayerPoint) e la
+       posizione dei livelli di tessere: a mappa ferma non si vede, in un film che si muove di 0,2 px a fotogramma
+       coste, pioggia e tessere tremano di un pixel avanti e indietro. Qui si tolgono i due arrotondamenti. */
+    m.latLngToLayerPoint = function (ll) { return this.project(L.latLng(ll))._subtract(this.getPixelOrigin()); };
+    L.GridLayer.prototype._setZoomTransform = function (level, center, zoom) {
+      const scale = this._map.getZoomScale(zoom, level.zoom),
+        translate = level.origin.multiplyBy(scale).subtract(this._map._getNewPixelOrigin(center, zoom));
+      L.DomUtil.setTransform(level.el, translate, scale);
+    };
     // 3. panes del film, sotto la pioggia (overlayPane sta a 400)
     const pane = (n, z) => { const p = m.createPane(n); p.style.zIndex = z; p.style.pointerEvents = 'none'; return p; };
     pane('film-terra', 150); pane('film-rilievo', 160); pane('film-boschi', 170); pane('film-boschi-tela', 175); pane('film-linee', 450);
@@ -127,9 +138,9 @@ async function apri({ url, larghezza, altezza, scala = 1, griglia }) {
     // 4. terra: il contorno dell'Italia dai confini della mappa
     const contorno = await (await fetch('/__film/italia-contorno.json')).json();
     const linee = await (await fetch('/__film/italia-regioni-linee.json')).json();
-    window.__terra = L.geoJSON(contorno, { renderer: L.svg({ pane: 'film-terra', padding: 1 }), interactive: false,
+    window.__terra = L.geoJSON(contorno, { renderer: L.svg({ pane: 'film-terra', padding: 1 }), interactive: false, smoothFactor: 0,
       style: { stroke: false, fill: true, fillColor: '#1b1b1d', fillOpacity: 1 } }).addTo(m);
-    window.__linee = L.geoJSON(linee, { renderer: L.svg({ pane: 'film-linee', padding: 1 }), interactive: false,
+    window.__linee = L.geoJSON(linee, { renderer: L.svg({ pane: 'film-linee', padding: 1 }), interactive: false, smoothFactor: 0,
       style: { color: '#ffffff', weight: 0.8, opacity: 0 } }).addTo(m);
     // 5. rilievo e boschi: le tessere della mappa, solo quelle che esistono (indici delle tessere)
     const VUOTA = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==';
@@ -155,7 +166,14 @@ async function apri({ url, larghezza, altezza, scala = 1, griglia }) {
       window.__film.initCanvas(); window.__film.canvas().id = 'film-pioggia';
       window.__film.imposta(pts, contorno.geometry.type === 'Polygon' ? [contorno.geometry.coordinates] : contorno.geometry.coordinates, GR);
     }
-  }, { griglia, JSDELIVR });
+    if (satellite) {
+      // la foto aerea della mappa del test (la stessa Esri World Imagery; in prod c'e' la chiave), sotto i boschi
+      pane('film-sat', 158);
+      window.__sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { pane: 'film-sat', maxZoom: 19, maxNativeZoom: 19, crossOrigin: 'anonymous', keepBuffer: 0, updateWhenIdle: false }).addTo(m);
+      window.__terra.setStyle({ fillOpacity: 0 });
+    }
+  }, { griglia, JSDELIVR, satellite });
   return { browser, page, errori };
 }
 
@@ -167,6 +185,12 @@ async function scena(page, s) {
     const m = window._mapDebug;
     const raf = () => new Promise(r => requestAnimationFrame(() => r()));
     m.setView(s.centro, s.zoom, { animate: false, reset: true });
+    /* ⚠️ SOTTO-PIXEL. setView arrotonda l'origine della mappa al pixel intero: con la deriva lenta della fine
+       (0,2 px a fotogramma) l'immagine avanzava a scatti di un pixel, uno si' e tre no. Il resto
+       dell'arrotondamento si restituisce spostando il pane della mappa di una frazione di pixel. */
+    const vuole = m.project(L.latLng(s.centro), s.zoom).subtract(m.getSize().divideBy(2));
+    const resto = vuole.subtract(m.getPixelOrigin());
+    m.getPane('mapPane').style.transform = `translate3d(${-resto.x}px,${-resto.y}px,0)`;
     window.__terra.setStyle({ fillColor: s.terra || '#1b1b1d' });
     window.__linee.setStyle({ opacity: s.linee || 0 });
     const vuoi = (l, on) => { if (on && !m.hasLayer(l)) l.addTo(m); if (!on && m.hasLayer(l)) m.removeLayer(l); };
@@ -181,11 +205,12 @@ async function scena(page, s) {
       window.__film.canvas().style.opacity = s.pioggia == null ? 1 : s.pioggia;
     }
     // tessere: si aspetta che ci siano TUTTE; una tessera sbagliata si richiede (niente buchi)
-    for (let giro = 0; giro < 400; giro++) {
+    const inizio = performance.now();
+    for (let giro = 0; performance.now() - inizio < 120000; giro++) {   // fino a 2 minuti: al primo giro le tessere si scaricano
       await raf();
       let pronte = true;
-      for (const l of [window.__rilievo, window.__boschi]) {
-        if (!m.hasLayer(l)) continue;
+      for (const l of [window.__rilievo, window.__boschi, window.__sat]) {
+        if (!l || !m.hasLayer(l)) continue;
         if (l.isLoading && l.isLoading()) pronte = false;
         for (const key in l._tiles) {
           const t = l._tiles[key], img = t.el;
@@ -201,14 +226,16 @@ async function scena(page, s) {
     const tela = window.__tela || (window.__tela = (() => {
       const c = document.createElement('canvas'); c.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none';
       m.getPane('film-boschi-tela').appendChild(c); return c; })());
-    const size = m.getSize(), ctx = tela.getContext('2d');
-    tela.width = size.x; tela.height = size.y;
+    const size = m.getSize(), ctx = tela.getContext('2d'), dpr = window.devicePixelRatio || 1;
+    tela.width = size.x * dpr; tela.height = size.y * dpr;   // a scala 2 la tela ha i pixel veri dello schermo
+    tela.style.width = size.x + 'px'; tela.style.height = size.y + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const tl = m.containerPointToLayerPoint([0, 0]);
     tela.style.transform = `translate(${tl.x}px,${tl.y}px)`;
     ctx.clearRect(0, 0, size.x, size.y);
     tela.style.opacity = s.boschi || 0;
     if ((s.boschi || 0) > 0) {
-      const box = m.getContainer().getBoundingClientRect();
+      const box = m.getPane('mapPane').getBoundingClientRect();   // l'origine del pane, spostamento sotto-pixel compreso
       ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
       ctx.globalAlpha = 0.7;   // OPACITA della mappa boschi
       for (const key in window.__boschi._tiles) {
