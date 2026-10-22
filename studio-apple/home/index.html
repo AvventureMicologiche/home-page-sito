@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../../favicon.ico">
+<title>Avventure Micologiche</title>
+<meta name="description" content="Mappa delle piogge: dove è piovuto davvero, stazione per stazione. Poi il canale YouTube e il quiz per l'esame tartufi.">
+<!-- MOCKUP DI STUDIO (studio-apple/home/), non e' la home vera e non e' pubblicato.
+     Struttura e ritmo misurati su apple.com (vedi ../brand-guide.html): menu 44 px sfocato,
+     fasce alternate #f5f5f7 / bianco / nero, titoli centrati, due pillole, poi riquadri a 2 colonne
+     con raggio 28 e spazio 20. Niente font web, niente librerie, niente richieste esterne:
+     immagini e filmati arrivano da ../../immagini/ e ../../video/ (nessun file copiato). -->
+<style>
+:root {
+  /* ── COLORE D'AZIONE: si sceglie con un blocco ──
+     Blu Apple (attivo). Testo bianco sul blu: 4,7 di contrasto. */
+  --color-action: #0071e3;
+  --color-on-action: #ffffff;
+  --color-link: #0066cc;        /* contorni e link su chiaro: 5,57 sul bianco */
+  --color-link-dark: #2997ff;   /* contorni e link su nero: 6,96 */
+  /* Verde del sito: togli il commento a queste quattro righe.
+     ⚠️ bianco su #8aaa6a fa solo 2,6: sulla pillola piena il testo diventa scuro (6,4). */
+  /* --color-action: #8aaa6a; --color-on-action: #1d1d1f; --color-link: #5a7a3e; --color-link-dark: #8aaa6a; */
+  /* Oro del sito: idem (bianco su #c8a96e fa 2,2, scuro 7,5). */
+  /* --color-action: #c8a96e; --color-on-action: #1d1d1f; --color-link: #8a6d2f; --color-link-dark: #c8a96e; */
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --bg: #ffffff;
+  --surface: #f5f5f7;
+  --black: #000000;
+  --text: #1d1d1f;
+  --muted: #6e6e73;   /* 5,1 sul #f5f5f7: il #707070 misurato scende a 4,6 sul grigio */
+  --muted-dark: #a1a1a6;
+  --border: #d2d2d7;
+  --radius: 28px;
+  --gap: 20px;
+  --pill-h: 44px;
+  --container: 1260px;
+  --ease: cubic-bezier(0, 0, 0.5, 1);
+  --t-display: clamp(2rem, 1.443rem + 2.286vw, 3.5rem);
+  --t-h2: clamp(2rem, 1.814rem + 0.762vw, 2.5rem);
+  --t-h4: clamp(1.1875rem, 0.979rem + 0.857vw, 1.75rem);
+  --t-lead: clamp(1.0625rem, 0.97rem + 0.381vw, 1.3125rem);
+  --t-body: clamp(0.875rem, 0.805rem + 0.286vw, 1.0625rem);
+  --nav-h: 44px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 60px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0; background: var(--bg); color: var(--text); font-family: var(--font);
+  font-size: var(--t-body); line-height: 1.471; letter-spacing: -0.022em; -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p, ul, figure { margin: 0; padding: 0; }
+img, video { display: block; max-width: 100%; }
+a { color: var(--color-link); }
+.wrap { max-width: var(--container); margin: 0 auto; padding: 0 22px; }
+.center { text-align: center; }
+.display { font-size: var(--t-display); line-height: 1.071; letter-spacing: -0.005em; font-weight: 600; }
+.h2 { font-size: var(--t-h2); line-height: 1.1; letter-spacing: 0.004em; font-weight: 600; }
+.lead { font-size: var(--t-lead); line-height: 1.381; letter-spacing: 0.011em; font-weight: 400; }
+.small { font-size: 0.75rem; line-height: 1.333; letter-spacing: -0.01em; }
+.muted { color: var(--muted); }
+
+/* ── PILLOLE ── */
+.pills { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+.pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--pill-h); padding: 11px 21px; border-radius: 980px; border: 1px solid transparent;
+  font-size: 17px; line-height: 1.17648; letter-spacing: -0.022em; text-decoration: none; text-align: center;
+  transition: background-color .24s var(--ease), color .24s var(--ease), border-color .24s var(--ease);
+}
+.pill-fill { background: var(--color-action); color: var(--color-on-action); }
+.pill-fill:hover { filter: brightness(1.06); }
+.pill-line { color: var(--color-link); border-color: var(--color-link); }
+.pill-line:hover { background: var(--color-link); color: #fff; }
+.dark .pill-line { color: var(--color-link-dark); border-color: var(--color-link-dark); }
+.dark .pill-line:hover { background: var(--color-link-dark); color: #000; }
+.pill svg { width: 18px; height: 18px; flex: none; }
+:focus-visible { outline: 2px solid var(--color-link-dark); outline-offset: 3px; }
+
+/* ── MENU: 44 px, fisso, bianco all'80% e sfocato ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: saturate(1.8) blur(20px); backdrop-filter: saturate(1.8) blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.nav .in { max-width: 1024px; margin: 0 auto; padding: 0 22px; height: var(--nav-h); display: flex; align-items: center; gap: 32px; }
+.nav .brand { font-size: 14px; font-weight: 600; color: var(--text); text-decoration: none; letter-spacing: -0.01em; white-space: nowrap; margin-right: auto; }
+.nav .links { display: flex; gap: 32px; }
+.nav .links a { font-size: 12px; color: rgba(0, 0, 0, 0.8); text-decoration: none; white-space: nowrap; transition: color .24s cubic-bezier(0.4, 0, 0.6, 1); }
+.nav .links a:hover { color: #000; }
+
+/* ── 1. LA MAPPA (fascia chiara) ── */
+.hero { background: var(--surface); padding: calc(var(--nav-h) + 56px) 0 64px; text-align: center; }
+.hero .sub { margin: 12px auto 0; max-width: 40ch; }
+.hero .where { margin-top: 18px; }
+.frame { position: relative; max-width: 1060px; margin: 44px auto 0; border-radius: var(--radius); overflow: hidden; background: #dfe3e8; aspect-ratio: 16 / 9; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.35); }
+.frame video { width: 100%; height: 100%; object-fit: cover; }
+
+/* bottone pausa/play sui filmati, tondo grigio come quelli misurati */
+.vbtn {
+  position: absolute; right: 16px; bottom: 16px; width: 36px; height: 36px; border-radius: 50%; border: 0;
+  background: rgba(232, 232, 237, 0.85); color: var(--text); display: grid; place-items: center; cursor: pointer;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.vbtn svg { width: 14px; height: 14px; }
+.vbtn .i-play { display: none; }
+.vbtn.paused .i-play { display: block; }
+.vbtn.paused .i-pause { display: none; }
+.vbtn[hidden] { display: none; }
+
+/* ── 2. RIQUADRI DELLA MAPPA ── */
+.tiles-sec { padding: var(--gap) 0; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); max-width: var(--container); margin: 0 auto; padding: 0 var(--gap); }
+.tile { border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; text-align: center; min-height: 580px; }
+.tile.light { background: var(--surface); color: var(--text); }
+.tile.dark { background: var(--black); color: #fff; }
+.tile .txt { padding: 52px 28px 28px; }
+.tile .txt p { margin-top: 10px; max-width: 40ch; margin-left: auto; margin-right: auto; }
+.tile.dark .txt p { color: var(--muted-dark); }
+.tile.light .txt p { color: var(--muted); }
+.tile .pills { margin-top: 20px; }
+.tile .media { position: relative; margin-top: auto; padding: 0 28px 28px; }
+.tile .media .box { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 16 / 9; background: #1d1d1f; }
+.tile .media video { width: 100%; height: 100%; object-fit: cover; }
+.tile .vbtn { right: 12px; bottom: 12px; }
+.dark a:not(.pill) { color: var(--color-link-dark); }
+
+/* ── 3. NUMERI ── */
+.numbers { background: var(--surface); padding: 90px 0; text-align: center; }
+.numbers .sub { margin-top: 12px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); margin: 48px auto 0; max-width: 1024px; list-style: none; }
+.stats li { background: var(--bg); border-radius: var(--radius); padding: 32px 20px; }
+.stats b { display: block; font-size: var(--t-display); line-height: 1.071; letter-spacing: -0.005em; font-weight: 600; }
+.stats span { display: block; margin-top: 8px; }
+.stats small { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.numbers .free { margin-top: 32px; font-weight: 600; }
+
+/* ── 4. YOUTUBE (fascia nera) ── */
+.yt { background: var(--black); color: #fff; padding: 90px 0 var(--gap); text-align: center; }
+.yt .eyebrow { color: var(--muted-dark); font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.yt .sub { margin: 12px auto 0; max-width: 40ch; color: var(--muted-dark); }
+.mosaic { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: var(--gap); max-width: var(--container); margin: 56px auto 0; padding: 0 var(--gap); }
+.mosaic figure { border-radius: var(--radius); overflow: hidden; background: #1d1d1f; }
+.mosaic figure:first-child { grid-row: span 2; }
+.mosaic img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── 5. QUIZ ── */
+.quiz-sec { padding: 90px 0 var(--gap); }
+.quiz { max-width: var(--container); margin: 0 auto; padding: 0 var(--gap); }
+.quiz .card { background: var(--surface); border-radius: var(--radius); overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+.quiz .txt { padding: 56px; text-align: left; }
+.quiz .txt .pills { justify-content: flex-start; }
+.quiz .txt p.sub { margin-top: 12px; }
+.quiz .txt p.info { margin-top: 16px; color: var(--muted); max-width: 46ch; }
+.quiz .regions { margin-top: 24px; font-size: 14px; color: var(--muted); line-height: 1.9; }
+.quiz .regions a { white-space: nowrap; }
+.quiz .pic { display: block; height: 100%; }
+.quiz .pic img { width: 100%; height: 100%; object-fit: cover; min-height: 360px; }
+
+/* ── 6. CHI SIAMO ── */
+.about { padding: 90px 0; text-align: center; }
+.about .sub { margin: 16px auto 0; max-width: 52ch; color: var(--muted); }
+.about .pics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); max-width: 1024px; margin: 48px auto 0; }
+.about figure { border-radius: var(--radius); overflow: hidden; aspect-ratio: 4 / 3; background: var(--surface); }
+.about img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── PIEDE ── */
+footer { background: var(--surface); color: var(--muted); font-size: 12px; line-height: 1.5; padding: 40px 0 28px; }
+footer .row { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+footer .name { color: var(--text); font-size: 17px; font-weight: 600; }
+footer .mail { margin-top: 6px; overflow-wrap: anywhere; }
+.socials { display: flex; gap: 12px; }
+.soc { width: 44px; height: 44px; border-radius: 50%; background: #e8e8ed; color: var(--text); display: grid; place-items: center; transition: color .24s var(--ease), background-color .24s var(--ease); }
+.soc svg { width: 20px; height: 20px; fill: currentColor; }
+.soc-yt:hover { color: #ff0000; } .soc-fb:hover { color: #1877f2; } .soc-ig:hover { color: #e1306c; } .soc-suno:hover { color: #ff6b00; }
+footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* ── TELEFONO: tutto in una colonna, pillole a tutta larghezza ── */
+@media (max-width: 1068px) {
+  .tile { min-height: 0; }
+  .quiz .txt { padding: 40px; }
+}
+@media (max-width: 734px) {
+  :root { --nav-h: 84px; }
+  html { scroll-padding-top: 96px; }
+  /* due righe: il nome, poi le cinque voci. Niente menu ☰ (scelta del sito: da solo nessuno lo apre) */
+  .nav .in { height: auto; flex-wrap: wrap; gap: 0; padding: 0 16px; }
+  .nav .brand { height: 44px; display: flex; align-items: center; }
+  .nav .links { flex-basis: 100%; justify-content: space-between; gap: 8px; height: 40px; align-items: center; border-top: 1px solid rgba(0, 0, 0, 0.06); }
+  .nav .links a { padding: 10px 0; }
+  .wrap { padding: 0 16px; }
+  .hero { padding: calc(var(--nav-h) + 40px) 0 40px; }
+  .pills { flex-direction: column; align-items: stretch; }
+  .pill { width: 100%; }
+  .frame { margin-top: 32px; border-radius: 18px; }
+  .tiles { grid-template-columns: minmax(0, 1fr); padding: 0 12px; gap: 12px; }
+  .tiles-sec { padding: 12px 0; }
+  .tile .txt { padding: 40px 20px 20px; }
+  .tile .media { padding: 0 12px 12px; }
+  .numbers { padding: 56px 0; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 32px; }
+  .stats li { padding: 22px 12px; }
+  .yt { padding: 56px 0 12px; }
+  .mosaic { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 12px; padding: 0 12px; margin-top: 36px; }
+  .mosaic figure:first-child { grid-column: span 2; grid-row: auto; aspect-ratio: 4 / 3; }
+  .mosaic figure:not(:first-child) { aspect-ratio: 1; }
+  .quiz-sec { padding: 56px 0 12px; }
+  .quiz { padding: 0 12px; }
+  .quiz .card { grid-template-columns: minmax(0, 1fr); }
+  .quiz .pic { order: -1; }
+  .quiz .pic img { min-height: 0; aspect-ratio: 16 / 9; }
+  .quiz .txt { padding: 28px 20px 32px; }
+  .about { padding: 56px 0; }
+  .about .pics { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 32px; }
+  footer .row { flex-direction: column; align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="in">
+    <a class="brand" href="#top">Avventure Micologiche</a>
+    <nav class="links" aria-label="Menu">
+      <a href="https://precipitazioni.avventuremicologiche.it">Mappa</a>
+      <a href="https://precipitazioni.avventuremicologiche.it/funghi/">Funghi</a>
+      <a href="#youtube">YouTube</a>
+      <a href="/esame-tartufi/">Quiz</a>
+      <a href="#chi-siamo">Chi siamo</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- 1. LA MAPPA: il cuore della pagina -->
+<section class="hero" id="mappa">
+  <div class="wrap">
+    <h1 class="display">Mappa delle piogge.</h1>
+    <p class="lead sub">Dove è piovuto davvero, stazione per stazione.</p>
+    <div class="pills">
+      <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Apri la mappa</a>
+      <!-- ⚠️ testo vero, non immagine: serve a Google per arrivare alla pagina delle localita' -->
+      <a class="pill pill-line" href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a>
+    </div>
+    <p class="small muted where">Italia, Svizzera, Austria, Francia e Slovenia. Gratis.</p>
+    <div class="frame">
+      <video poster="../../immagini/poster-piogge.jpg" muted loop playsinline preload="none" width="1280" height="720"
+             aria-label="La mappa delle piogge si colora quando si sceglie il periodo: sette giorni, poi trenta">
+        <source src="../../video/piogge.mp4" type="video/mp4">
+      </video>
+      <button class="vbtn paused" type="button" aria-label="Avvia il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<!-- 2. LE FUNZIONI DELLA MAPPA: riquadri a 2 colonne, chiari e neri alternati -->
+<section class="tiles-sec" aria-label="Cosa trovi nella mappa">
+  <div class="tiles">
+    <article class="tile dark">
+      <div class="txt">
+        <h2 class="h2">Diretta radar.</h2>
+        <p class="lead">La pioggia che cade adesso, le ultime due ore e i prossimi 40 minuti.</p>
+        <div class="pills">
+          <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it/?r=lombardia,veneto,emilia&amp;radar=ora" target="_blank" rel="noopener">Guarda il radar</a>
+          <a class="pill pill-line" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Tutta la mappa</a>
+        </div>
+      </div>
+      <div class="media"><div class="box">
+        <video poster="../../immagini/poster-radar.jpg" muted loop playsinline preload="none" width="768" height="432"
+               aria-label="Le piogge che si muovono sul radar, le ultime due ore">
+          <source src="../../video/radar.mp4" type="video/mp4">
+        </video>
+        <button class="vbtn paused" type="button" aria-label="Avvia il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg></button>
+      </div></div>
+    </article>
+    <article class="tile light">
+      <div class="txt">
+        <h2 class="h2">Mappa boschi e satellite.</h2>
+        <p class="lead">Faggete, castagneti, querceti e abetaie sopra la foto vera. Ti avvicini fino agli alberi.</p>
+        <div class="pills">
+          <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it/?r=trentino&amp;boschi=1" target="_blank" rel="noopener">Apri i boschi</a>
+          <a class="pill pill-line" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Tutta la mappa</a>
+        </div>
+      </div>
+      <div class="media"><div class="box">
+        <video poster="../../immagini/poster-boschi-satellite.jpg" muted loop playsinline preload="none" width="768" height="432"
+               aria-label="La mappa dei boschi che si accende sul Trentino, poi il satellite fino alle chiome di una faggeta">
+          <source src="../../video/boschi-satellite.mp4" type="video/mp4">
+        </video>
+        <button class="vbtn paused" type="button" aria-label="Avvia il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg></button>
+      </div></div>
+    </article>
+    <article class="tile light">
+      <div class="txt">
+        <h2 class="h2">Previsioni meteo.</h2>
+        <p class="lead">I prossimi sette giorni, ora per ora: temperatura, pioggia, probabilità e vento.</p>
+        <div class="pills">
+          <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev" target="_blank" rel="noopener">Vedi le previsioni</a>
+          <a class="pill pill-line" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Tutta la mappa</a>
+        </div>
+      </div>
+      <div class="media"><div class="box">
+        <video poster="../../immagini/poster-previsioni.jpg" muted loop playsinline preload="none" width="768" height="432"
+               aria-label="Le icone del tempo sulle località della Liguria, poi il dettaglio di Genova ora per ora">
+          <source src="../../video/previsioni.mp4" type="video/mp4">
+        </video>
+        <button class="vbtn paused" type="button" aria-label="Avvia il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg></button>
+      </div></div>
+    </article>
+    <article class="tile dark">
+      <div class="txt">
+        <h2 class="h2">Ogni stazione, giorno per giorno.</h2>
+        <p class="lead">Tocca un pallino: pioggia, temperatura, vento e umidità.</p>
+        <div class="pills">
+          <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Apri la mappa</a>
+          <a class="pill pill-line" href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a>
+        </div>
+      </div>
+      <div class="media"><div class="box">
+        <video poster="../../immagini/poster-scheda.jpg" muted loop playsinline preload="none" width="768" height="432"
+               aria-label="La scheda di un pluviometro: pioggia, temperatura, vento e umidità">
+          <source src="../../video/scheda.mp4" type="video/mp4">
+        </video>
+        <button class="vbtn paused" type="button" aria-label="Avvia il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg></button>
+      </div></div>
+    </article>
+  </div>
+</section>
+
+<!-- 3. I NUMERI: solo quelli scritti nella home attuale -->
+<section class="numbers">
+  <div class="wrap">
+    <h2 class="display">Pluviometri veri.</h2>
+    <p class="lead sub muted">I millimetri misurati dalle agenzie regionali, non le previsioni.</p>
+    <ul class="stats">
+      <li><b>5000+</b><span>stazioni meteo</span></li>
+      <li><b>5</b><span>nazioni</span><small>Italia, Svizzera, Austria, Francia, Slovenia</small></li>
+      <li><b>1 anno</b><span>di dati</span></li>
+      <li><b>24 ore</b><span>tra un aggiornamento e l'altro</span></li>
+    </ul>
+    <p class="lead free">Gratis, senza pubblicità, senza registrazione.</p>
+  </div>
+</section>
+
+<!-- 4. YOUTUBE: fascia nera, va spinto -->
+<section class="yt dark" id="youtube">
+  <div class="wrap">
+    <p class="eyebrow">YouTube</p>
+    <h2 class="display">Il bosco, ogni mese.</h2>
+    <p class="lead sub">Il nostro diario, 12 mesi all'anno, in tempo reale: specie nuove, ritrovamenti strani, giornate epiche e disastrose. Sempre con Archie.</p>
+    <div class="pills">
+      <a class="pill pill-fill" href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>Guarda il canale</a>
+    </div>
+  </div>
+  <div class="mosaic">
+    <figure><img src="../../immagini/spugnole.jpg" width="1619" height="913" loading="lazy" alt="Archie, il nostro lagotto, tra le foglie d'autunno"></figure>
+    <figure><img src="../../immagini/porcini.jpg" width="1452" height="822" loading="lazy" alt="Ovoli appena raccolti, tenuti in mano"></figure>
+    <figure><img src="../../immagini/cestino_giorno.jpg" width="916" height="694" loading="lazy" alt="Un tartufo nero nel palmo della mano"></figure>
+  </div>
+</section>
+
+<!-- 5. QUIZ ESAME TARTUFI. I link alle otto regioni sono testo vero: servono a Google. -->
+<section class="quiz-sec" id="quiz">
+  <div class="quiz">
+    <article class="card">
+      <div class="txt">
+        <h2 class="display">Quiz esame tartufi.</h2>
+        <p class="lead sub">Le domande del tesserino, in un gioco.</p>
+        <p class="info">Domande ufficiali per Campania, Lazio, Marche e Toscana. Per le altre quattro regioni, esempi elaborati sui testi di studio. Gratis, senza registrazione, anche dal telefono.</p>
+        <div class="pills"><a class="pill pill-fill" href="/esame-tartufi/">Prova il quiz</a></div>
+        <p class="regions">Le regioni: <a href="/esame-tartufi/lombardia/">Lombardia</a> · <a href="/esame-tartufi/piemonte/">Piemonte</a> · <a href="/esame-tartufi/emilia-romagna/">Emilia-Romagna</a> · <a href="/esame-tartufi/liguria/">Liguria</a> · <a href="/esame-tartufi/campania/">Campania</a> · <a href="/esame-tartufi/lazio/">Lazio</a> · <a href="/esame-tartufi/marche/">Marche</a> · <a href="/esame-tartufi/toscana/">Toscana</a></p>
+      </div>
+      <a class="pic" href="/esame-tartufi/" aria-label="Apri il quiz esame tartufi">
+        <img src="../../immagini/home-quiz-tartufi.jpg" width="1100" height="619" loading="lazy" alt="Il tartufaio esulta con un tartufo nero in mano, accanto al suo lagotto, in un bosco d'autunno">
+      </a>
+    </article>
+  </div>
+</section>
+
+<!-- 6. CHI SIAMO -->
+<section class="about" id="chi-siamo">
+  <div class="wrap">
+    <h2 class="display">Con Archie, sempre.</h2>
+    <p class="lead sub">Un piccolo canale nato per raccontare la vita nei boschi: funghi epigei e ipogei, dai porcini al tartufo bianco pregiato. Con noi c'è sempre Archie, il nostro lagotto romagnolo.</p>
+    <div class="pics">
+      <figure><img src="../../immagini/archie_tartufo.jpg" width="1565" height="916" loading="lazy" alt="Archie accanto a un tartufo nero appena trovato, tenuto in mano"></figure>
+      <figure><img src="../../immagini/ovoli_mano.jpg" width="975" height="1300" loading="lazy" alt="Archie sul sentiero, davanti a lui un porcino"></figure>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <div>
+        <div class="name">Avventure Micologiche</div>
+        <div>con Archie</div>
+        <div class="mail">Scrivici: <a href="mailto:avventuremicologiche@gmail.com">avventuremicologiche@gmail.com</a></div>
+      </div>
+      <div class="socials">
+        <a href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" aria-label="YouTube" class="soc soc-yt">
+          <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+        </a>
+        <a href="https://www.facebook.com/avventuremicologiche/" target="_blank" rel="noopener" aria-label="Facebook" class="soc soc-fb">
+          <svg viewBox="0 0 24 24"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/avventuremicologiche/" target="_blank" rel="noopener" aria-label="Instagram" class="soc soc-ig">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+        <a href="https://suno.com/@avventuremicologiche" target="_blank" rel="noopener" aria-label="Suno" class="soc soc-suno">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/><polygon points="10,8 16,12 10,16" fill="currentColor"/></svg>
+        </a>
+      </div>
+    </div>
+    <p class="copy">© 2025-2026 Avventure Micologiche · avventuremicologiche.it · Tutti i diritti riservati</p>
+  </div>
+</footer>
+
+<script>
+/* Filmati: partono SOLO quando il riquadro entra nello schermo e si fermano quando esce.
+   Stessa logica dello script in fondo all'index.html attuale (21/9/2026):
+   ⚠️ niente `autoplay`, se no il browser li scarica tutti appena apre la pagina;
+   `preload="none"` finche' non servono; con «riduci animazioni» non parte niente e resta il poster;
+   `play()` rifiutato (risparmio energetico) = si lascia il poster senza insistere.
+   In piu': il tondo pausa/play (chi ferma un filmato lo ritrova fermo anche quando torna). */
+(function () {
+  var video = document.querySelectorAll('main video');
+  if (!video.length) return;
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  if (!('IntersectionObserver' in window)) {          // browser vecchio: si lascia il poster
+    return;
+  }
+  function tasto(el) { return el.parentNode.querySelector('.vbtn'); }
+  function segna(el) {
+    var b = tasto(el); if (!b) return;
+    var fermo = el.paused;
+    b.classList.toggle('paused', fermo);
+    b.setAttribute('aria-label', fermo ? 'Avvia il filmato' : 'Metti in pausa il filmato');
+  }
+  function parti(el) {
+    if (el.preload === 'none') el.preload = 'auto';
+    var p = el.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+  var guardia = new IntersectionObserver(function (voci) {
+    voci.forEach(function (v) {
+      var el = v.target;
+      if (v.isIntersecting) {
+        if (!el.dataset.fermato) parti(el);
+      } else {
+        el.pause();
+      }
+    });
+  }, { threshold: 0.35 });
+
+  Array.prototype.forEach.call(video, function (el) {
+    var b = tasto(el);
+    if (b) {
+      b.hidden = false;
+      b.addEventListener('click', function () {
+        if (el.paused) { delete el.dataset.fermato; parti(el); }
+        else { el.dataset.fermato = '1'; el.pause(); }
+      });
+      el.addEventListener('play', function () { segna(el); });
+      el.addEventListener('pause', function () { segna(el); });
+    }
+    guardia.observe(el);
+  });
+})();
+</script>
+
+</body>
+</html>
