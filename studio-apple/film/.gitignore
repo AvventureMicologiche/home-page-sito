@@ -1,3 +1,6 @@
 cache/
 frames/
 prova/
+node_modules/
+package-lock.json
+# ⚠️ cache/satellite/ contiene le tessere Esri World Imagery: NON vanno mai nel repo (sono di Esri)
