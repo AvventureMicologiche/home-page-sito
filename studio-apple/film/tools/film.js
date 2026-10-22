@@ -234,7 +234,7 @@ function codifica() {
   const stills = path.join(FILM, 'stills');
   fs.rmSync(stills, { recursive: true, force: true }); fs.mkdirSync(stills, { recursive: true });
   for (let s = 0; s < DUR; s++) execFileSync(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', path.join(FRAMES, `f${String(s * FPS).padStart(5, '0')}.png`),
-    '-vf', 'scale=960:-2', '-q:v', '4', path.join(stills, `still-${String(s).padStart(2, '0')}s.jpg`)]);
+    '-vf', 'scale=1280:-2', '-q:v', '4', path.join(stills, `still-${String(s).padStart(2, '0')}s.jpg`)]);
   for (const f of ['apertura-1080.mp4', 'apertura-720.mp4', 'apertura-poster.webp'])
     console.log(f, (fs.statSync(path.join(FILM, f)).size / 1048576).toFixed(2), 'MB');
 }
