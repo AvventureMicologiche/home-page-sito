@@ -65,9 +65,10 @@ function verso(da, a) {
 const NODI = [
   [0.0, 6.62, 0.016],     // l'Italia, ci si avvicina appena
   [9.2, 6.79, 0.03],      // parte il volo sulla Liguria
-  [12.6, 9.12, 0.72],     // la Liguria, senza fermarsi: si continua a scendere
-  [18.3, 14.3, 0],        // le chiome (14,3: le tessere dei boschi sono quasi al loro dettaglio vero)
-  [21.9, 9.05, -0.07],    // di nuovo la regione intera, per le previsioni
+  [12.6, 9.12, 0.95],     // la Liguria, senza fermarsi: si continua a scendere, ancora sotto la pioggia
+  [15.2, 12.0, 0.45],     // i boschi entrano qui, dove sono macchie grandi (vedi sotto, «perche' cosi'»)
+  [18.6, 14.3, 0],        // le chiome (14,3: le tessere dei boschi sono quasi al loro dettaglio vero)
+  [22.0, 9.05, -0.07],    // di nuovo la regione intera, per le previsioni
   [24.0, 8.97, -0.03],    // e ci si allontana appena
 ];
 function zoomAl(t) {
@@ -82,15 +83,15 @@ const VERSO1 = verso(ITALIA2, LIGURIA), VERSO2 = verso(LIGURIA, BOSCO), VERSO3 =
 const DERIVA = (() => {
   const dt = 1 / 600, out = [[0, 0]]; let ex = 0, ey = 0;
   for (let t = dt; t <= DUR + 1e-9; t += dt) {
-    const v = 16 * liscia((t - 15.4) / 1.6) * (1 - liscia((t - 19.4) / 1.6)), sc = 256 * 2 ** zoomAl(t);
+    const v = 16 * liscia((t - 16.4) / 1.6) * (1 - liscia((t - 19.8) / 1.6)), sc = 256 * 2 ** zoomAl(t);
     ex += 0.94 * v / sc * dt; ey += -0.34 * v / sc * dt; out.push([ex, ey]);
   }
   return t => out[Math.min(out.length - 1, Math.round(t * 600))];
 })();
 function cameraGrezza(t) {
   const zoom = zoomAl(t);
-  const m = t < 9.2 ? proj(ITALIA.centro) : t < 12.6 ? VERSO1(zoom) : t < 18.3 ? VERSO2(zoom) : t < 21.9 ? VERSO3(zoom)
-    : (() => { const p = proj(PREVISIONI.centro), u = t - 21.9; return [p[0] + 0.0000016 * u, p[1] - 0.0000006 * u]; })();
+  const m = t < 9.2 ? proj(ITALIA.centro) : t < 12.6 ? VERSO1(zoom) : t < 18.6 ? VERSO2(zoom) : t < 22.0 ? VERSO3(zoom)
+    : (() => { const p = proj(PREVISIONI.centro), u = t - 22.0; return [p[0] + 0.0000016 * u, p[1] - 0.0000006 * u]; })();
   const d = DERIVA(t);
   return { m: [m[0] + d[0], m[1] + d[1]], zoom };
 }
@@ -138,28 +139,30 @@ function statoAl(t, { sat, prev }) {
   const u = clamp((t - 2.2) / 8.8), ue = 0.5 * u + 0.5 * liscia(u);
   const g = TEMPO_PIOGGIA ? TEMPO_PIOGGIA(ue) : (GIORNI - 1 + MORBIDO) * ue;
   const nascita = g < 10 ? 0.02 + 0.33 * liscia((g - 2.6) / 5) + 0.8 * liscia((g - 7) / 3) : null;   // la prima pioggia (25/9) nasce dai pallini
-  const terraU = tratto(t, 11.6, 13.6), terraFine = tratto(t, 18.8, 21.2);
+  const terraU = tratto(t, 13.6, 15.6), terraFine = tratto(t, 19.4, 21.4);
+  /* PERCHE' COSI' (seconda sessione): i boschi visti fra lo zoom 9 e l'11 sono migliaia di poligoni minuscoli, e
+     in movimento l'H.264 li impasta (servivano 19 Mbit/s per tenerli nitidi). Allora si scende verso il bosco ancora
+     sotto la pioggia, che e' liscia, e i boschi entrano in dissolvenza a zoom 11-12, dove sono macchie grandi. */
   return {
     centro: c.centro, zoom: c.zoom,
     giorno: g, morbido: MORBIDO, nascita,
     pallini: clamp((t - 0.4) / 2.2) * 1.0001, pallinoVia: clamp((g - 15) / 4.5),                   // i pallini sfumano con la pioggia grande (7-10 ottobre)
     // la pioggia sfuma mentre i boschi si accendono (dissolvenza incrociata), poi se ne va del tutto
-    pioggia: 1 - tratto(t, 12.0, 14.8),
+    pioggia: 1 - tratto(t, 13.8, 16.0),
     linee: 0.10 * (1 - tratto(t, 9.4, 11.2)),
     terra: hex(mixc(mixc(TERRA_BUIA, TERRA_RILIEVO, terraU), TERRA_FINE, terraFine)),
     // il rilievo sale solo quando la pioggia e' quasi andata (regola della mappa), e alla fine resta morbido
-    rilievo: tratto(t, 13.0, 15.0) * (1 - 0.35 * terraFine),
+    rilievo: tratto(t, 15.2, 16.6) * (1 - 0.6 * tratto(t, 18.9, 20.2)),   // nel ritorno veloce il rilievo si abbassa: costa banda
     // vicino alle chiome i boschi si fanno un po' piu' trasparenti: sotto si vede il satellite
-    boschi: tratto(t, 11.9, 12.3) * (1 - tratto(t, 18.9, 20.6)) * (1 - 0.4 * tratto(t, 16.0, 17.6) * (1 - tratto(t, 18.4, 19.4))),
-    soglia: mix(320, 25, tratto(t, 12.0, 15.2)),                 // prima dove e' piovuto di piu'
+    boschi: tratto(t, 13.7, 14.1) * (1 - tratto(t, 18.7, 19.8)) * (1 - 0.4 * tratto(t, 16.8, 18.0)),
+    soglia: mix(320, 25, tratto(t, 13.8, 16.4)),                 // prima dove e' piovuto di piu'
     morbidoBoschi: 30,
-    sat: tratto(t, 14.6, 16.8) * (1 - tratto(t, 18.7, 20.6)),    // il satellite sfuma dentro SOTTO i boschi
-    prev: clamp((t - 20.0) / 2.6) * 1.0001, prevGiorno: 1,
-    /* MOSSO: quando lo zoom corre, le tessere si sfumano appena (al massimo 0,9 px), come una cinepresa vera.
-       Senza, la discesa sui boschi chiedeva 19 Mbit/s per restare nitida e l'H.264 la impastava. */
-    mosso: Math.min(0.9, 0.45 * Math.max(0, velZoom(i) - 0.35)),
-    nota: !sat && t > 14.4 && t < 20.9 ? 'segnaposto: il satellite si rifà dal PC' : !prev && t > 19.8 ? 'segnaposto: le previsioni si rifanno dal PC' : null,
-    notaOpacita: !sat && t < 20.9 ? tratto(t, 14.4, 15.2) * (1 - tratto(t, 20.2, 20.9)) : tratto(t, 19.8, 20.6),
+    sat: tratto(t, 15.8, 17.6) * (1 - tratto(t, 19.0, 20.6)),    // il satellite sfuma dentro SOTTO i boschi
+    prev: clamp((t - 20.2) / 2.6) * 1.0001, prevGiorno: 1,
+    /* MOSSO: quando lo zoom corre, le tessere si sfumano appena (al massimo 1,4 px), come una cinepresa vera. */
+    mosso: Math.min(1.4, 0.7 * Math.max(0, velZoom(i) - 0.5)),
+    nota: !sat && t > 15.6 && t < 20.9 ? 'segnaposto: il satellite si rifà dal PC' : !prev && t > 20.0 ? 'segnaposto: le previsioni si rifanno dal PC' : null,
+    notaOpacita: !sat && t < 20.9 ? tratto(t, 15.6, 16.4) * (1 - tratto(t, 20.2, 20.9)) : tratto(t, 20.0, 20.8),
     loop: tratto(t, DUR - 0.8, DUR)                              // dissolvenza sul primo fotogramma
   };
 }
