@@ -37,7 +37,7 @@ const AREA = 'liguria';
 const ITALIA = { centro: [41.85, 12.5], zoom: 6.62 };     // l'Italia intera in 1920x1080, con margine
 const LIGURIA = { centro: [44.27, 8.95], zoom: 9.12 };     // la regione intera, il mare sotto
 const BOSCO = { centro: [44.5395, 9.4566], zoom: 14.3 };   // faggete e castagneti sopra Santo Stefano d'Aveto
-const PREVISIONI = { centro: [44.17, 8.83], zoom: 9.05 };  // i capoluoghi della Liguria, da Sanremo alla Spezia
+const PREVISIONI = { centro: [44.16, 8.66], zoom: 9.42 };  // i capoluoghi della Liguria, da Sanremo alla Spezia (a sinistra la pagina sfuma il video)
 const GIORNI = 30, MORBIDO = 2.5;                          // MORBIDO: ogni giorno entra nel cumulato in 2,5 «giorni»
 const TERRA_BUIA = [0x1b, 0x1b, 0x1d], TERRA_RILIEVO = [0x3c, 0x3c, 0x3f], TERRA_FINE = [0x2e, 0x2e, 0x31];
 
@@ -68,8 +68,8 @@ const NODI = [
   [12.6, 9.12, 0.95],     // la Liguria, senza fermarsi: si continua a scendere, ancora sotto la pioggia
   [15.2, 12.0, 0.45],     // i boschi entrano qui, dove sono macchie grandi (vedi sotto, «perche' cosi'»)
   [18.6, 14.3, 0],        // le chiome (14,3: le tessere dei boschi sono quasi al loro dettaglio vero)
-  [22.0, 9.05, -0.07],    // di nuovo la regione intera, per le previsioni
-  [24.0, 8.97, -0.03],    // e ci si allontana appena
+  [22.0, 9.42, -0.07],    // di nuovo la regione intera, per le previsioni
+  [24.0, 9.34, -0.03],    // e ci si allontana appena
 ];
 function zoomAl(t) {
   let i = 0; while (i < NODI.length - 2 && t > NODI[i + 1][0]) i++;
@@ -158,7 +158,7 @@ function statoAl(t, { sat, prev }) {
     soglia: mix(320, 25, tratto(t, 13.8, 16.4)),                 // prima dove e' piovuto di piu'
     morbidoBoschi: 30,
     sat: tratto(t, 15.8, 17.6) * (1 - tratto(t, 19.0, 20.6)),    // il satellite sfuma dentro SOTTO i boschi
-    prev: clamp((t - 20.2) / 2.6) * 1.0001, prevGiorno: 1,
+    prev: clamp((t - 20.2) / 2.6) * 1.0001, prevGiorno: 1, prevZoomRif: 9.38,
     /* MOSSO: quando lo zoom corre, le tessere si sfumano appena (al massimo 1,4 px), come una cinepresa vera. */
     mosso: Math.min(1.4, 0.7 * Math.max(0, velZoom(i) - 0.5)),
     nota: !sat && t > 15.6 && t < 20.9 ? 'segnaposto: il satellite si rifà dal PC' : !prev && t > 20.0 ? 'segnaposto: le previsioni si rifanno dal PC' : null,
@@ -229,14 +229,21 @@ function codifica() {
   if (mancano.length) { console.log('mancano', mancano.length, 'fotogrammi, per esempio', mancano.slice(0, 5)); process.exit(1); }
   const ff = ffmpeg();
   const colore = ['-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv'];
-  const comune = crf => ['-c:v', 'libx264', '-preset', 'slow', '-crf', String(crf), '-profile:v', 'high', '-tune', 'film', '-movflags', '+faststart', '-an', ...colore];
+  const comune = ['-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-tune', 'film', '-movflags', '+faststart', '-an', ...colore];
   const ingresso = ['-y', '-hide_banner', '-loglevel', 'error', '-framerate', String(FPS), '-i', path.join(FRAMES, 'f%05d.png')];
-  /* La qualita' la decide il CRF; il tetto di banda c'e' solo per stare nei pesi (1080 sui 7-8 MB, 720 sotto i 2,5).
-     Si alza se i boschi da vicino si impastano: meglio qualche MB in piu' che il dettaglio sgranato. */
-  execFileSync(ff, [...ingresso, '-vf', 'scale=1920:1080:out_color_matrix=bt709:out_range=tv,format=yuv420p',
-    ...comune(process.env.CRF_1080 || 17), '-maxrate', process.env.TETTO_1080 || '3000k', '-bufsize', '6000k', path.join(FILM, 'apertura-1080.mp4')], { stdio: 'inherit' });
-  execFileSync(ff, [...ingresso, '-vf', 'scale=1280:720:flags=lanczos:out_color_matrix=bt709:out_range=tv,format=yuv420p',
-    ...comune(process.env.CRF_720 || 18), '-maxrate', process.env.TETTO_720 || '800k', '-bufsize', '1600k', path.join(FILM, 'apertura-720.mp4')], { stdio: 'inherit' });
+  /* ⚠️ DUE PASSATE, NON CRF (seconda sessione, misurato). Con CRF 17 e un tetto di banda i bit finivano nella pioggia
+     sull'Italia (2-5 s: 3-4 Mbit/s per un PSNR di 45-51 dB, piu' del necessario) e la discesa sui boschi restava
+     strozzata dal tetto a 29 dB, impastata. In due passate, a parita' di peso, il codificatore sposta la banda dove
+     serve: il punto peggiore sale a 32,5 dB e la qualita' e' uniforme. Media 2,6 Mbit/s = circa 8 MB in 24 s. */
+  const duePassate = (vf, media, tetto, out) => {
+    const log = path.join(CACHE, 'passate-' + path.basename(out, '.mp4'));
+    const args = [...ingresso, '-vf', vf, ...comune, '-b:v', media, '-maxrate', tetto, '-bufsize', String(parseInt(tetto) * 2) + 'k', '-passlogfile', log];
+    execFileSync(ff, [...args, '-pass', '1', '-f', 'null', process.platform === 'win32' ? 'NUL' : '/dev/null'], { stdio: 'inherit' });
+    execFileSync(ff, [...args, '-pass', '2', out], { stdio: 'inherit' });
+  };
+  fs.mkdirSync(CACHE, { recursive: true });
+  duePassate('scale=1920:1080:out_color_matrix=bt709:out_range=tv,format=yuv420p', process.env.MEDIA_1080 || '2600k', process.env.TETTO_1080 || '7000k', path.join(FILM, 'apertura-1080.mp4'));
+  duePassate('scale=1280:720:flags=lanczos:out_color_matrix=bt709:out_range=tv,format=yuv420p', process.env.MEDIA_720 || '740k', process.env.TETTO_720 || '2000k', path.join(FILM, 'apertura-720.mp4'));
   execFileSync(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', path.join(FRAMES, 'f00000.png'), '-c:v', 'libwebp', '-quality', '82', path.join(FILM, 'apertura-poster.webp')], { stdio: 'inherit' });
   const stills = path.join(FILM, 'stills');
   fs.rmSync(stills, { recursive: true, force: true }); fs.mkdirSync(stills, { recursive: true });

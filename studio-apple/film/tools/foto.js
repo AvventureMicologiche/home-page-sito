@@ -34,7 +34,7 @@ const SCENE = {
   // (3) i boschi sopra la foto aerea, vicino fino alle chiome: faggete e castagneti sopra Santo Stefano d'Aveto
   'satellite': { sat: true, s: { centro: [44.5395, 9.4566], zoom: 14.4, pioggia: 0, sat: 1, boschi: 0.62, soglia: null, terra: '#3c3c3f' } },
   // (4) le previsioni dei capoluoghi della Liguria, come le mostra la mappa (domani)
-  'previsioni': { prev: 'liguria', s: { centro: [44.17, 8.83], zoom: 9.05, pioggia: 0, rilievo: 0.75, terra: '#2e2e31', prev: 2, prevGiorno: 1 } },
+  'previsioni': { prev: 'liguria', s: { centro: [44.17, 8.83], zoom: 9.2, prevZoomRif: 9.2, pioggia: 0, rilievo: 0.75, terra: '#2e2e31', prev: 2, prevGiorno: 1 } },
 };
 
 async function main() {

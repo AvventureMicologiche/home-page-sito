@@ -97,10 +97,6 @@ const CSS_PULITO = `
   .leaflet-overlay-pane>*:not(#film-pioggia){display:none!important}
   .leaflet-tile-pane{display:none!important}
   .leaflet-container{background:#000!important;outline:none!important}
-  /* le targhette delle previsioni: lo stile della mappa (.pv-m), solo piu' grandi perche' il film si guarda
-     ridotto nella pagina; il nome sta sotto l'icona come nella mappa */
-  .film-pv{position:absolute;left:0;top:0;will-change:transform,opacity}
-  .film-pv .pv-m{zoom:1.9;cursor:default}
   #film-nota{position:fixed;right:18px;bottom:14px;z-index:99998;font:600 15px/1.3 system-ui,sans-serif;color:rgba(255,255,255,.55);
     letter-spacing:.02em;pointer-events:none}
 `;
@@ -189,7 +185,7 @@ async function apri({ url, larghezza, altezza, scala = 1, griglia, nonPulire = f
     // 3. panes del film (overlayPane, la pioggia, sta a 400)
     const pane = (n, z) => { const p = m.createPane(n); p.style.zIndex = z; p.style.pointerEvents = 'none'; return p; };
     pane('film-terra', 150); pane('film-sat', 158); pane('film-rilievo', 160); pane('film-boschi-tela', 175);
-    pane('film-linee', 450); pane('film-pallini', 460); pane('film-prev', 620);
+    pane('film-linee', 450); pane('film-pallini', 460); pane('film-prev', 620);   // le targhette: una tela (vedi scena)
     m.getPane('film-rilievo').style.mixBlendMode = 'multiply';
     // una tela per strato, grande quanto lo schermo, nella sua pane
     window.__tele = {};
@@ -259,6 +255,11 @@ async function scena(page, s) {
     const vuole = m.project(L.latLng(s.centro), s.zoom).subtract(m.getSize().divideBy(2));
     const resto = vuole.subtract(m.getPixelOrigin());
     m.getPane('mapPane').style.transform = `translate3d(${-resto.x}px,${-resto.y}px,0)`;
+    /* ⚠️ E IL CONTORNO SVG. Il renderer SVG di Leaflet, all'evento «zoom» di setView, si sposta da solo di una frazione
+       di pixel che annulla il resto qui sopra: la terra e i confini restavano agganciati al pixel intero mentre pioggia
+       e tessere scorrevano lisce, e la costa tremava di mezzo pixel (la curva della fluidita' alternava 0,5 e 0,8 a
+       fotogramma). Si rimette il renderer al suo posto intero: il resto lo fa il pane, come per tutto il resto. */
+    [window.__terra, window.__linee].forEach(g => { const r = g.options.renderer; if (r && r._container && r._bounds) L.DomUtil.setPosition(r._container, r._bounds.min); });
     window.__terra.setStyle({ fillColor: s.terra || '#1b1b1d', fillOpacity: s.terraOpacita == null ? 1 : s.terraOpacita });
     window.__linee.setStyle({ opacity: s.linee || 0 });
     const size = m.getSize(), dpr = window.devicePixelRatio || 1, po = m.getPixelOrigin(), z = m.getZoom();
@@ -430,33 +431,63 @@ async function scena(page, s) {
       gp.globalAlpha = 1;
     }
 
-    /* ── le targhette delle previsioni: quelle della mappa (.pv-m), una dopo l'altra ── */
-    const pp = m.getPane('film-prev');
+    /* ── le targhette delle previsioni: quelle della mappa (.pv-m), una dopo l'altra ──
+       ⚠️ NON SONO HTML NEL FOTOGRAMMA. Chromium aggancia il testo al pixel intero: con la deriva lenta della fine
+       (0,4 px a fotogramma) ogni scritta avanzava a scatti. Ogni targhetta si disegna UNA volta su una tela piccola
+       (stile della mappa: icona, nome, massima e minima; misure di .pv-m per 1,6) e poi si posa sulla tela del
+       fotogramma con drawImage a coordinate frazionarie, che il browser interpola: si muove davvero sotto il pixel. */
+    const tp = T['film-prev'] || (T['film-prev'] = (() => { const c = document.createElement('canvas'); c.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none';
+      m.getPane('film-prev').appendChild(c); return c; })());
+    const gt = prepara(tp);
     if ((s.prev || 0) > 0 && window.__prevArea) {
       const ICONE = [[/clearsky_day|fair_day/, '☀️'], [/clearsky_night|fair_night/, '🌙'], [/partlycloudy_day/, '⛅'], [/partlycloudy_night|^cloudy|fog/, '☁️'], [/thunder/, '⛈️'], [/heavyrain|heavysleet/, '🌧️'], [/rain|sleet|drizzle/, '🌦️'], [/snow/, '🌨️']];
       const icona = x => { for (const [re, i] of ICONE) if (re.test(x || '')) return i; return '☁️'; };
-      const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-      if (!pp.dataset.fatto) {
+      if (!window.__pvSprite) {
         const P = window.__prev;
         // senza dati (cloud) il segnaposto: i capoluoghi veri dell'area, col solo nome
-        const lista = P ? P.capoluoghi.filter(c => c.giorni && c.giorni.length) : (window.__capoluoghi || []);
-        lista.sort((u, v) => u.lon - v.lon);   // compaiono da ovest a est
-        window.__pvEl = lista.map(c => {
+        const lista = (P ? P.capoluoghi.filter(c => c.giorni && c.giorni.length) : (window.__capoluoghi || [])).slice().sort((u, v) => u.lon - v.lon);
+        const Z = s.prevScala || 1.6, Q = 2 * dpr, F = "system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
+        window.__pvSprite = lista.map(c => {
           const e = (c.giorni || [])[Math.min((c.giorni || []).length - 1, s.prevGiorno || 0)];
-          const d = document.createElement('div'); d.className = 'film-pv';
-          d.innerHTML = '<div class="pv-m">' + (e ? '<span class="ic">' + icona(e.s) + '</span>' : '') + '<span class="nm">' + esc(c.n)
-            + (e ? '<span class="tx"><span class="mx">' + e.mx + '°</span> <span class="mn">' + e.mn + '°</span></span>' : '') + '</span></div>';
-          pp.appendChild(d); return { d, c };
+          const k = document.createElement('canvas'), g = k.getContext('2d');
+          const fNome = `800 ${12.5 * Z}px ${F}`, fTx = `700 ${12 * Z}px ${F}`, fIc = `${30 * Z}px ${F}`;
+          g.font = fNome; const wN = g.measureText(c.n).width;
+          const mx = e ? e.mx + '°' : '', mn = e ? e.mn + '°' : '';
+          g.font = fTx; const wMx = g.measureText(mx).width, wSp = g.measureText(' ').width, wMn = g.measureText(mn).width;
+          const padX = 9 * Z, hN = 12.5 * 1.1 * Z, hT = e ? (1 + 12 * 1.1) * Z : 0, padT = 3 * Z, padB = 4 * Z, bord = 1 * Z;
+          const wPill = Math.max(wN, wMx + wSp + wMn) + 2 * padX + 2 * bord, hPill = padT + hN + hT + padB + 2 * bord;
+          const hIc = e ? 30 * Z : 0, gap = e ? 1 * Z : 0, W = Math.ceil(wPill + 8), H = Math.ceil(hIc + gap + hPill + 8);
+          k.width = W * Q; k.height = H * Q; g.scale(Q, Q); g.textAlign = 'center'; g.textBaseline = 'top';
+          const cx = W / 2;
+          if (e) { g.save(); g.font = fIc; g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 1 * Z; g.shadowOffsetY = 1 * Z; g.fillText(icona(e.s), cx, 4); g.restore(); }
+          const y0 = 4 + hIc + gap, x0 = cx - wPill / 2, r = 9 * Z;
+          g.beginPath(); g.roundRect(x0 + bord / 2, y0 + bord / 2, wPill - bord, hPill - bord, r);
+          g.fillStyle = 'rgba(255,255,255,.93)'; g.fill(); g.lineWidth = bord; g.strokeStyle = '#9db4d6'; g.stroke();
+          g.font = fNome; g.fillStyle = '#1b3f6e'; g.fillText(c.n, cx, y0 + bord + padT);
+          if (e) { g.font = fTx; const yT = y0 + bord + padT + hN + Z, xs = cx - (wMx + wSp + wMn) / 2;
+            g.textAlign = 'left'; g.fillStyle = '#c21f1f'; g.fillText(mx, xs, yT); g.fillStyle = '#1856b8'; g.fillText(mn, xs + wMx + wSp, yT); }
+          return { k, W, H, c };
         });
-        pp.dataset.fatto = 1;
+        /* due targhette che si toccano allo zoom della fine (prevZoomRif): resta la piu' importante (il capoluogo di
+           regione, poi quelli di provincia, poi la piu' bassa), come fa una carta. Si decide una volta sola, cosi'
+           nessuna compare e scompare mentre lo zoom cambia. */
+        const zr = s.prevZoomRif || z, prio = x => (x.c.c ? 0 : x.c.s ? 1 : 2) * 1e5 + (x.c.q || 0);
+        const prese = [];
+        window.__pvSprite.slice().sort((u, v) => prio(u) - prio(v)).forEach(x => {
+          const p = m.project(L.latLng(x.c.lat, x.c.lon), zr), b = { x0: p.x - x.W / 2 + 4, x1: p.x + x.W / 2 - 4, y0: p.y - x.H * 0.42, y1: p.y + x.H * 0.42 };   // la tela ha 4 px d'aria per lato
+          if (prese.some(o => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0)) x.via = true; else prese.push(b);
+        });
+        window.__pvSprite = window.__pvSprite.filter(x => !x.via);
       }
-      const tot = window.__pvEl.length;
-      window.__pvEl.forEach(({ d, c }, i) => {
-        const a = liscia((s.prev - (tot > 1 ? i / (tot - 1) : 0) * 0.6) / 0.4), p = qui([c.lat, c.lon]);
-        d.style.opacity = a; d.style.display = a > 0 ? 'block' : 'none';
-        d.style.transform = `translate(${p.x}px,${p.y + 10 * (1 - a)}px)`;
+      const tot = window.__pvSprite.length;
+      gt.imageSmoothingEnabled = true; gt.imageSmoothingQuality = 'high';
+      window.__pvSprite.forEach(({ k, W, H, c }, i) => {
+        const a = liscia((s.prev - (tot > 1 ? i / (tot - 1) : 0) * 0.6) / 0.4); if (a <= 0.002) return;
+        const p = qui([c.lat, c.lon]);
+        gt.globalAlpha = a; gt.drawImage(k, p.x - W / 2, p.y - H / 2 + 10 * (1 - a), W, H);
       });
-    } else Array.from(pp.children).forEach(d => { d.style.display = 'none'; });
+      gt.globalAlpha = 1;
+    }
 
     // la scritta d'angolo dei segnaposto (solo nel cloud: dal PC non c'e')
     let nt = document.getElementById('film-nota');
