@@ -1,0 +1,63 @@
+File
+  ok   brand-guide.html sotto 150 KB  (80.8 KB)
+  ok   brand-guide-hero.html sotto 4 MB  (1.58 MB)
+  ok   tokens.json valido (W3C, $value su ogni token, OKLCH sui colori)  (66 token)
+  ok   tokens.css con i token misurati
+
+Guida @1440
+  ok   guida @1440: zero richieste esterne senza rete
+  ok   guida @1440: zero errori in console
+  ok   guida @1440: niente scorrimento orizzontale  (scrollWidth 1440)
+  ok   guida @1440: sezioni presenti e in ordine
+  ok   guida @1440: «Unofficial analysis» e avviso in copertina, barra e piede  (#cover:true #topbar:true footer:true)
+  ok   guida @1440: 5 citazioni e 3 regole  (5 citazioni, 3 regole)
+  ok   guida @1440: Contents con 8 schede  (8 schede)
+  ok   guida @1440: nessun trattino lungo nei testi visibili  (0 trovati)
+  ok   guida @1440: bottone ricostruito = token  ({"height":"44px","padding":"11px 21px","radius":"980px","bg":"rgb(0, 113, 227)","fg":"rgb(255, 255, 255)","size":"17px","weight":"400","tracking":"-0.37px"})
+  ok   guida @1440: scheda chiara ricostruita = token
+  ok   guida @1440: scheda scura ricostruita = token
+  ok   guida @1440: etichetta su ogni spazio immagine  (20 immagini, 0 senza etichetta)
+
+Guida con le foto @1440
+  ok   guida-hero @1440: zero richieste esterne senza rete
+  ok   guida-hero @1440: zero errori in console
+  ok   guida-hero @1440: niente scorrimento orizzontale  (scrollWidth 1440)
+  ok   guida-hero @1440: sezioni presenti e in ordine
+  ok   guida-hero @1440: «Unofficial analysis» e avviso in copertina, barra e piede  (#cover:true #topbar:true footer:true)
+  ok   guida-hero @1440: 5 citazioni e 3 regole  (5 citazioni, 3 regole)
+  ok   guida-hero @1440: Contents con 8 schede  (8 schede)
+  ok   guida-hero @1440: nessun trattino lungo nei testi visibili  (0 trovati)
+  ok   guida-hero @1440: bottone ricostruito = token  ({"height":"44px","padding":"11px 21px","radius":"980px","bg":"rgb(0, 113, 227)","fg":"rgb(255, 255, 255)","size":"17px","weight":"400","tracking":"-0.37px"})
+  ok   guida-hero @1440: scheda chiara ricostruita = token
+  ok   guida-hero @1440: scheda scura ricostruita = token
+  ok   guida-hero @1440: etichetta su ogni spazio immagine  (20 immagini, 0 senza etichetta)
+  ok   guida-hero @1440: ogni spazio immagine ha la foto WebP  (0 senza foto)
+
+Mockup home @1440
+  ok   home @1440: peso all'apertura sotto 1,5 MB  (1.20 MB)
+  ok   home @1440: zero errori in console
+  ok   home @1440: zero richieste esterne
+  ok   home @1440: niente scorrimento orizzontale  (scrollWidth 1440)
+  ok   home @1440: 5 filmati, niente autoplay, preload none, poster  ({"n":5,"auto":0,"pre":0,"poster":0,"heroPlaying":true,"tilePlaying":0})
+  ok   home @1440: parte solo il filmato nello schermo  (testata true, riquadri in moto 0)
+  ok   home @1440: link della mappa, YouTube, quiz, 8 regioni, social, mail
+  ok   home @1440: niente trattini lunghi e niente punti esclamativi  ({"dash":0,"bang":0})
+
+Guida @390
+  ok   guida @390: zero richieste esterne senza rete
+  ok   guida @390: zero errori in console
+  ok   guida @390: niente scorrimento orizzontale  (scrollWidth 390)
+
+Guida con le foto @390
+  ok   guida-hero @390: zero richieste esterne senza rete
+  ok   guida-hero @390: zero errori in console
+  ok   guida-hero @390: niente scorrimento orizzontale  (scrollWidth 390)
+
+Mockup home @390
+  ok   home @390: peso all'apertura sotto 1,5 MB  (1.06 MB)
+  ok   home @390: zero errori in console
+  ok   home @390: zero richieste esterne
+  ok   home @390: niente scorrimento orizzontale  (scrollWidth 390)
+  ok   home @390: pillole a tutta larghezza  (0 pillole piu' strette)
+
+48/48 controlli passati in 44.2 s, screenshot in studio-apple/screenshot/

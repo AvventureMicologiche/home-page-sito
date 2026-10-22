@@ -168,6 +168,7 @@ a { color: var(--color-link); }
 .about .pics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); max-width: 1024px; margin: 48px auto 0; }
 .about figure { border-radius: var(--radius); overflow: hidden; aspect-ratio: 4 / 3; background: var(--surface); }
 .about img { width: 100%; height: 100%; object-fit: cover; }
+.about img.top { object-position: 50% 12%; } /* foto verticale: Archie sta in alto, il porcino in basso */
 
 /* ── PIEDE ── */
 footer { background: var(--surface); color: var(--muted); font-size: 12px; line-height: 1.5; padding: 40px 0 28px; }
@@ -393,7 +394,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <p class="lead sub">Un piccolo canale nato per raccontare la vita nei boschi: funghi epigei e ipogei, dai porcini al tartufo bianco pregiato. Con noi c'è sempre Archie, il nostro lagotto romagnolo.</p>
     <div class="pics">
       <figure><img src="../../immagini/archie_tartufo.jpg" width="1565" height="916" loading="lazy" alt="Archie accanto a un tartufo nero appena trovato, tenuto in mano"></figure>
-      <figure><img src="../../immagini/ovoli_mano.jpg" width="975" height="1300" loading="lazy" alt="Archie sul sentiero, davanti a lui un porcino"></figure>
+      <figure><img class="top" src="../../immagini/ovoli_mano.jpg" width="975" height="1300" loading="lazy" alt="Archie sul sentiero, davanti a lui un porcino"></figure>
     </div>
   </div>
 </section>

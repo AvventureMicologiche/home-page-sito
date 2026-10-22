@@ -1,0 +1,245 @@
+{
+  "when": "2026-10-22T08:55:02.719Z",
+  "results": [
+    {
+      "name": "brand-guide.html sotto 150 KB",
+      "ok": true,
+      "detail": "80.8 KB"
+    },
+    {
+      "name": "brand-guide-hero.html sotto 4 MB",
+      "ok": true,
+      "detail": "1.58 MB"
+    },
+    {
+      "name": "tokens.json valido (W3C, $value su ogni token, OKLCH sui colori)",
+      "ok": true,
+      "detail": "66 token"
+    },
+    {
+      "name": "tokens.css con i token misurati",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida @1440: zero richieste esterne senza rete",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida @1440: zero errori in console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida @1440: niente scorrimento orizzontale",
+      "ok": true,
+      "detail": "scrollWidth 1440"
+    },
+    {
+      "name": "guida @1440: sezioni presenti e in ordine",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida @1440: «Unofficial analysis» e avviso in copertina, barra e piede",
+      "ok": true,
+      "detail": "#cover:true #topbar:true footer:true"
+    },
+    {
+      "name": "guida @1440: 5 citazioni e 3 regole",
+      "ok": true,
+      "detail": "5 citazioni, 3 regole"
+    },
+    {
+      "name": "guida @1440: Contents con 8 schede",
+      "ok": true,
+      "detail": "8 schede"
+    },
+    {
+      "name": "guida @1440: nessun trattino lungo nei testi visibili",
+      "ok": true,
+      "detail": "0 trovati"
+    },
+    {
+      "name": "guida @1440: bottone ricostruito = token",
+      "ok": true,
+      "detail": "{\"height\":\"44px\",\"padding\":\"11px 21px\",\"radius\":\"980px\",\"bg\":\"rgb(0, 113, 227)\",\"fg\":\"rgb(255, 255, 255)\",\"size\":\"17px\",\"weight\":\"400\",\"tracking\":\"-0.37px\"}"
+    },
+    {
+      "name": "guida @1440: scheda chiara ricostruita = token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida @1440: scheda scura ricostruita = token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida @1440: etichetta su ogni spazio immagine",
+      "ok": true,
+      "detail": "20 immagini, 0 senza etichetta"
+    },
+    {
+      "name": "guida-hero @1440: zero richieste esterne senza rete",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida-hero @1440: zero errori in console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida-hero @1440: niente scorrimento orizzontale",
+      "ok": true,
+      "detail": "scrollWidth 1440"
+    },
+    {
+      "name": "guida-hero @1440: sezioni presenti e in ordine",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida-hero @1440: «Unofficial analysis» e avviso in copertina, barra e piede",
+      "ok": true,
+      "detail": "#cover:true #topbar:true footer:true"
+    },
+    {
+      "name": "guida-hero @1440: 5 citazioni e 3 regole",
+      "ok": true,
+      "detail": "5 citazioni, 3 regole"
+    },
+    {
+      "name": "guida-hero @1440: Contents con 8 schede",
+      "ok": true,
+      "detail": "8 schede"
+    },
+    {
+      "name": "guida-hero @1440: nessun trattino lungo nei testi visibili",
+      "ok": true,
+      "detail": "0 trovati"
+    },
+    {
+      "name": "guida-hero @1440: bottone ricostruito = token",
+      "ok": true,
+      "detail": "{\"height\":\"44px\",\"padding\":\"11px 21px\",\"radius\":\"980px\",\"bg\":\"rgb(0, 113, 227)\",\"fg\":\"rgb(255, 255, 255)\",\"size\":\"17px\",\"weight\":\"400\",\"tracking\":\"-0.37px\"}"
+    },
+    {
+      "name": "guida-hero @1440: scheda chiara ricostruita = token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida-hero @1440: scheda scura ricostruita = token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida-hero @1440: etichetta su ogni spazio immagine",
+      "ok": true,
+      "detail": "20 immagini, 0 senza etichetta"
+    },
+    {
+      "name": "guida-hero @1440: ogni spazio immagine ha la foto WebP",
+      "ok": true,
+      "detail": "0 senza foto"
+    },
+    {
+      "name": "home @1440: peso all'apertura sotto 1,5 MB",
+      "ok": true,
+      "detail": "1.20 MB"
+    },
+    {
+      "name": "home @1440: zero errori in console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home @1440: zero richieste esterne",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home @1440: niente scorrimento orizzontale",
+      "ok": true,
+      "detail": "scrollWidth 1440"
+    },
+    {
+      "name": "home @1440: 5 filmati, niente autoplay, preload none, poster",
+      "ok": true,
+      "detail": "{\"n\":5,\"auto\":0,\"pre\":0,\"poster\":0,\"heroPlaying\":true,\"tilePlaying\":0}"
+    },
+    {
+      "name": "home @1440: parte solo il filmato nello schermo",
+      "ok": true,
+      "detail": "testata true, riquadri in moto 0"
+    },
+    {
+      "name": "home @1440: link della mappa, YouTube, quiz, 8 regioni, social, mail",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home @1440: niente trattini lunghi e niente punti esclamativi",
+      "ok": true,
+      "detail": "{\"dash\":0,\"bang\":0}"
+    },
+    {
+      "name": "guida @390: zero richieste esterne senza rete",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida @390: zero errori in console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida @390: niente scorrimento orizzontale",
+      "ok": true,
+      "detail": "scrollWidth 390"
+    },
+    {
+      "name": "guida-hero @390: zero richieste esterne senza rete",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida-hero @390: zero errori in console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guida-hero @390: niente scorrimento orizzontale",
+      "ok": true,
+      "detail": "scrollWidth 390"
+    },
+    {
+      "name": "home @390: peso all'apertura sotto 1,5 MB",
+      "ok": true,
+      "detail": "1.06 MB"
+    },
+    {
+      "name": "home @390: zero errori in console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home @390: zero richieste esterne",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home @390: niente scorrimento orizzontale",
+      "ok": true,
+      "detail": "scrollWidth 390"
+    },
+    {
+      "name": "home @390: pillole a tutta larghezza",
+      "ok": true,
+      "detail": "0 pillole piu' strette"
+    }
+  ]
+}
