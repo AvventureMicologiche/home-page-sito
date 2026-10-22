@@ -3,6 +3,20 @@
 Ramo `claude/dreamy-albattani-g6zdi2` (nato da `claude/dazzling-goldberg-dblun0`).
 Si lavora solo in `studio-apple/film/` e `studio-apple/home-v2/`. Il repo della mappa si usa in sola lettura.
 
+## Passo 0: la rete dal cloud (provata il 22/10/2026, seconda sessione, ramo `claude/intelligent-babbage-ckzf3g`)
+| Fonte | Esito |
+|---|---|
+| Satellite Esri `server.arcgisonline.com` (World_Imagery), anche `services.arcgisonline.com` | ❌ chiuso (il proxy risponde 403 al CONNECT) |
+| Sentinel-2 cloudless EOX `tiles.maps.eox.at` (e `s2maps-tiles.eu`) | ❌ chiuso |
+| Previsioni di produzione `https://precipitazioni.avventuremicologiche.it/api/previsioni` (e tutto il dominio) | ❌ chiuso |
+| Open-Meteo, MET Norway, OpenStreetMap, Google, NASA GIBS, jsDelivr | ❌ chiusi |
+| `raw.githubusercontent.com`, `github.com` (git) | ✅ aperti: dati delle stazioni, tessere boschi e rilievo |
+
+Quindi nel cloud satellite e previsioni sono **segnaposto**, e dal PC basta un comando per ciascuno (vedi in fondo,
+«Cosa va lanciato dal PC»). Il ponte per le previsioni è già nel motore: la mappa clonata, in locale, chiede
+`http://127.0.0.1:8788/api/previsioni` (così è scritto nel suo `index.html`); `motore.js` intercetta quella richiesta
+e la gira a `https://precipitazioni.avventuremicologiche.it/api/previsioni` (produzione), che accetta le origini locali.
+
 ## Fatto
 - [x] `tools/griglie.py`: la pioggia vera, giorno per giorno, con la stessa interpolazione della mappa.
 - [x] `tools/motore.js`: apre la mappa vera in Chromium, toglie tutta l'interfaccia, disegna una scena.
