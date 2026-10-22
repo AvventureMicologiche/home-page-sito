@@ -25,8 +25,8 @@ window.SCRITTE_FILM = {
   passoParola: 0.09,   // le parole della riga entrano una dopo l'altra
   righe: [
     { da: 0.7,  a: 2.5,  occhiello: 'Misure vere',            testo: 'Ogni punto, un pluviometro.' },  // i pluviometri si accendono
-    { da: 3.5,  a: 6.1,  occhiello: 'Gli ultimi trenta giorni', testo: 'La pioggia caduta davvero.' },  // la pioggia sale, pausa
-    { da: 7.9,  a: 10.1, occhiello: 'Faggete · castagneti · abetaie', testo: 'Poi, i boschi.' },// boschi e satellite, telecamera ferma
+    { da: 3.5,  a: 6.1,  occhiello: 'Scegli le date e guarda', testo: 'La pioggia caduta davvero.' },  // la pioggia sale, pausa
+    { da: 7.9,  a: 10.1, occhiello: 'Poi, i boschi', testo: 'Faggete, castagneti, abetaie.' },// boschi e satellite, telecamera ferma
     { da: 14.2, a: 20.9, occhiello: 'Dal satellite',          testo: 'Fino alle chiome.' }            // lo zoom: il retino sparisce
   ]
 };
@@ -96,7 +96,7 @@ a { color: var(--color-link-dark); }
   background: rgba(22, 22, 23, 0.8);
   -webkit-backdrop-filter: saturate(1.8) blur(20px); backdrop-filter: saturate(1.8) blur(20px);
 }
-.nav .in { max-width: 1200px; margin: 0 auto; padding: 0 22px; height: var(--nav-h); display: flex; align-items: center; gap: 30px; }
+.nav .in { max-width: none; margin: 0; padding: 0 clamp(18px, 2.4vw, 40px); height: var(--nav-h); display: flex; align-items: center; gap: 30px; }
 .nav .brand { font-family: var(--font-display); font-size: 21px; font-weight: 600; color: #f5f5f7; text-decoration: none; letter-spacing: -0.015em; white-space: nowrap; margin-right: auto; }
 .nav .links { display: flex; gap: 32px; }
 .nav .links a { font-size: 13px; color: rgba(255, 255, 255, 0.8); text-decoration: none; white-space: nowrap; transition: color .24s cubic-bezier(0.4, 0, 0.6, 1); }
@@ -105,7 +105,7 @@ a { color: var(--color-link-dark); }
 /* ── 1. IL FILM ── */
 .film { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; background: #000; }
 /* il film sta nei due terzi a destra e sfuma nel nero a sinistra: il testo non pesta mai l'Italia */
-.film video { position: absolute; top: 0; right: 0; width: 72%; height: 100%; object-fit: cover;
+.film video { position: absolute; top: var(--nav-h); right: 0; width: 72%; height: calc(100% - var(--nav-h)); object-fit: cover;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%); mask-image: linear-gradient(90deg, transparent 0%, #000 22%); }
 /* velo in basso, sotto la nota */
 .film::after { content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -294,7 +294,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 <!-- 2. I CAPITOLI: pioggia, scheda, boschi, satellite, previsioni. Ognuno ha il suo link alla mappa gia' in quel modo. -->
 <section class="cap" id="piove">
   <div class="wrap su">
-    <h2 class="display">Millimetro per millimetro.</h2>
+    <h2 class="display">Scegli la data e guarda quanto ha piovuto.</h2>
     <p class="lead sub">I millimetri misurati dai pluviometri delle agenzie regionali. Più di 5000 stazioni, in 5 nazioni: Italia, Svizzera, Austria, Francia e Slovenia.</p>
     <!-- ⚠️ testo vero, non immagine: serve a Google per arrivare alla pagina delle localita' -->
     <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=piemonte,valledaosta,lombardia,trentino,altoadige,veneto,friuli,liguria,emilia&amp;g=30" target="_blank" rel="noopener">Apri la pioggia del Nord, 30 giorni</a> · <a href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a></p>
