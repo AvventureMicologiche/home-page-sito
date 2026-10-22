@@ -1,0 +1,130 @@
+{
+  "when": "2026-10-22T10:33:08.589Z",
+  "results": [
+    {
+      "name": "apertura-1080.mp4 fra 3 e 5 MB",
+      "ok": true,
+      "detail": "4.31 MB"
+    },
+    {
+      "name": "apertura-720.mp4 sotto 1,5 MB",
+      "ok": true,
+      "detail": "1.43 MB"
+    },
+    {
+      "name": "apertura-poster.webp presente",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "immagini HD: 2880 sotto 600 KB, 1440 sotto 250 KB",
+      "ok": true,
+      "detail": "boschi-vicino-1440 184, boschi-vicino-2880 394, finestra-funghi-1440 34, finestra-funghi-2880 76, pioggia-italia-1440 27, pioggia-italia-2880 61, scheda-stazione-1440 63, scheda-stazione-2880 127"
+    },
+    {
+      "name": "home v2 @1440: apertura senza il film sotto 1 MB",
+      "ok": true,
+      "detail": "288 KB (+ film 4.31 MB)"
+    },
+    {
+      "name": "home v2 @1440: il film e' apertura-1080.mp4, muto, in loop, playsinline, autoplay, col poster, e gira",
+      "ok": true,
+      "detail": "{\"src\":\"apertura-1080.mp4\",\"muted\":true,\"loop\":true,\"inline\":true,\"auto\":true,\"poster\":true,\"playing\":true}"
+    },
+    {
+      "name": "home v2 @1440: niente scorrimento orizzontale",
+      "ok": true,
+      "detail": "scrollWidth 1440"
+    },
+    {
+      "name": "home v2 @1440: tutte le immagini caricate dopo lo scorrimento",
+      "ok": true,
+      "detail": "6 immagini"
+    },
+    {
+      "name": "home v2 @1440: capitoli con srcset e sizes, lazy tranne la prima",
+      "ok": true,
+      "detail": "[false,true,true,true]"
+    },
+    {
+      "name": "home v2 @1440: tutti i blocchi comparsi dopo lo scorrimento",
+      "ok": true,
+      "detail": "0 ancora nascosti"
+    },
+    {
+      "name": "home v2 @1440: zero errori in console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home v2 @1440: zero richieste esterne",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home v2 @1440: «Apri la mappa» e «Le località più bagnate» due volte, YouTube, quiz, 8 regioni, social, mail",
+      "ok": true,
+      "detail": "{\"mappa\":2,\"funghi\":2,\"yt\":true,\"quiz\":true,\"regioni\":8,\"mail\":true,\"social\":4}"
+    },
+    {
+      "name": "home v2 @1440: niente trattini lunghi, punti esclamativi, Lei o voi",
+      "ok": true,
+      "detail": "{\"dash\":0,\"bang\":0,\"voi\":0}"
+    },
+    {
+      "name": "home v2 @1440: i cinque capitoli, in ordine",
+      "ok": true,
+      "detail": "È piovuto qui. / Sui boschi giusti. / Tra 13 e 20 giorni, nascono. / Ogni stazione, giorno per giorno. / E domani."
+    },
+    {
+      "name": "home v2 @1440: con «riduci animazioni» il film resta fermo sul poster",
+      "ok": true,
+      "detail": "{\"paused\":true,\"t\":0,\"poster\":\"apertura-poster.webp\"}"
+    },
+    {
+      "name": "home v2 @390: apertura senza il film sotto 1 MB",
+      "ok": true,
+      "detail": "351 KB (+ film 1.43 MB)"
+    },
+    {
+      "name": "home v2 @390: il film e' apertura-720.mp4, muto, in loop, playsinline, autoplay, col poster, e gira",
+      "ok": true,
+      "detail": "{\"src\":\"apertura-720.mp4\",\"muted\":true,\"loop\":true,\"inline\":true,\"auto\":true,\"poster\":true,\"playing\":true}"
+    },
+    {
+      "name": "home v2 @390: niente scorrimento orizzontale",
+      "ok": true,
+      "detail": "scrollWidth 390"
+    },
+    {
+      "name": "home v2 @390: tutte le immagini caricate dopo lo scorrimento",
+      "ok": true,
+      "detail": "6 immagini"
+    },
+    {
+      "name": "home v2 @390: capitoli con srcset e sizes, lazy tranne la prima",
+      "ok": true,
+      "detail": "[false,true,true,true]"
+    },
+    {
+      "name": "home v2 @390: tutti i blocchi comparsi dopo lo scorrimento",
+      "ok": true,
+      "detail": "0 ancora nascosti"
+    },
+    {
+      "name": "home v2 @390: zero errori in console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home v2 @390: zero richieste esterne",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home v2 @390: con «riduci animazioni» il film resta fermo sul poster",
+      "ok": true,
+      "detail": "{\"paused\":true,\"t\":0,\"poster\":\"apertura-poster.webp\"}"
+    }
+  ]
+}

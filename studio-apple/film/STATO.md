@@ -23,8 +23,23 @@ Si lavora solo in `studio-apple/film/` e `studio-apple/home-v2/`. Il repo della 
       la mappa le chiede a `/api/previsioni` (funzione Netlify che va su Open-Meteo, chiuso). Fino ad allora la
       home v2 usa `immagini/poster-previsioni.jpg` (vecchia, piccola). Nel film si può aggiungere il satellite allo
       stesso modo (opzione da portare in `film.js`).
-- [ ] Passo 3: `home-v2/index.html`.
-- [ ] Passo 4: `verify.js` esteso al v2, screenshot in `film/screenshot/`.
+- [ ] Telefono: il film è 16:9 come chiesto e al telefono l'Italia viene piccola. Se piace l'idea, una versione
+      quadrata o 4:5 per il telefono (ritaglio centrale: l'Italia ci sta intera, della Liguria si perdono le punte).
+- [ ] Decidere colore d'azione (blu, verde, oro: un blocco in cima al CSS del v2) e testi definitivi.
+
+- [x] **Passo 3**: `home-v2/index.html` (28 KB). Il film a tutto schermo (al computer occupa i due terzi a destra e
+      sfuma nel nero, il testo sta a sinistra sul mare; al telefono il film sta intero in 16:9 e il testo sotto),
+      cinque capitoli uno per schermata con un'immagine ciascuno, la chiusura, «E poi ci siamo noi» (YouTube e quiz
+      con gli 8 link alle regioni), il piede del v1. Comparse lente dal basso con `--ease-brand`. Il capitolo
+      «E domani.» ha un segnaposto finché non c'è l'immagine delle previsioni.
+      Apertura senza il film: 288 KB a 1440, 351 KB a 390 (limite 1 MB).
+      ⚠️ `<source media>` dentro `<video>` Chromium lo ignora: uno script in linea subito dopo il video toglie la
+      sorgente sbagliata, così al telefono arriva davvero il 720.
+- [x] **Passo 4**: `node studio-apple/verify.js --v2` (25 controlli: pesi, sorgente giusta per lo schermo, zero errori,
+      zero richieste esterne, niente scorrimento orizzontale a 390, immagini caricate dopo lo scorrimento, comparse,
+      link, testi senza trattini lunghi né punti esclamativi, poster con «riduci animazioni»). 25/25; l'intero
+      `verify.js` 73/73. Screenshot a 1440 e 390 di ogni capitolo in `film/screenshot/`.
+      Nota: il Chromium di Playwright non decodifica H.264, quindi nello screenshot il film è sostituito da uno still.
 
 ## Le scelte del film
 - **Periodo**: 22 settembre → 21 ottobre 2026, cioè «30 giorni» com'erano il 22/10. È la finestra più recente
@@ -64,6 +79,12 @@ Si lavora solo in `studio-apple/film/` e `studio-apple/home-v2/`. Il repo della 
   valore sfuma verso un'IDW a 0,8° (sempre stazioni vere; serve all'interno dell'Abruzzo, che la mappa copre con
   Open-Meteo dal vivo, irraggiungibile dal cloud); la griglia sborda di 0,04° in mare perché la costa resti netta.
 - Le stazioni a zero che fanno «buco» (veto) restano: sono la mappa vera (si vedono in Sicilia nei primi giorni).
+
+## Come si prova la pagina
+```
+python -m http.server 8000        # dalla radice del repo
+```
+poi `http://localhost:8000/studio-apple/home-v2/`.
 
 ## Come si rilancia (dal PC o dal cloud)
 ```
