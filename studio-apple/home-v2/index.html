@@ -402,7 +402,8 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   <figure class="con-tel su dopo ritaglio">
     <picture>
       <!-- al telefono la mappa com'e' sul telefono (scatto 390x720 a 3x) -->
-      <source media="(max-width: 734px)" srcset="../film/foto/tel-satellite-780.webp 780w, ../film/foto/tel-satellite-1170.webp 1170w" sizes="calc(100vw - 24px)" width="1170" height="2160">
+      <!-- satellite: scatto a 2x e non a 3x, la mappa stira le tessere a 3x e la foto viene morbida -->
+      <source media="(max-width: 734px)" srcset="../film/foto/tel-satellite-780.webp 780w" sizes="calc(100vw - 24px)" width="780" height="1440">
       <img src="../film/foto/satellite-vera-1440.webp"
          srcset="../film/foto/satellite-vera-1440.webp 1440w, ../film/foto/satellite-vera-2880.webp 2880w"
          sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy" style="object-position: 64% 50%"

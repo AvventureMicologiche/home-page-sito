@@ -23,7 +23,7 @@ const puppeteer = require('D:/video youtube/claudio/grafiche-social/node_modules
   // TELEFONO=1: la mappa com'e' sul telefono (390x720 a 3x, tocco, user agent da telefono), per le foto verticali
   if (process.env.TELEFONO) {
     await p.setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36');
-    await p.setViewport({ width: +(process.env.LARGO || 390), height: +(process.env.ALTO || 720), deviceScaleFactor: 3, isMobile: true, hasTouch: true });
+    await p.setViewport({ width: +(process.env.LARGO || 390), height: +(process.env.ALTO || 720), deviceScaleFactor: +(process.env.DPR || 3), isMobile: true, hasTouch: true });
   } else await p.setViewport({ width: 1440, height: 900, deviceScaleFactor: 2 });
   await p.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
   // solo nello scatto: con 9 regioni le etichette sotto «Indietro» non ci stanno su una riga, si va a capo
