@@ -233,12 +233,12 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   .nav .links a { padding: 10px 0; font-size: 11.5px; }
   .wrap { padding: 0 16px; }
   .film { height: auto; min-height: 0; padding-top: var(--nav-h); }
-  .film video { position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 16 / 9; -webkit-mask-image: none; mask-image: none; }
+  .film video { position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; -webkit-mask-image: none; mask-image: none; }
   .film::after { display: none; }
   .film .txt { position: static; transform: none; max-width: none; padding: 28px 16px 8px; }
   .film .nota { position: static; padding: 16px 16px 36px; }
-  .vbtn { top: calc(var(--nav-h) + 56.25vw - 48px); bottom: auto; right: 12px; }
-  .scritte { top: calc(var(--nav-h) + 56.25vw - 64px); bottom: auto; width: auto; left: 48px; right: 48px; height: 0; }
+  .vbtn { top: calc(var(--nav-h) + 125vw - 48px); bottom: auto; right: 12px; }
+  .scritte { top: calc(var(--nav-h) + 125vw - 112px); bottom: auto; width: auto; left: 16px; right: 16px; height: 0; }
   .scritta { bottom: auto; top: 0; }
   .scritta .riga { font-size: 1.2rem; white-space: nowrap; }
   .scritta .occhiello { font-size: 0.66rem; margin-bottom: 6px; gap: 10px; }
@@ -250,6 +250,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   .cap figure img, .cap .segnaposto { border-radius: 18px; }
   /* l'Italia intera sta nel mezzo dell'immagine: al telefono si ritaglia in 4:5 e diventa grande il doppio */
   .cap figure.ritaglio img { aspect-ratio: 4 / 5; object-fit: cover; }
+  .cap figure.con-tel img { aspect-ratio: auto; height: auto; object-fit: contain; }
   .fine { padding: 80px 0 90px; }
   .noi { padding: 64px 0 12px; }
   .riquadri { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 0 12px; margin-top: 32px; }
@@ -290,7 +291,8 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 <section class="film" aria-label="La mappa delle piogge">
   <video id="film" poster="../film/apertura-poster.webp" muted playsinline autoplay preload="auto" width="1920" height="1080"
          aria-label="L'Italia al buio: si accendono i pallini dei pluviometri e sale la pioggia di trenta giorni; poi la pioggia lascia il posto ai boschi sopra la foto dal satellite, e la telecamera scende fino alle chiome degli alberi.">
-    <source src="../film/apertura-720.mp4" type="video/mp4" media="(max-width: 734px)">
+    <!-- 23/10: al telefono il film VERTICALE in 4:5 (stessa sceneggiatura, inquadratura per lo schermo in piedi) -->
+    <source src="../film/apertura-v-720.mp4" type="video/mp4" media="(max-width: 734px)">
     <source src="../film/apertura-1080.mp4" type="video/mp4">
   </video>
   <script>
@@ -303,6 +305,8 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
       /* ⚠️ `media` su <source> dentro <video> non lo rispetta ogni browser (Chromium lo ignora e scarica il
          1080 anche al telefono): si tengono solo le sorgenti giuste per questo schermo e si ricomincia la scelta. */
       if (!window.matchMedia) return;
+      // al telefono anche il poster e' quello verticale
+      if (matchMedia('(max-width: 734px)').matches) v.poster = '../film/apertura-v-poster.webp';
       var tolte = 0;
       Array.prototype.slice.call(v.querySelectorAll('source')).forEach(function (s, i, tutte) {
         var m = s.getAttribute('media');
@@ -336,14 +340,18 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <!-- ⚠️ testo vero, non immagine: serve a Google per arrivare alla pagina delle localita' -->
     <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=piemonte,valledaosta,lombardia,trentino,altoadige,veneto,friuli,liguria,emilia&amp;g=30" target="_blank" rel="noopener">Apri la pioggia del Nord, 30 giorni</a> · <a href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a></p>
   </div>
-  <figure class="su dopo ritaglio">
+  <figure class="con-tel su dopo ritaglio">
     <!-- 22/10 sera, sua richiesta: la mappa VERA, com'e' sul sito (scatto a 2880 px della mappa servita in locale coi
          dati veri, 30 giorni, tutto il Nord; il tetto delle 3 regioni alzato solo nello scatto) -->
-    <img src="../film/foto/mappa-vera-nord-1440.webp"
+    <picture>
+      <!-- al telefono la mappa com'e' sul telefono (scatto 390x720 a 3x) -->
+      <source media="(max-width: 734px)" srcset="../film/foto/tel-pioggia-780.webp 780w, ../film/foto/tel-pioggia-1170.webp 1170w" sizes="calc(100vw - 24px)" width="1170" height="2160">
+      <img src="../film/foto/mappa-vera-nord-1440.webp"
          srcset="../film/foto/mappa-vera-nord-1440.webp 1440w, ../film/foto/mappa-vera-nord-2880.webp 2880w"
          sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" style="object-position: 64% 50%"
          alt="La mappa pluviometrica com'è sul sito: il Nord Italia colorato dalla pioggia di trenta giorni su OpenStreetMap, con 1596 pluviometri bianchi, il pannello dei periodi a sinistra con 30 giorni scelto e la scala dei millimetri.">
-    <figcaption class="small">La mappa com'è sul sito: il Nord, trenta giorni, 1.596 pluviometri.</figcaption>
+    </picture>
+    <figcaption class="small">La mappa com'è sul sito: trenta giorni di pioggia, stazione per stazione.</figcaption>
   </figure>
 </section>
 
@@ -367,13 +375,17 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <p class="lead sub">Faggete, castagneti, querceti, abetaie, lariceti e pinete, dalle carte forestali delle Regioni: sopra la cartina o sopra la foto dal satellite.</p>
     <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?boschi=1&amp;r=liguria" target="_blank" rel="noopener">Apri la mappa dei boschi</a></p>
   </div>
-  <figure class="su dopo ritaglio">
+  <figure class="con-tel su dopo ritaglio">
     <!-- 22/10 sera, sua richiesta: la mappa VERA dei boschi, sopra il satellite e non OpenStreetMap (scatto a 2880 px,
          intensita' dei boschi al 75% col cursore; zoom 11 sul Trentino intorno a Trento: da lontano i boschi non si leggono) -->
-    <img src="../film/foto/boschi-vera-nord-1440.webp"
+    <picture>
+      <!-- al telefono la mappa com'e' sul telefono (scatto 390x720 a 3x) -->
+      <source media="(max-width: 734px)" srcset="../film/foto/tel-boschi-780.webp 780w, ../film/foto/tel-boschi-1170.webp 1170w" sizes="calc(100vw - 24px)" width="1170" height="2160">
+      <img src="../film/foto/boschi-vera-nord-1440.webp"
          srcset="../film/foto/boschi-vera-nord-1440.webp 1440w, ../film/foto/boschi-vera-nord-2880.webp 2880w"
          sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy" style="object-position: 64% 50%"
          alt="La mappa dei boschi com'è sul sito, da vicino sopra la foto dal satellite: le montagne intorno a Trento coperte dai colori di abetaie, faggete, lariceti e pinete, e a sinistra la legenda dei tipi di bosco.">
+    </picture>
     <figcaption class="small">La mappa dei boschi com'è sul sito, sopra la foto dal satellite.</figcaption>
   </figure>
 </section>
@@ -387,11 +399,15 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   <!-- 23/10, sua richiesta: il satellite al massimo dettaglio, d'ESTATE, chiome e qualche casa (scatto della mappa vera a
        2880 px, zoom 18, boschi al 10%; scelto fra quattro paesi quello con la foto Esri estiva). Il nome del paese non si
        scrive: mai legare le foto a un luogo. -->
-  <figure class="su dopo ritaglio">
-    <img src="../film/foto/satellite-vera-1440.webp"
+  <figure class="con-tel su dopo ritaglio">
+    <picture>
+      <!-- al telefono la mappa com'e' sul telefono (scatto 390x720 a 3x) -->
+      <source media="(max-width: 734px)" srcset="../film/foto/tel-satellite-780.webp 780w, ../film/foto/tel-satellite-1170.webp 1170w" sizes="calc(100vw - 24px)" width="1170" height="2160">
+      <img src="../film/foto/satellite-vera-1440.webp"
          srcset="../film/foto/satellite-vera-1440.webp 1440w, ../film/foto/satellite-vera-2880.webp 2880w"
          sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy" style="object-position: 64% 50%"
          alt="La mappa col satellite al massimo dettaglio, d'estate: il bosco fitto, chioma per chioma, e in basso i tetti di un paese di montagna con la strada e un prato.">
+    </picture>
     <figcaption class="small">Il satellite al massimo dettaglio: il bosco, chioma per chioma, e le prime case del paese.</figcaption>
   </figure>
 </section>
@@ -405,11 +421,15 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   <!-- 23/10: le previsioni vere della mappa (scatto a 2880 px della mappa in locale, previsioni chieste al sito vero),
        zoom 9 con Liguria e Piemonte e la scheda di Genova aperta: la tabella dei sette giorni e delle ore. Avvicinandosi
        non compaiono altre localita' (sono i capoluoghi), anzi se ne vedono meno. -->
-  <figure class="su dopo ritaglio">
-    <img src="../film/foto/previsioni-vera-1440.webp"
+  <figure class="con-tel su dopo ritaglio">
+    <picture>
+      <!-- al telefono la mappa com'e' sul telefono (scatto 390x720 a 3x) -->
+      <source media="(max-width: 734px)" srcset="../film/foto/tel-previsioni-780.webp 780w, ../film/foto/tel-previsioni-1170.webp 1170w" sizes="calc(100vw - 24px)" width="1170" height="2160">
+      <img src="../film/foto/previsioni-vera-1440.webp"
          srcset="../film/foto/previsioni-vera-1440.webp 1440w, ../film/foto/previsioni-vera-2880.webp 2880w"
          sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy" style="object-position: 72% 50%"
          alt="Le previsioni come sono sul sito: Liguria e Piemonte con le icone del tempo e le temperature di tredici località, e a destra la scheda di Genova con i sette giorni e la tabella ora per ora di temperatura, pioggia, probabilità e vento.">
+    </picture>
     <figcaption class="small">Le previsioni come sono sul sito: tocchi una località e hai i sette giorni, ora per ora.</figcaption>
   </figure>
 </section>

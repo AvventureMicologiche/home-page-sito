@@ -23,9 +23,9 @@ const path = require('path');
 const { FILM, CACHE, arg, scarica, scaricaTutti, serverMappa, lanciaChrome, ffmpeg, codificatori, esegui, preparaGriglia } = require('./comune');
 const { apri, scena, mascheraRegioni, satFile, SAT, RAW } = require('./motore');
 const RC = require('./racconto');
-const { FPS, DUR, N, W, H, T } = RC;
+const { FPS, DUR, N, W, H, T, VERT, SUF } = RC;
 
-const FRAMES = path.join(FILM, 'frames');
+const FRAMES = path.join(FILM, 'frames' + SUF);
 
 function leggiBosco() {
   const b = arg('bosco', null);
@@ -149,8 +149,8 @@ async function main() {
     }
     // le regioni a schermo, per la misura dell'uniformita' della pioggia
     await scena(page, R.statoAl(0));
-    const nomi = await mascheraRegioni(page, path.join(CACHE, 'regioni.png'));
-    fs.writeFileSync(path.join(CACHE, 'regioni.json'), JSON.stringify(nomi));
+    const nomi = await mascheraRegioni(page, path.join(CACHE, 'regioni' + SUF + '.png'));
+    fs.writeFileSync(path.join(CACHE, 'regioni' + SUF + '.json'), JSON.stringify(nomi));
     if (errori.length) console.log('errori della pagina:', errori);
     await browser.close(); srv.chiudi();
     if (prova) return;
@@ -202,14 +202,14 @@ async function codifica() {
   for (const scelto of candidati) {
     console.log('codifica con', scelto, scelto === 'libx264' ? '(due passate)' : '(⚠️ senza libx264: una passata, qualita\' un po\' piu\' bassa; meglio un ffmpeg con libx264)');
     try {
-      video(scelto, 'scale=1920:1080:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_1080 || '2600k', process.env.TETTO_1080 || '7000k', path.join(FILM, 'apertura-1080.mp4'));
-      video(scelto, 'scale=1280:720:flags=lanczos:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_720 || '740k', process.env.TETTO_720 || '2000k', path.join(FILM, 'apertura-720.mp4'));
+      video(scelto, (VERT ? 'scale=1080:1350' : 'scale=1920:1080') + ':out_color_matrix=bt709:out_range=tv', process.env.MEDIA_1080 || '2600k', process.env.TETTO_1080 || '7000k', path.join(FILM, 'apertura' + SUF + '-1080.mp4'));
+      video(scelto, (VERT ? 'scale=720:900' : 'scale=1280:720') + ':flags=lanczos:out_color_matrix=bt709:out_range=tv', process.env.MEDIA_720 || '740k', process.env.TETTO_720 || '2000k', path.join(FILM, 'apertura' + SUF + '-720.mp4'));
       fatto = true; break;
     } catch (e) { console.log(`⚠️ ${scelto} non e' andato (${e.message.split('\n')[0]}), provo il prossimo`); }
   }
   if (!fatto) { console.error('⚠️ nessun codificatore H.264 ha funzionato: serve un ffmpeg con libx264 (https://www.gyan.dev/ffmpeg/builds/), poi --solo-codifica --ffmpeg <percorso>.'); process.exit(1); }
   // il poster: il primo fotogramma in WebP (con ffmpeg se ha libwebp, se no lo codifica Chrome)
-  const poster = path.join(FILM, 'apertura-poster.webp'), f0 = path.join(FRAMES, 'f00000.png');
+  const poster = path.join(FILM, 'apertura' + SUF + '-poster.webp'), f0 = path.join(FRAMES, 'f00000.png');
   if (ATTIVI(enc, 'libwebp')) esegui(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', f0, '-c:v', 'libwebp', '-quality', '82', poster]);
   else {
     const browser = await lanciaChrome(), page = await browser.newPage();
@@ -220,7 +220,7 @@ async function codifica() {
   }
   /* gli stills: uno al secondo, e uno ogni mezzo secondo nelle dissolvenze (pioggia, boschi, satellite, inizio
      dello zoom, loop). still-09s.jpg serve anche a verify.js. */
-  const stills = path.join(FILM, 'stills');
+  const stills = path.join(FILM, 'stills' + SUF);
   fs.rmSync(stills, { recursive: true, force: true }); fs.mkdirSync(stills, { recursive: true });
   const dentro = t => [T.pioggia, [T.pioggiaVia[0], T.boschi[1]], T.satellite, [T.zoom[0], T.zoom[0] + 3], T.loop].some(([a, b]) => t >= a - 0.01 && t <= b + 0.01);
   for (let k = 0; k < Math.floor(DUR * 2); k++) {
@@ -230,7 +230,7 @@ async function codifica() {
     esegui(ff, ['-y', '-hide_banner', '-loglevel', 'error', '-i', path.join(FRAMES, `f${String(Math.round(t * FPS)).padStart(5, '0')}.png`),
       '-vf', 'scale=1280:-2', '-q:v', '4', path.join(stills, nome)]);
   }
-  for (const f of ['apertura-1080.mp4', 'apertura-720.mp4', 'apertura-poster.webp'])
+  for (const f of ['apertura' + SUF + '-1080.mp4', 'apertura' + SUF + '-720.mp4', 'apertura' + SUF + '-poster.webp'])
     console.log(f, (fs.statSync(path.join(FILM, f)).size / 1048576).toFixed(2), 'MB');
 }
 
@@ -243,7 +243,7 @@ function graficoCamera() {
     righe.push(`${(i / FPS).toFixed(4)},${(Math.hypot(pb[0] - pa[0], pb[1] - pa[1]) * sc).toFixed(4)},${(Math.abs(b.zoom - a.zoom) * Math.LN2 * Math.hypot(W, H) / 2).toFixed(4)}`);
   }
   fs.mkdirSync(CACHE, { recursive: true });
-  fs.writeFileSync(path.join(CACHE, 'camera.csv'), righe.join('\n'));
+  fs.writeFileSync(path.join(CACHE, 'camera' + SUF + '.csv'), righe.join('\n'));
 }
 
 /* le misure, in Python (numpy, pillow, matplotlib): fluidita.png e uniformita.png. Se Python non c'e', lo dice e
@@ -252,10 +252,10 @@ function misura() {
   const py = arg('python', 'python');
   const fp = RC.fotogrammiPioggia();
   const passi = [
-    ['fluidita.py', '--frames', FRAMES, '--camera', path.join(CACHE, 'camera.csv'), '--out', path.join(FILM, 'fluidita.png'), '--fps', String(FPS),
+    ['fluidita.py', '--frames', FRAMES, '--camera', path.join(CACHE, 'camera' + SUF + '.csv'), '--out', path.join(FILM, 'fluidita' + SUF + '.png'), '--fps', String(FPS),
       '--zone', JSON.stringify({ 'pioggia sale': T.pioggia, 'pioggia → boschi': [T.pioggiaVia[0], T.boschi[1]], 'satellite': T.satellite, 'zoom': T.zoom, 'loop': T.loop })],
-    ['uniformita.py', '--frames', FRAMES, '--regioni', path.join(CACHE, 'regioni.png'), '--nomi', path.join(CACHE, 'regioni.json'),
-      '--base', String(fp.base), '--pieno', String(fp.pieno), '--lista', fp.lista.join(','), '--fps', String(FPS), '--out', path.join(FILM, 'uniformita.png')],
+    ['uniformita.py', '--frames', FRAMES, '--regioni', path.join(CACHE, 'regioni' + SUF + '.png'), '--nomi', path.join(CACHE, 'regioni' + SUF + '.json'),
+      '--base', String(fp.base), '--pieno', String(fp.pieno), '--lista', fp.lista.join(','), '--fps', String(FPS), '--out', path.join(FILM, 'uniformita' + SUF + '.png')],
   ];
   for (const [script, ...a] of passi) {
     try { esegui(py, [path.join(__dirname, script), ...a]); }

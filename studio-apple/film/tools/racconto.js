@@ -17,9 +17,14 @@
    Per cambiare il punto d'arrivo: --bosco lat,lon,zoom (vedi STATO.md). */
 'use strict';
 const FPS = 60, DUR = 22.5, N = FPS * DUR;
-const W = 1920, H = 1080;
+/* 23/10, sua richiesta: anche il film VERTICALE per il telefono. FORMATO=verticale -> 1080x1350 (4:5): l'Italia e' stretta
+   e alta e in verticale riempie lo schermo. Stessa sceneggiatura, stessi tempi; cambia solo l'inquadratura iniziale. */
+const VERT = process.env.FORMATO === 'verticale';
+const W = VERT ? 1080 : 1920, H = VERT ? 1350 : 1080;
+const SUF = VERT ? '-v' : '';
 
-const ITALIA = { centro: [41.85, 12.5], zoom: 6.62 };   // l'Italia intera in 1920x1080, la stessa inquadratura di prima
+const ITALIA = { centro: [41.85, 12.5], zoom: 6.62 };
+if (VERT) { ITALIA.centro = [42.0, 12.55]; ITALIA.zoom = 6.85; }   // l'Italia intera in 1080x1350, con un po' di margine   // l'Italia intera in 1920x1080, la stessa inquadratura di prima
 /* IL PUNTO D'ARRIVO: la faggeta (con macchie di abete bianco) sul crinale fra Campigna e Sasso Fratino, nel Parco
    nazionale delle Foreste Casentinesi. Sasso Fratino e' riserva integrale dal 1959, patrimonio UNESCO: li' non entra
    nessuno, tanto meno a raccogliere. Nelle tessere dei boschi della mappa e' faggeta piena per piu' dei 4 x 2,4 km
@@ -191,4 +196,4 @@ function fotogrammiPioggia() {
   return { base: Math.round((T.pioggia[0] - 0.05) * FPS), pieno: Math.round((T.pioggiaVia[0] - 0.1) * FPS), lista: out };
 }
 
-module.exports = { FPS, DUR, N, W, H, T, ITALIA, BOSCO_PREDEFINITO, crea, tessereVista, tessereFilm, fotogrammiPioggia, italiaZ12, inItaliaFatto, proj, unproj, liscia, tratto, clamp };
+module.exports = { VERT, SUF, FPS, DUR, N, W, H, T, ITALIA, BOSCO_PREDEFINITO, crea, tessereVista, tessereFilm, fotogrammiPioggia, italiaZ12, inItaliaFatto, proj, unproj, liscia, tratto, clamp };
