@@ -10,9 +10,12 @@
 <meta name="author" content="Avventure Micologiche">
 <meta property="og:title" content="Mappa delle piogge per funghi e boschi · Avventure Micologiche">
 <meta property="og:description" content="La mappa gratuita della pioggia caduta davvero, dai pluviometri reali, per chi va a funghi: boschi, satellite e previsioni. E il quiz per l'esame tartufi.">
+<link rel="preload" as="image" href="immagini/apertura-v-poster.webp" media="(max-width: 734px)">
 <link rel="canonical" href="https://avventuremicologiche.it/">
 <meta property="og:url" content="https://avventuremicologiche.it/">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Avventure Micologiche">
+<meta property="og:locale" content="it_IT">
 <!-- l'anteprima della home nuova (23/10, la A delle tre proposte): preview.jpg resta alle pagine del quiz -->
 <meta property="og:image" content="https://avventuremicologiche.it/immagini/anteprima-home.jpg">
 <meta property="og:image:width" content="2400">
@@ -180,6 +183,7 @@ a { color: var(--color-link-dark); }
 .pill svg { width: 18px; height: 18px; flex: none; }
 .film .pill { font-size: 19px; min-height: 52px; padding: 14px 28px; letter-spacing: -0.02em; }
 :focus-visible { outline: 2px solid var(--color-link-dark); outline-offset: 3px; }
+.noi :focus-visible, footer :focus-visible { outline-color: var(--color-link); }   /* sul grigio chiaro il blu chiaro non si vedeva */
 
 /* ── MENU: 44 px, fisso, scuro e sfocato (la pagina e' una storia al buio) ── */
 .nav {
@@ -193,9 +197,9 @@ a { color: var(--color-link-dark); }
 .nav .links a { font-size: 13px; color: rgba(255, 255, 255, 0.8); text-decoration: none; white-space: nowrap; transition: color .24s cubic-bezier(0.4, 0, 0.6, 1); }
 .nav .links a:hover { color: #fff; }
 /* YouTube nel menu: il bottone rosso «Iscriviti» col logo, l'unica cosa colorata della barra */
-.nav .links a.nav-yt { display: inline-flex; align-items: center; gap: 7px; background: #ff0000; color: #fff; font-weight: 600;
+.nav .links a.nav-yt { display: inline-flex; align-items: center; gap: 7px; background: #d40000; color: #fff; font-weight: 600;
   padding: 7px 14px 7px 12px; border-radius: 980px; }
-.nav .links a.nav-yt:hover { background: #e00000; color: #fff; }
+.nav .links a.nav-yt:hover { background: #b80000; color: #fff; }
 .nav .links a.nav-yt svg { width: 18px; height: 18px; fill: #fff; }
 
 /* ── 1. IL FILM ── */
@@ -260,9 +264,6 @@ a { color: var(--color-link-dark); }
 .js .su.dopo { transition-delay: .18s; }
 
 /* ── 3. CHIUSURA DELLA STORIA ── */
-.fine { padding: 140px 0 150px; text-align: center; }
-.fine .pills { justify-content: center; }
-.fine .alt { margin-top: 22px; }
 
 /* ── 4. E POI CI SIAMO NOI (chiaro, piu' piccolo) ── */
 .noi { background: var(--color-surface); color: var(--color-text); padding: 90px 0 var(--gap); }
@@ -281,7 +282,7 @@ a { color: var(--color-link-dark); }
 .riq .pic.yt { display: grid; place-items: center; background: #fff; }
 .riq .pic.yt svg { width: 34%; height: auto; }
 /* YouTube: testo a sinistra, mosaico di tre foto a destra (una alta e due basse), riquadro bianco come su apple.com */
-.yt-blocco, .quiz-blocco { max-width: var(--container); margin: 48px auto 0; background: #fff; border-radius: var(--radius); overflow: hidden;
+.yt-blocco, .quiz-blocco { width: calc(100% - 44px); max-width: var(--container); margin: 48px auto 0; background: #fff; border-radius: var(--radius); overflow: hidden;
   display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
 .quiz-blocco { margin-top: var(--gap); grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
 .yt-blocco .txt, .quiz-blocco .txt { padding: 56px 52px; align-self: center; }
@@ -289,12 +290,17 @@ a { color: var(--color-link-dark); }
 .yt-blocco p, .quiz-blocco p { margin-top: 12px; color: var(--muted); }
 .yt-logo { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; margin-bottom: 14px; }
 .yt-logo svg { width: 30px; height: 30px; fill: #ff0000; }
-.pill-yt { background: #ff0000; color: #fff; }
-.pill-yt:hover { background: #e00000; }
+.pill-yt { background: #d40000; color: #fff; }   /* check 23/10: #ff0000 col bianco faceva 4,0, serve 4,5 */
+.pill-yt:hover { background: #b80000; }
 .pill-yt svg { fill: #fff; }
-.mosaico { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; min-height: 460px; }
-.mosaico img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.mosaico .m1 { grid-row: 1 / 3; }
+.mosaico { position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; min-height: 460px; }
+/* check 23/10: su Safari le foto in righe 1fr con height:100% uscivano alte quanto tutto il mosaico. Ogni foto sta in una
+   cella sua (un div) e dentro e' in posizione assoluta: uguale su tutti i motori */
+.mosaico > span { position: relative; overflow: hidden; display: block; }
+.mosaico img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.mosaico .m1 { grid-area: 1 / 1 / 3 / 2; }
+.mosaico .m2 { grid-area: 1 / 2 / 2 / 3; }
+.mosaico .m3 { grid-area: 2 / 2 / 3 / 3; }
 .quiz-blocco .pic { display: block; overflow: hidden; }
 .quiz-blocco .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .quiz-blocco .regioni { margin-top: 20px; font-size: 14px; line-height: 1.9; }
@@ -306,7 +312,7 @@ footer { background: var(--color-surface); color: var(--muted); font-size: 12px;
 footer .row { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
 footer .name { color: var(--color-text); font-size: 17px; font-weight: 600; }
 footer .mail { margin-top: 6px; overflow-wrap: anywhere; }
-footer .fonte-film { margin-top: 10px; color: var(--muted-dark); }
+footer .fonte-film { margin-top: 10px; color: var(--muted); }
 footer a { color: var(--color-link); }
 .socials { display: flex; gap: 12px; }
 .soc { width: 44px; height: 44px; border-radius: 50%; background: #e8e8ed; color: var(--color-text); display: grid; place-items: center; transition: color .24s var(--ease-brand), background-color .24s var(--ease-brand); }
@@ -319,7 +325,21 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
    piede), sua scelta del 23/10 */
 @media (min-width: 735px) and (max-width: 999px) { .nav .lungo { display: none; } .nav .links { gap: 22px; } }
 @media (max-width: 734px) { .nav .links a.contatti { display: none; } }
-@media (max-width: 359px) { .nav .lungo { display: none; } }   /* i telefoni piu' piccoli (320 px): «Quiz» corto */
+@media (max-width: 389px) { .nav .lungo { display: none; } }   /* sotto i 390 px «Quiz» corto (check 23/10: a 360 «Iscriviti» toccava il bordo) */
+
+/* check 23/10: TELEFONO IN ORIZZONTALE. Largo 735-932 px e basso 320-430: prende il disegno del computer, quindi il film
+   prende l'altezza dello schermo, il titolo si rimpicciolisce e le scritte stanno sopra il tondo */
+@media (min-width: 735px) and (max-height: 500px) {
+  .film { min-height: 0; }
+  .film h1 { font-size: 2.1rem; }
+  .film .sub { margin-top: 8px; font-size: 0.95rem; }
+  .film .pills { margin-top: 14px; }
+  .film .pill { font-size: 15px; min-height: 40px; padding: 9px 18px; }
+  .film .gratis { margin-top: 10px; }
+  .scritte { bottom: 16%; right: 64px; width: calc(64% - 64px); }
+  .scritta .riga { font-size: 1.5rem; }
+  .scritta .occhiello { font-size: 0.7rem; margin-bottom: 8px; }
+}
 
 /* ── TELEFONO: una colonna; il film sta intero in 16:9 e il testo sotto, sul nero ── */
 @media (max-width: 734px) {
@@ -338,7 +358,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   .vbtn { top: calc(var(--nav-h) + 125vw - 48px); bottom: auto; right: 12px; }
   .scritte { top: calc(var(--nav-h) + 125vw - 112px); bottom: auto; width: auto; left: 16px; right: 16px; height: 0; }
   .scritta { bottom: auto; top: 0; }
-  .scritta .riga { font-size: 1.2rem; white-space: nowrap; }
+  .scritta .riga { font-size: 1.2rem; font-weight: 400; white-space: nowrap; }
   .scritta .occhiello { font-size: 0.66rem; margin-bottom: 6px; gap: 10px; }
   .scritta .occhiello::before, .scritta .occhiello::after { width: 24px; }
   .pills { flex-direction: column; align-items: stretch; }
@@ -349,10 +369,9 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   /* l'Italia intera sta nel mezzo dell'immagine: al telefono si ritaglia in 4:5 e diventa grande il doppio */
   .cap figure.ritaglio img { aspect-ratio: 4 / 5; object-fit: cover; }
   .cap figure.con-tel img { aspect-ratio: auto; height: auto; object-fit: contain; }
-  .fine { padding: 80px 0 90px; }
   .noi { padding: 64px 0 12px; }
   .riquadri { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 0 12px; margin-top: 32px; }
-  .yt-blocco, .quiz-blocco { grid-template-columns: minmax(0, 1fr); margin-left: 12px; margin-right: 12px; }
+  .yt-blocco, .quiz-blocco { width: auto; grid-template-columns: minmax(0, 1fr); margin-left: 12px; margin-right: 12px; }
   .yt-blocco .txt, .quiz-blocco .txt { padding: 28px 22px 32px; }
   .mosaico { min-height: 0; aspect-ratio: 4 / 3; }
   .quiz-blocco .pic { aspect-ratio: 16 / 9; }
@@ -360,6 +379,12 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   .nav .links a.nav-yt svg { width: 15px; height: 15px; }
   .riq .txt { padding: 24px 20px 30px; }
   footer .row { flex-direction: column; align-items: flex-start; }
+}
+/* il telefono piccolo in orizzontale (iPhone SE, 568x320): il film 4:5 sarebbe alto 710 px, sta nello schermo intero */
+@media (max-width: 734px) and (orientation: landscape) {
+  .film video { aspect-ratio: auto; height: calc(100svh - var(--nav-h)); object-fit: contain; background: #000; }
+  .vbtn { top: calc(100svh - 48px); }
+  .scritte { top: calc(100svh - 104px); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
@@ -411,12 +436,12 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
         var giusta = m ? matchMedia(m).matches : !tutte.some(function (t) { return t.getAttribute('media') && matchMedia(t.getAttribute('media')).matches; });
         if (!giusta) { v.removeChild(s); tolte++; }
       });
-      if (tolte) v.load();
+      if (tolte && !matchMedia('(prefers-reduced-motion: reduce)').matches) v.load();   // check 23/10: con «riduci animazioni» load() scaricava il film lo stesso
     })();
   </script>
   <div class="txt">
     <h1>Dove è piovuto davvero.</h1>
-    <p class="lead sub">La mappa dei pluviometri reali, stazione per stazione.</p>
+    <p class="lead sub">La mappa dei pluviometri reali, per chi va a funghi.</p>
     <div class="pills">
       <a class="pill pill-fill" href="https://precipitazioni.avventuremicologiche.it" target="_blank" rel="noopener">Storico piogge</a>
       <!-- ⚠️ nella mappa le previsioni partono solo con una regione: «?m=prev» da solo aspetta 15 s una regione
@@ -436,7 +461,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <h2 class="display">Scegli la data e guarda quanto ha piovuto.</h2>
     <p class="lead sub">I millimetri misurati dai pluviometri delle agenzie regionali. Più di 5000 stazioni, in 5 nazioni: Italia, Svizzera, Austria, Francia e Slovenia.</p>
     <!-- ⚠️ testo vero, non immagine: serve a Google per arrivare alla pagina delle localita' -->
-    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=piemonte,valledaosta,lombardia,trentino,altoadige,veneto,friuli,liguria,emilia&amp;g=30" target="_blank" rel="noopener">Apri la pioggia del Nord, 30 giorni</a> · <a href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a></p>
+    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=piemonte,valledaosta,lombardia,liguria&amp;g=30" target="_blank" rel="noopener">Apri la pioggia del Nord-Ovest, 30 giorni</a> · <a href="https://precipitazioni.avventuremicologiche.it/funghi/" target="_blank" rel="noopener">Le località più bagnate</a></p>
   </div>
   <figure class="con-tel su dopo ritaglio">
     <!-- 22/10 sera, sua richiesta: la mappa VERA, com'e' sul sito (scatto a 2880 px della mappa servita in locale coi
@@ -538,7 +563,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 <section class="noi light" id="noi">
   <h2 class="su">E poi ci siamo noi.</h2>
   <!-- YouTube per primo, a tutta larghezza, con le foto vere: Archie e i funghi. ⚠️ I nomi dei file sono scambiati:
-       ovoli_mano.jpg = Archie sul sentiero dietro un porcino, archie_corre.jpg = due porcini in mano. -->
+       yt-archie-sentiero = Archie sul sentiero dietro un porcino (era ovoli_mano.jpg), yt-porcini = due porcini in mano (era archie_corre.jpg). -->
   <article class="yt-blocco su">
     <div class="txt">
       <span class="yt-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>YouTube</span>
@@ -550,9 +575,9 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
       </div>
     </div>
     <a class="mosaico" href="https://www.youtube.com/@avventuremicologiche" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
-      <img class="m1" src="immagini/ovoli_mano.jpg" width="975" height="1300" loading="lazy" alt="">
-      <img class="m2" src="immagini/archie_tartufo.jpg" width="1565" height="916" loading="lazy" alt="">
-      <img class="m3" src="immagini/archie_corre.jpg" width="1638" height="916" loading="lazy" alt="">
+      <span class="m1"><img src="immagini/home/yt-archie-sentiero-800.webp" width="800" height="1067" loading="lazy" alt=""></span>
+      <span class="m2"><img src="immagini/home/yt-archie-tartufo-800.webp" width="800" height="468" loading="lazy" alt=""></span>
+      <span class="m3"><img src="immagini/home/yt-porcini-800.webp" width="800" height="447" loading="lazy" alt=""></span>
     </a>
   </article>
   <article class="quiz-blocco su dopo">
