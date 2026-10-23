@@ -27,7 +27,7 @@ window.SCRITTE_FILM = {
     { da: 0.7,  a: 2.5,  occhiello: 'Misure vere',            testo: 'Ogni punto, un pluviometro.' },  // i pluviometri si accendono
     { da: 3.5,  a: 6.1,  occhiello: 'Scegli le date e guarda', testo: 'La pioggia caduta davvero.' },  // la pioggia sale, pausa
     { da: 7.9,  a: 10.1, occhiello: 'Poi, i boschi', testo: 'Faggete, castagneti, abetaie.' },// boschi e satellite, telecamera ferma
-    { da: 14.2, a: 20.9, occhiello: 'Dal satellite',          testo: 'Fino alle chiome.' }            // lo zoom: il retino sparisce
+    { da: 14.2, a: 99,   occhiello: 'Dal satellite',          testo: 'Fino alle chiome.' }            // lo zoom: il retino sparisce
   ]
 };
 </script>
@@ -98,7 +98,7 @@ a { color: var(--color-link-dark); }
 }
 .nav .in { max-width: none; margin: 0; padding: 0 clamp(18px, 2.4vw, 40px); height: var(--nav-h); display: flex; align-items: center; gap: 30px; }
 .nav .brand { font-family: var(--font-display); font-size: 21px; font-weight: 600; color: #f5f5f7; text-decoration: none; letter-spacing: -0.015em; white-space: nowrap; margin-right: auto; }
-.nav .links { display: flex; gap: 32px; }
+.nav .links { display: flex; align-items: center; gap: 32px; }
 .nav .links a { font-size: 13px; color: rgba(255, 255, 255, 0.8); text-decoration: none; white-space: nowrap; transition: color .24s cubic-bezier(0.4, 0, 0.6, 1); }
 .nav .links a:hover { color: #fff; }
 /* YouTube nel menu: il bottone rosso «Iscriviti» col logo, l'unica cosa colorata della barra */
@@ -143,9 +143,14 @@ a { color: var(--color-link-dark); }
   font-weight: 300; letter-spacing: -0.022em; color: #fff; max-width: 16em; margin: 0 auto; text-wrap: balance;
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55), 0 0 1px rgba(0, 0, 0, 0.4); }
 .scritta .parola { display: inline-block; opacity: 0; will-change: opacity, transform, filter; }
-.vbtn .i-play { display: none; }
+.vbtn .i-play, .vbtn .i-rifai, .vbtn .t-rifai { display: none; }
 .vbtn.paused .i-play { display: block; }
 .vbtn.paused .i-pause { display: none; }
+/* a film finito il tondo si allarga in una pillola «Riguarda», come su apple.com */
+.vbtn.fine { width: auto; padding: 0 16px 0 13px; border-radius: 980px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+.vbtn.fine .i-pause, .vbtn.fine .i-play { display: none; }
+.vbtn.fine .i-rifai { display: block; width: 15px; height: 15px; }
+.vbtn.fine .t-rifai { display: inline; }
 .vbtn[hidden] { display: none; }
 
 /* ── 2. I CAPITOLI: uno per schermata, testo corto e UNA immagine ── */
@@ -283,8 +288,8 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 
 <!-- 1. IL FILM: la mappa vera, senza interfaccia. Il testo lo mette la pagina, non il video. -->
 <section class="film" aria-label="La mappa delle piogge">
-  <video id="film" poster="../film/apertura-poster.webp" muted loop playsinline autoplay preload="auto" width="1920" height="1080"
-         aria-label="L'Italia al buio con i pallini dei pluviometri. Da lì nasce la pioggia vera di trenta giorni, che si accumula; poi la telecamera scende sulla Liguria, la pioggia lascia il posto ai boschi, sotto compare il satellite fino alle chiome, e alla fine le previsioni dei capoluoghi.">
+  <video id="film" poster="../film/apertura-poster.webp" muted playsinline autoplay preload="auto" width="1920" height="1080"
+         aria-label="L'Italia al buio: si accendono i pallini dei pluviometri e sale la pioggia di trenta giorni; poi la pioggia lascia il posto ai boschi sopra la foto dal satellite, e la telecamera scende fino alle chiome degli alberi.">
     <source src="../film/apertura-720.mp4" type="video/mp4" media="(max-width: 734px)">
     <source src="../film/apertura-1080.mp4" type="video/mp4">
   </video>
@@ -320,7 +325,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
   </div>
   <!-- le scritte del film: i tempi stanno in cima alla pagina (SCRITTE_FILM) -->
   <div class="scritte" aria-hidden="true"></div>
-  <button class="vbtn" type="button" aria-label="Metti in pausa il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg></button>
+  <button class="vbtn" type="button" aria-label="Metti in pausa il filmato" hidden><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8.5" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L12 7z" fill="currentColor"/></svg><svg class="i-rifai" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5a5.5 5.5 0 1 1-5.3 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.2 3.2 2.9 7l3.6-1.9z" fill="currentColor"/></svg><span class="t-rifai">Riguarda</span></button>
 </section>
 
 <!-- 2. I CAPITOLI: pioggia, scheda, boschi, satellite, previsioni. Ognuno ha il suo link alla mappa gia' in quel modo. -->
@@ -379,14 +384,15 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <p class="lead sub">Ti avvicini fino a vedere gli alberi uno per uno, i sentieri e le case.</p>
     <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?boschi=1&amp;sat=1&amp;r=liguria" target="_blank" rel="noopener">Apri il satellite</a></p>
   </div>
-  <!-- 23/10, sua richiesta: il satellite al massimo dettaglio, un pezzo di bosco e qualche casa (scatto della mappa vera a
-       2880 px, zoom 18, boschi al 10%). Il nome del paese non si scrive: mai legare le foto a un luogo. -->
+  <!-- 23/10, sua richiesta: il satellite al massimo dettaglio, d'ESTATE, chiome e qualche casa (scatto della mappa vera a
+       2880 px, zoom 18, boschi al 10%; scelto fra quattro paesi quello con la foto Esri estiva). Il nome del paese non si
+       scrive: mai legare le foto a un luogo. -->
   <figure class="su dopo ritaglio">
     <img src="../film/foto/satellite-vera-1440.webp"
          srcset="../film/foto/satellite-vera-1440.webp 1440w, ../film/foto/satellite-vera-2880.webp 2880w"
          sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy" style="object-position: 64% 50%"
-         alt="La mappa col satellite al massimo dettaglio: i tetti di un paese di montagna, le strade, le macchine parcheggiate e il bosco intorno, albero per albero.">
-    <figcaption class="small">Il satellite al massimo dettaglio: un paese di montagna e il bosco intorno.</figcaption>
+         alt="La mappa col satellite al massimo dettaglio, d'estate: il bosco fitto, chioma per chioma, e in basso i tetti di un paese di montagna con la strada e un prato.">
+    <figcaption class="small">Il satellite al massimo dettaglio: il bosco, chioma per chioma, e le prime case del paese.</figcaption>
   </figure>
 </section>
 
@@ -396,13 +402,15 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <p class="lead sub">Il tempo dei prossimi sette giorni, ora per ora: temperatura, pioggia, probabilità e vento.</p>
     <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev" target="_blank" rel="noopener">Apri le previsioni</a></p>
   </div>
-  <!-- 23/10: le previsioni vere della mappa (scatto a 2880 px della mappa in locale, previsioni chieste al sito vero) -->
+  <!-- 23/10: le previsioni vere della mappa (scatto a 2880 px della mappa in locale, previsioni chieste al sito vero),
+       zoom 9 con Liguria e Piemonte e la scheda di Genova aperta: la tabella dei sette giorni e delle ore. Avvicinandosi
+       non compaiono altre localita' (sono i capoluoghi), anzi se ne vedono meno. -->
   <figure class="su dopo ritaglio">
     <img src="../film/foto/previsioni-vera-1440.webp"
          srcset="../film/foto/previsioni-vera-1440.webp 1440w, ../film/foto/previsioni-vera-2880.webp 2880w"
-         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy" style="object-position: 58% 50%"
-         alt="Le previsioni come sono sul sito: la Liguria con le icone del tempo e le temperature massime e minime di Sanremo, Imperia, Albenga, Savona, Genova, Sestri Levante e La Spezia, e a sinistra i sette giorni da scegliere.">
-    <figcaption class="small">Le previsioni come sono sul sito: sette giorni, località per località.</figcaption>
+         sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy" style="object-position: 72% 50%"
+         alt="Le previsioni come sono sul sito: Liguria e Piemonte con le icone del tempo e le temperature di tredici località, e a destra la scheda di Genova con i sette giorni e la tabella ora per ora di temperatura, pioggia, probabilità e vento.">
+    <figcaption class="small">Le previsioni come sono sul sito: tocchi una località e hai i sette giorni, ora per ora.</figcaption>
   </figure>
 </section>
 
@@ -538,25 +546,44 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 })();
 
 /* Il film: tondo pausa/play come su apple.com; fuori dallo schermo si ferma, rientrando riparte
-   (se non l'hai fermato tu). Con «riduci animazioni» resta il poster e il tondo non c'e'. */
+   (se non l'hai fermato tu). Con «riduci animazioni» resta il poster e il tondo non c'e'.
+   23/10, sua scelta: il film gira UNA VOLTA SOLA e si ferma sulle chiome, prima della dissolvenza che nel file
+   riporta al primo fotogramma (da 21,5 s). Il tondo diventa la pillola «Riguarda». */
 (function () {
   var v = document.getElementById('film'), b = document.querySelector('.film .vbtn');
   if (!v || !b) return;
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var FINE = 21.4, finito = false;
   b.hidden = false;
   function segna() {
-    b.classList.toggle('paused', v.paused);
-    b.setAttribute('aria-label', v.paused ? 'Avvia il filmato' : 'Metti in pausa il filmato');
+    b.classList.toggle('paused', v.paused && !finito);
+    b.classList.toggle('fine', finito);
+    b.setAttribute('aria-label', finito ? 'Riguarda il filmato' : v.paused ? 'Avvia il filmato' : 'Metti in pausa il filmato');
   }
   function parti() { var p = v.play(); if (p && p.catch) p.catch(segna); }
+  function chiudi() { if (finito) return; finito = true; v.dataset.fermato = '1'; v.pause(); segna(); }
+  function guarda(t) { if (!finito && t >= FINE) chiudi(); }
+  if ('requestVideoFrameCallback' in v) {
+    var giro = function (adesso, meta) { guarda(meta.mediaTime); v.requestVideoFrameCallback(giro); };
+    v.requestVideoFrameCallback(giro);
+  }
+  v.addEventListener('timeupdate', function () { guarda(v.currentTime); });
+  v.addEventListener('ended', chiudi);
   b.addEventListener('click', function () {
+    if (finito) {
+      // da capo; se il server non sa spostarsi nel file (in locale, senza Range) si ricarica il film
+      finito = false; delete v.dataset.fermato; segna();
+      v.currentTime = 0;
+      setTimeout(function () { if (v.currentTime > 1) v.load(); parti(); }, 120);
+      return;
+    }
     if (v.paused) { delete v.dataset.fermato; parti(); } else { v.dataset.fermato = '1'; v.pause(); }
   });
   v.addEventListener('play', segna); v.addEventListener('pause', segna);
   segna();
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (voci) {
-      voci.forEach(function (x) { if (x.isIntersecting) { if (!v.dataset.fermato) parti(); } else v.pause(); });
+      voci.forEach(function (x) { if (x.isIntersecting) { if (!v.dataset.fermato) parti(); } else if (!finito) v.pause(); });
     }, { threshold: 0.25 }).observe(v);
   }
 })();
