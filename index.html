@@ -272,10 +272,12 @@ footer a { color: var(--color-link); }
 .soc-yt:hover { color: #ff0000; } .soc-fb:hover { color: #1877f2; } .soc-ig:hover { color: #e1306c; } .soc-suno:hover { color: #ff6b00; }
 footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-border); }
 
-/* «Quiz esame tartufi» per intero solo dove c'e' spazio: sotto i 1000 px resta «Quiz» (a 740 px «Iscriviti» usciva
-   dallo schermo), e fra 735 e 999 px le voci si avvicinano un po' */
-@media (max-width: 999px) { .nav .lungo { display: none; } }
-@media (min-width: 735px) and (max-width: 999px) { .nav .links { gap: 22px; } }
+/* «Quiz esame tartufi» per intero: al computer sempre; fra 735 e 999 px resta «Quiz» (a 740 px «Iscriviti» usciva
+   dallo schermo) e le voci si avvicinano un po'; al TELEFONO torna intero e si toglie «Contatti» (la mail e' nel
+   piede), sua scelta del 23/10 */
+@media (min-width: 735px) and (max-width: 999px) { .nav .lungo { display: none; } .nav .links { gap: 22px; } }
+@media (max-width: 734px) { .nav .links a.contatti { display: none; } }
+@media (max-width: 359px) { .nav .lungo { display: none; } }   /* i telefoni piu' piccoli (320 px): «Quiz» corto */
 
 /* ── TELEFONO: una colonna; il film sta intero in 16:9 e il testo sotto, sul nero ── */
 @media (max-width: 734px) {
@@ -333,7 +335,7 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
       <a href="https://precipitazioni.avventuremicologiche.it">Mappa pluviometrica</a>
       <a href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev">Previsioni</a>
       <a href="/esame-tartufi/">Quiz<span class="lungo"> esame tartufi</span></a>
-      <a href="#piede">Contatti</a>
+      <a class="contatti" href="#piede">Contatti</a>
       <a class="nav-yt" href="https://www.youtube.com/@avventuremicologiche?sub_confirmation=1" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>Iscriviti</a>
     </nav>
   </div>
