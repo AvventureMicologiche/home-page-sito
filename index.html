@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<title>Avventure Micologiche</title>
-<meta name="description" content="Dove è piovuto davvero, stazione per stazione: la mappa dei pluviometri reali, sui boschi giusti. Poi il canale YouTube e il quiz per l'esame tartufi.">
+<title>Mappa delle piogge per funghi e boschi · Avventure Micologiche</title>
+<meta name="description" content="La mappa gratuita della pioggia caduta davvero, dai pluviometri reali, per chi va a funghi: boschi, satellite e previsioni. E il quiz per l'esame tartufi.">
 <meta name="author" content="Avventure Micologiche">
-<meta property="og:title" content="Avventure Micologiche">
-<meta property="og:description" content="Dove è piovuto davvero, stazione per stazione: la mappa dei pluviometri reali, sui boschi giusti. Poi il canale YouTube e il quiz per l'esame tartufi.">
+<meta property="og:title" content="Mappa delle piogge per funghi e boschi · Avventure Micologiche">
+<meta property="og:description" content="La mappa gratuita della pioggia caduta davvero, dai pluviometri reali, per chi va a funghi: boschi, satellite e previsioni. E il quiz per l'esame tartufi.">
 <link rel="canonical" href="https://avventuremicologiche.it/">
 <meta property="og:url" content="https://avventuremicologiche.it/">
 <meta property="og:type" content="website">
@@ -19,6 +19,43 @@
 <meta property="og:image:height" content="1260">
 <meta property="og:image:alt" content="L'Italia colorata dalla pioggia caduta in trenta giorni e la scritta: Dove è piovuto davvero.">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://avventuremicologiche.it/#chi",
+      "name": "Avventure Micologiche",
+      "url": "https://avventuremicologiche.it/",
+      "email": "avventuremicologiche@gmail.com",
+      "sameAs": [
+        "https://www.youtube.com/@avventuremicologiche",
+        "https://www.facebook.com/avventuremicologiche/",
+        "https://www.instagram.com/avventuremicologiche/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://avventuremicologiche.it/#sito",
+      "name": "Avventure Micologiche",
+      "url": "https://avventuremicologiche.it/",
+      "inLanguage": "it",
+      "publisher": { "@id": "https://avventuremicologiche.it/#chi" }
+    },
+    {
+      "@type": "WebApplication",
+      "name": "Mappa pluviometrica",
+      "url": "https://precipitazioni.avventuremicologiche.it/",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Web",
+      "description": "La pioggia caduta davvero, dai pluviometri reali delle agenzie regionali, con i boschi, il satellite e le previsioni.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+      "publisher": { "@id": "https://avventuremicologiche.it/#chi" }
+    }
+  ]
+}
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-4WLB4PFS69"></script>
 <script>
@@ -478,8 +515,8 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 <section class="cap" id="domani">
   <div class="wrap su">
     <h2 class="display">Che tempo farà?</h2>
-    <p class="lead sub">Il tempo dei prossimi sette giorni, ora per ora: temperatura, pioggia, probabilità e vento.</p>
-    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev" target="_blank" rel="noopener">Apri le previsioni</a></p>
+    <p class="lead sub">Il tempo dei prossimi sette giorni, ora per ora: temperatura, pioggia, probabilità e vento. E la diretta radar della pioggia che sta cadendo adesso.</p>
+    <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/?r=liguria&amp;m=prev" target="_blank" rel="noopener">Apri le previsioni</a> · <a href="https://precipitazioni.avventuremicologiche.it/?r=lombardia,veneto,emilia&amp;radar=ora" target="_blank" rel="noopener">Apri la diretta radar</a></p>
   </div>
   <!-- 23/10: le previsioni vere della mappa (scatto a 2880 px della mappa in locale, previsioni chieste al sito vero),
        zoom 9 con Liguria e Piemonte e la scheda di Genova aperta: la tabella dei sette giorni e delle ore. Avvicinandosi
