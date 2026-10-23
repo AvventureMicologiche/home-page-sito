@@ -6,6 +6,12 @@ const puppeteer = require('D:/video youtube/claudio/grafiche-social/node_modules
   await p.setRequestInterception(true);
   p.on('request', async r => {
     if (/google-analytics|googletagmanager|clarity\.ms|doubleclick/.test(r.url())) return r.abort();
+    // le previsioni: in locale la mappa le chiede a 127.0.0.1:8788 (wrangler), qui si girano al sito vero (solo lettura)
+    if (/\/api\/previsioni/.test(r.url())) {
+      const u = new URL(r.url()), vero = 'https://precipitazioni.avventuremicologiche.it' + u.pathname + u.search;
+      try { const res = await fetch(vero); return r.respond({ status: res.status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: await res.text() }); }
+      catch (e) { return r.abort(); }
+    }
     // solo nello scatto: il tetto delle 3 regioni si alza a 9 (come QUATTRO=1 in scatta-link-hd.js)
     if (r.resourceType() === 'document' && /127\.0\.0\.1:8899\/\?/.test(r.url())) {
       let html = await (await fetch(r.url())).text();
@@ -17,6 +23,8 @@ const puppeteer = require('D:/video youtube/claudio/grafiche-social/node_modules
   await p.setViewport({ width: 1440, height: 900, deviceScaleFactor: 2 });
   await p.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
   // solo nello scatto: con 9 regioni le etichette sotto «Indietro» non ci stanno su una riga, si va a capo
+  // e la vetrina del video («Nuovo video», in alto a destra) nelle foto della home non c'entra
+  await p.addStyleTag({ content: '#channel-logo.vetrina{display:none!important}' });
   await p.addStyleTag({ content: '#rg-scelte{justify-content:center!important}#rg-scelte .rg-chip{flex:0 1 auto!important;width:auto!important;font-size:11.5px!important;padding-left:5px!important;padding-right:5px!important;gap:3px!important;white-space:nowrap!important}' });
   await new Promise(r => setTimeout(r, +(process.env.ATTESA || 8000)));
   // VISTA=lat,lon,zoom: sposta la mappa prima dello scatto
