@@ -80,7 +80,7 @@ var IMG_CDN = 'img/', IMG_LOC = 'img/', IMG_B = IMG_CDN;
 function imgUrl(n) { return IMG_B + n + '.webp'; }
 function imgRiserva(el) { el.onerror = null; IMG_B = IMG_LOC; if (el.src && el.src.indexOf(IMG_CDN) === 0) el.src = el.src.replace(IMG_CDN, IMG_LOC); try { document.querySelector('#scena .bg').style.backgroundImage = 'url(img/sfondo-giro.webp)'; } catch (e) {} }
 </script>
-<link rel="preload" as="image" href="img/sfondo-giro.webp">
+<link rel="preload" as="image" href="/esame-tartufi/img/sfondo-giro.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
