@@ -551,17 +551,18 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <p class="lead sub">Il tempo dei prossimi sette giorni, ora per ora: temperatura, pioggia, probabilità e vento. E la diretta radar della pioggia che sta cadendo adesso.</p>
     <p class="lead apri"><a href="https://precipitazioni.avventuremicologiche.it/previsioni/" target="_blank" rel="noopener">Apri le previsioni</a> · <a href="https://precipitazioni.avventuremicologiche.it/?r=lombardia,veneto,emilia&amp;radar=ora" target="_blank" rel="noopener">Apri la diretta radar</a></p>
   </div>
-  <!-- 23/10: le previsioni vere della mappa (scatto a 2880 px della mappa in locale, previsioni chieste al sito vero),
-       zoom 9 con Liguria e Piemonte e la scheda di Genova aperta: la tabella dei sette giorni e delle ore. Avvicinandosi
-       non compaiono altre localita' (sono i capoluoghi), anzi se ne vedono meno. -->
+  <!-- 30/10/2026: le previsioni con la grafica nuova (vista a etichette col satellite, in prod dal 30/10), scattate dal
+       sito vero con scatta-previsioni-nuove.js del banco: al computer l'Italia col satellite, le icone e la fascia gialla
+       che scorre; al telefono la Liguria con le etichette e sotto la scheda di Genova. Prima (23/10): Liguria e Piemonte
+       sulla cartina, con la scheda di Genova a destra. -->
   <figure class="con-tel su dopo ritaglio">
     <picture>
-      <!-- al telefono la mappa com'e' sul telefono (scatto 390x720 a 3x) -->
+      <!-- al telefono la mappa com'e' sul telefono (scatto 390x844 a 3x, tenuti i primi 720 punti) -->
       <source media="(max-width: 734px)" srcset="immagini/home/tel-previsioni-780.webp 780w, immagini/home/tel-previsioni-1170.webp 1170w" sizes="calc(100vw - 24px)" width="1170" height="2160">
       <img src="immagini/home/previsioni-vera-1440.webp"
          srcset="immagini/home/previsioni-vera-1440.webp 1440w, immagini/home/previsioni-vera-2880.webp 2880w"
          sizes="(max-width: 734px) calc(100vw - 24px), min(1136px, calc(100vw - 44px))" width="2880" height="1800" loading="lazy" style="object-position: 72% 50%"
-         alt="Le previsioni come sono sul sito: Liguria e Piemonte con le icone del tempo e le temperature di tredici località, e a destra la scheda di Genova con i sette giorni e la tabella ora per ora di temperatura, pioggia, probabilità e vento.">
+         alt="Le previsioni come sono sul sito: l'Italia vista dal satellite con le icone del tempo sulle città, sole al nord e pioggia al sud, e in basso la fascia gialla che scorre con il nome, l'icona, la minima e la massima di ogni città.">
     </picture>
     <figcaption class="small">Le previsioni come sono sul sito: tocchi una località e hai i sette giorni, ora per ora.</figcaption>
   </figure>
