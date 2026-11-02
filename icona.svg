@@ -1,14 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.4 -0.35 48.8 48.8">
-<defs>
-<clipPath id="g1"><path d="M11.36 19.1L9.91 36.25C9.57 40.32 13.08 43.62 16.99 43.62C20.9 43.62 24.41 40.32 24.07 36.25L22.62 19.1Z"/></clipPath><clipPath id="g2"><path d="M29.25 24.77L28.33 38.66C28.15 41.4 30.62 43.63 33.45 43.63C36.27 43.63 38.75 41.4 38.57 38.66L37.65 24.77Z"/></clipPath>
-<clipPath id="k1"><path d="M-0.29 22.1A17.55 18.63 0 0 1 34.75 22.1Z"/></clipPath><clipPath id="k2"><path d="M18.81 27.77A14.73 15.59 0 0 1 48.2 27.77Z"/></clipPath>
-</defs>
-<path fill="#e5a02f" d="M11.36 19.1L9.91 36.25C9.57 40.32 13.08 43.62 16.99 43.62C20.9 43.62 24.41 40.32 24.07 36.25L22.62 19.1Z"/>
-<g clip-path="url(#g1)"><path fill="#f7b239" transform="translate(3.62 0)" d="M11.36 19.1L9.91 36.25C9.57 40.32 13.08 43.62 16.99 43.62C20.9 43.62 24.41 40.32 24.07 36.25L22.62 19.1Z"/></g>
-<path fill="#e54728" d="M-0.29 22.1A17.55 18.63 0 0 1 34.75 22.1Z"/>
-<circle fill="#f95428" clip-path="url(#k1)" cx="22.6" cy="19.62" r="15.13"/>
-<path fill="#e5a02f" d="M29.25 24.77L28.33 38.66C28.15 41.4 30.62 43.63 33.45 43.63C36.27 43.63 38.75 41.4 38.57 38.66L37.65 24.77Z"/>
-<g clip-path="url(#g2)"><path fill="#f7b239" transform="translate(3.48 0)" d="M29.25 24.77L28.33 38.66C28.15 41.4 30.62 43.63 33.45 43.63C36.27 43.63 38.75 41.4 38.57 38.66L37.65 24.77Z"/></g>
-<path fill="#e54728" d="M18.81 27.77A14.73 15.59 0 0 1 48.2 27.77Z"/>
-<circle fill="#f95428" clip-path="url(#k2)" cx="43.01" cy="29.5" r="18.74"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Icona del sito, 26/10/2026: la G4 variante 2 (goccia e fungo grande davanti, col filo chiaro). Disegno originale, quadrato 64. -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3f7ff"/><stop offset="1" stop-color="#b3e5ff"/></linearGradient>
+    <linearGradient id="goccia" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fe0ff"/><stop offset=".55" stop-color="#2f74e8"/><stop offset="1" stop-color="#7a4fe0"/></linearGradient>
+    <linearGradient id="arancio" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#f0521f"/></linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#cielo)"/>
+  <path d="M26 5 C26 5 8 26 8 36 A18 18 0 0 0 44 36 C44 26 26 5 26 5 Z" fill="url(#goccia)"/>
+  <g stroke="#e9f8ff" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M35 44 H48 L47 59 Q41.5 62 36 59 Z" fill="#ffc94d"/>
+    <path d="M22 45 C22 25 61 25 61 45 Q41.5 49.5 22 45 Z" fill="url(#arancio)"/>
+  </g>
 </svg>
