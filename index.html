@@ -660,20 +660,24 @@ html { scroll-padding-top: 100px; }
   </div>
 </section>
 <script>
-/* La striscia gialla porta al libro. ⚠️ Al telefono le foto dei capitoli sopra si caricano mentre si scende
+/* La striscia gialla porta al libro, e cosi' il link avventuremicologiche.it/#libro. ⚠️ Al telefono le foto dei capitoli sopra si caricano mentre si scende
    (loading=lazy), la pagina si allunga strada facendo e la discesa si fermava 2000 px prima (provato il 19/11 a 390 px):
    a discesa finita si ricontrolla e, se il libro non e' in cima, si completa il tragitto (al massimo 4 volte). */
 (function () {
   var a = document.querySelector('.striscia-libro'), t = document.getElementById('libro');
   if (!a || !t) return;
-  a.addEventListener('click', function (e) {
-    e.preventDefault();
+  function vai(dolce) {
     var n = 0, pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
     (function va() {
-      t.scrollIntoView({ behavior: n ? 'auto' : 'smooth', block: 'start' });
-      if (++n < 5) setTimeout(function () { if (Math.abs(t.getBoundingClientRect().top - pad) > 8) va(); }, 900);
+      t.scrollIntoView({ behavior: (dolce && !n) ? 'smooth' : 'auto', block: 'start' });
+      if (++n < 6) setTimeout(function () { if (Math.abs(t.getBoundingClientRect().top - pad) > 8) va(); }, 900);
     })();
-  });
+  }
+  a.addEventListener('click', function (e) { e.preventDefault(); vai(true); });
+  /* il link diretto avventuremicologiche.it/#libro (per i social): stesso problema all'arrivo, stesso rimedio */
+  if (location.hash === '#libro') {
+    if (document.readyState === 'complete') vai(false); else addEventListener('load', function () { vai(false); });
+  }
 })();
 </script>
 
