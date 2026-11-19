@@ -401,6 +401,28 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
 }
 </style>
 <script>document.documentElement.classList.add('js');</script>
+<style>
+/* 19/11/2026, IL LIBRO «A funghi con delitto». La striscia gialla del libro, attaccata sotto il menu: il menu cresce di 40 px e tutto il resto lo segue da solo */
+:root { --nav-h: 96px; }
+html { scroll-padding-top: 100px; }
+.nav .in { height: 56px; }
+.striscia-libro { display: flex; align-items: center; justify-content: center; gap: 14px; height: 40px; padding: 0 16px; background: #ecb91a; color: #111; text-decoration: none; font-size: 14px; letter-spacing: -0.01em; white-space: nowrap; }
+.striscia-libro img { height: 30px; width: auto; transform: rotate(-6deg); box-shadow: 0 2px 5px rgba(0,0,0,.35); border-radius: 1px; }
+.striscia-libro b { font-weight: 700; }
+.striscia-libro .sep { opacity: .45; }
+.striscia-libro .vai { font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+.striscia-libro .vai svg { width: 14px; height: 14px; transition: transform .24s var(--ease-brand); }
+.striscia-libro:hover .vai svg { transform: translateX(3px); }
+.striscia-libro .corto { display: none; }
+@media (max-width: 734px) {
+  :root { --nav-h: 130px; }
+  .nav .in { height: auto; }
+  html { scroll-padding-top: 136px; }
+  .striscia-libro { gap: 10px; font-size: 13px; }
+  .striscia-libro .lungo-s { display: none; }
+  .striscia-libro .corto { display: inline; }
+}
+</style>
 </head>
 <body>
 
@@ -415,6 +437,13 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
       <a class="nav-yt" href="https://www.youtube.com/@avventuremicologiche?sub_confirmation=1" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>Iscriviti</a>
     </nav>
   </div>
+  <!-- 19/11/2026: la striscia del libro, sotto il menu (stile in fondo alla testa, «la striscia gialla del libro») -->
+  <a class="striscia-libro" href="#libro">
+    <img src="immagini/libro/copertina-500.webp" alt="" width="500" height="800">
+    <span class="lungo-s"><b>A funghi con delitto</b>, il nostro giallo raccontato da Archie</span><span class="corto"><b>Il nostro giallo</b></span>
+    <span class="sep">·</span>
+    <span class="vai">A dicembre su Amazon<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+  </a>
 </header>
 
 <main id="top">
@@ -570,6 +599,83 @@ footer .copy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--
     <figcaption class="small">Le previsioni come sono sul sito: tocchi una località e hai i sette giorni, ora per ora.</figcaption>
   </figure>
 </section>
+
+<!-- 3 bis. IL LIBRO (19/11/2026): dopo i capitoli della mappa, sul nero come loro; la striscia gialla in cima porta qui.
+     Il testo e' quello del retro, ma senza dire chi muore (sua regola: «un omicidio mette in subbuglio il paese»).
+     Quando esce il link Amazon, il bollino «A dicembre su Amazon» diventa il bottone. -->
+<style>
+.libro { background: #000; color: #f5f5f7; padding: 110px 0 120px; overflow: hidden; }
+.libro .libro-in { max-width: 1080px; margin: 0 auto; padding: 0 22px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 72px; align-items: center; }
+.libro .cop { position: relative; display: block; justify-self: center; width: min(340px, 100%); aspect-ratio: 5 / 8; perspective: 1600px; }
+/* la luce gialla dietro e sotto il libro: stacca dal nero anche la fascia scura in fondo alla copertina */
+.libro .cop::before { content: ""; position: absolute; inset: -20% -50% -34%; background: radial-gradient(closest-side at 50% 62%, rgba(236,185,26,.62), rgba(236,185,26,.22) 55%, rgba(236,185,26,0)); }
+.libro .cop::after { content: ""; position: absolute; left: -2%; right: 6%; bottom: -5%; height: 9%; background: radial-gradient(closest-side, rgba(0,0,0,.75), rgba(0,0,0,0)); filter: blur(4px); }
+.libro .libro3d { position: absolute; inset: 0; z-index: 1; transform-style: preserve-3d; transform: rotateY(40deg) rotateX(3deg); }
+/* il libro gira piano avanti e indietro (con «riduci animazioni» resta fermo) */
+@keyframes libroGira { 0%, 100% { transform: rotateY(50deg) rotateX(3deg); } 50% { transform: rotateY(30deg) rotateX(1deg); } }
+@media (prefers-reduced-motion: no-preference) { .libro .libro3d { animation: libroGira 7s ease-in-out infinite; } }
+.libro .fronte, .libro .dorso, .libro .retro { position: absolute; top: 0; height: 100%; }
+.libro .fronte { left: 0; width: 100%; transform: translateZ(15px); border-radius: 1px 4px 4px 1px; overflow: hidden; }
+.libro .fronte img { width: 100%; height: 100%; display: block; }
+.libro .fronte { box-shadow: inset 0 -1px 0 rgba(255,255,255,.22), inset -1px 0 0 rgba(255,255,255,.18); }
+.libro .fronte::before { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; box-shadow: inset 0 -1px 0 rgba(255,236,170,.45), inset -1px 0 0 rgba(255,236,170,.35); pointer-events: none; }
+/* la piega vicino al dorso e la luce che arriva da sinistra */
+.libro .fronte::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.28) 0, rgba(255,255,255,.18) 1.4%, rgba(0,0,0,.10) 3.2%, rgba(255,255,255,0) 7%, rgba(255,255,255,0) 60%, rgba(0,0,0,.14) 100%); }
+.libro .dorso { left: 0; width: 30px; transform: translateX(-50%) rotateY(-90deg); background: url(immagini/libro/dorso.webp) center / 100% 100%; }
+.libro .dorso::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.45), rgba(0,0,0,.25)); }
+.libro .retro { left: 0; width: 100%; transform: translateZ(-15px); background: #b98f12; box-shadow: 30px 40px 70px rgba(0,0,0,.7); }
+.libro .occh { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #ecb91a; }
+.libro h2 { margin-top: 14px; font-family: var(--font-display); font-size: var(--type-display-size); line-height: 1.05; letter-spacing: -0.01em; font-weight: 600; }
+.libro .sotto { margin-top: 10px; font-size: var(--type-lead-size); line-height: 1.38; font-weight: 600; color: #ecb91a; }
+.libro .trama { margin-top: 22px; font-size: var(--type-body-size); line-height: 1.6; color: var(--muted-dark); max-width: 52ch; }
+.libro .archie { margin-top: 14px; font-style: italic; color: #f5f5f7; max-width: 52ch; line-height: 1.6; font-size: var(--type-body-size); }
+.libro .esce { display: inline-flex; align-items: center; gap: 10px; margin-top: 30px; min-height: 48px; padding: 12px 26px; border-radius: 980px;
+  background: #ecb91a; color: #111; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.libro .esce svg { width: 20px; height: 20px; }
+.libro .chi { margin-top: 16px; font-size: 13px; color: var(--muted-dark); letter-spacing: .02em; }
+@media (max-width: 734px) {
+  .libro { padding: 64px 0 72px; }
+  .libro .libro-in { grid-template-columns: minmax(0, 1fr); gap: 44px; padding: 0 22px; }
+  .libro .cop { width: 58%; }
+  .libro .libro-testo { text-align: left; }
+  .libro .esce { width: 100%; justify-content: center; }
+}
+</style>
+<section class="libro" id="libro" aria-label="Il libro">
+  <div class="libro-in">
+    <span class="cop su"><span class="libro3d">
+      <span class="retro"></span><span class="dorso"></span>
+      <span class="fronte"><img src="immagini/libro/copertina-800.webp" width="800" height="1280"
+        alt="Il libro «A funghi con delitto»: copertina gialla, con Archie disegnato a china dentro un cerchio, la scritta «Un giallo» e il numero 1 della serie."></span>
+    </span></span>
+    <div class="libro-testo su dopo">
+      <span class="occh">Il nostro libro</span>
+      <h2>A funghi con delitto.</h2>
+      <p class="sotto">Un giallo, raccontato da Archie.</p>
+      <p class="trama">Novembre 2002. In una valle dove andare a funghi non è un hobby, ma una religione, un omicidio mette in subbuglio il paese. Per i carabinieri è un suicidio. Il conte Edoardo Doglio di Valdilupo, cercatore pigro e gourmet testardo, non ne è convinto.</p>
+      <p class="archie">A raccontarla è Archie, il suo lagotto romagnolo, che ha un ottimo naso, molte opinioni e una ciotola sempre troppo vuota.</p>
+      <span class="esce"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/></svg>A dicembre su Amazon</span>
+      <p class="chi">di Franco Lucini · Piccoli omicidi tra i funghi, n. 1</p>
+    </div>
+  </div>
+</section>
+<script>
+/* La striscia gialla porta al libro. ⚠️ Al telefono le foto dei capitoli sopra si caricano mentre si scende
+   (loading=lazy), la pagina si allunga strada facendo e la discesa si fermava 2000 px prima (provato il 19/11 a 390 px):
+   a discesa finita si ricontrolla e, se il libro non e' in cima, si completa il tragitto (al massimo 4 volte). */
+(function () {
+  var a = document.querySelector('.striscia-libro'), t = document.getElementById('libro');
+  if (!a || !t) return;
+  a.addEventListener('click', function (e) {
+    e.preventDefault();
+    var n = 0, pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    (function va() {
+      t.scrollIntoView({ behavior: n ? 'auto' : 'smooth', block: 'start' });
+      if (++n < 5) setTimeout(function () { if (Math.abs(t.getBoundingClientRect().top - pad) > 8) va(); }, 900);
+    })();
+  });
+})();
+</script>
 
 <!-- 4. E POI CI SIAMO NOI -->
 <section class="noi light" id="noi">
