@@ -673,9 +673,23 @@ html { scroll-padding-top: 100px; }
       if (++n < 6) setTimeout(function () { if (Math.abs(t.getBoundingClientRect().top - pad) > 8) va(); }, 900);
     })();
   }
-  a.addEventListener('click', function (e) { e.preventDefault(); vai(true); });
+  /* Conteggi GA4 (20/11/2026, chiesti dalla scheda GA4 5): GA4 toglie «#libro» dall'indirizzo e il clic sulla
+     striscia non cambia pagina, quindi senza questi chi arriva al libro non si vede. Un nome per strada, come per il quiz. */
+  function conta(nome) { try { if (typeof gtag === 'function') gtag('event', nome); } catch (e) {} }
+  a.addEventListener('click', function (e) { e.preventDefault(); conta('libro_striscia'); vai(true); });
+  /* la sezione vista, qualunque sia la strada: una volta per visita */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (voci) {
+      if (!voci[0].isIntersecting) return;
+      io.disconnect();
+      try { if (sessionStorage.getItem('libroVisto')) return; sessionStorage.setItem('libroVisto', '1'); } catch (e) {}
+      conta('libro_visto');
+    }, { threshold: 0.35 });
+    io.observe(t);
+  }
   /* il link diretto avventuremicologiche.it/#libro (per i social): stesso problema all'arrivo, stesso rimedio */
   if (location.hash === '#libro') {
+    conta('libro_link');
     if (document.readyState === 'complete') vai(false); else addEventListener('load', function () { vai(false); });
   }
 })();
