@@ -441,7 +441,7 @@ html { scroll-padding-top: 100px; }
     <img src="immagini/libro/copertina-500.webp" alt="" width="500" height="800">
     <span class="lungo-s"><b>Sostienici</b> acquistando il nostro libro, <b>A funghi con delitto</b></span><span class="corto"><b>Il nostro giallo</b></span>
     <span class="sep">·</span>
-    <span class="vai">A dicembre su Amazon<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="vai">Ora su Amazon<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
   </a>
 </header>
 
@@ -601,7 +601,7 @@ html { scroll-padding-top: 100px; }
 
 <!-- 3 bis. IL LIBRO (19/11/2026): dopo i capitoli della mappa, sul nero come loro; la striscia gialla in cima porta qui.
      Il testo e' quello del retro, ma senza dire chi muore (sua regola: «un cadavere mette in subbuglio il paese»).
-     Quando esce il link Amazon, il bollino «A dicembre su Amazon» diventa il bottone. -->
+     Dal 26/11/2026 il libro e' su Amazon: il bollino e' diventato il bottone «Compralo su Amazon». -->
 <style>
 .libro { background: #000; color: #f5f5f7; padding: 110px 0 120px; overflow: hidden; }
 .libro .libro-in { max-width: 1080px; margin: 0 auto; padding: 0 22px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 72px; align-items: center; }
@@ -631,6 +631,7 @@ html { scroll-padding-top: 100px; }
 .libro .esce { display: inline-flex; align-items: center; gap: 10px; margin-top: 30px; min-height: 48px; padding: 12px 26px; border-radius: 980px;
   background: #ecb91a; color: #111; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
 .libro .esce svg { width: 20px; height: 20px; }
+a.esce { text-decoration: none; transition: background .2s; } a.esce:hover { background: #f6c938; }
 .libro .chi { margin-top: 16px; font-size: 13px; color: var(--muted-dark); letter-spacing: .02em; }
 @media (max-width: 734px) {
   .libro { padding: 64px 0 72px; }
@@ -653,7 +654,7 @@ html { scroll-padding-top: 100px; }
       <p class="sotto">Un giallo, raccontato da Archie.</p>
       <p class="trama">Novembre 2002. In una valle dove andare a funghi non è un hobby, ma una religione, un cadavere mette in subbuglio il paese. Per i carabinieri è un suicidio. Il conte Edoardo Doglio di Valdilupo, cercatore pigro e gourmet testardo, non ne è convinto.</p>
       <p class="archie">A raccontarla è Archie, il suo lagotto romagnolo, che ha un ottimo naso, molte opinioni e una ciotola sempre troppo vuota.</p>
-      <span class="esce"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/></svg>A dicembre su Amazon</span>
+      <a class="esce" href="https://www.amazon.it/dp/B0HSZ41P8S" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/></svg>Compralo su Amazon</a>
       <p class="chi">di Franco Lucini · Piccoli omicidi tra i funghi, n. 1</p>
     </div>
   </div>
@@ -676,6 +677,8 @@ html { scroll-padding-top: 100px; }
      striscia non cambia pagina, quindi senza questi chi arriva al libro non si vede. Un nome per strada, come per il quiz. */
   function conta(nome) { try { if (typeof gtag === 'function') gtag('event', nome); } catch (e) {} }
   a.addEventListener('click', function (e) { e.preventDefault(); conta('libro_striscia'); vai(true); });
+  /* 26/11/2026: il libro e' su Amazon, il clic sul bottone della sezione si conta */
+  var am = t.querySelector('a.esce'); if (am) am.addEventListener('click', function () { conta('libro_amazon'); });
   /* la sezione vista, qualunque sia la strada: una volta per visita */
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (voci) {
@@ -885,5 +888,6 @@ document.addEventListener('click', function (e) {
 });
 </script>
 
+<script src="uscita-libro.js" defer></script>
 </body>
 </html>
