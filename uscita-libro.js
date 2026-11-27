@@ -29,16 +29,16 @@
     '#usc .alone{position:absolute;inset:0;background:radial-gradient(closest-side at 50% 46%,rgba(236,185,26,.30),rgba(236,185,26,.08) 55%,rgba(0,0,0,0));transition:opacity 1.2s}' +
     '#usc .chiudi{position:absolute;top:14px;right:16px;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.10);color:#fff;font-size:26px;line-height:44px;cursor:pointer;z-index:5}' +
     '#usc .scena{position:relative;width:min(760px,92vw);min-height:min(640px,86vh);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0}' +
-    '#usc .lb{position:absolute;left:50%;top:50%;width:min(270px,48vw);aspect-ratio:5/8;transform:translate(-50%,-50%);perspective:1400px}' +
-    '#usc .l3{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(50deg) rotateX(3deg);transition:transform 1.6s cubic-bezier(.4,0,.2,1)}' +
-    '#usc .lf,#usc .ld,#usc .lr{position:absolute;top:0;height:100%}' +
-    '#usc .lf{left:0;width:100%;transform:translateZ(13px);border-radius:1px 4px 4px 1px;overflow:hidden;box-shadow:inset 0 -1px 0 rgba(255,236,170,.4)}' +
-    '#usc .lf img{width:100%;height:100%;display:block}' +
-    '#usc .ld{left:0;width:26px;transform:translateX(-50%) rotateY(-90deg);background:url(' + DORSO + ') center/100% 100%}' +
-    '#usc .ld::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.45),rgba(0,0,0,.25))}' +
-    '#usc .lr{left:0;width:100%;transform:translateZ(-13px);background:#b98f12;box-shadow:24px 34px 60px rgba(0,0,0,.7)}' +
+    '#usc .u-lb{position:absolute;left:50%;top:50%;width:min(270px,48vw);height:calc(min(270px,48vw) * 1.6);aspect-ratio:auto;margin:0;padding:0;transform:translate(-50%,-50%);perspective:1400px}' +
+    '#usc .u-l3{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(50deg) rotateX(3deg);transition:transform 1.6s cubic-bezier(.4,0,.2,1)}' +
+    '#usc .u-lf,#usc .u-ld,#usc .u-lr{position:absolute;top:0;height:100%}' +
+    '#usc .u-lf{left:0;width:100%;transform:translateZ(13px);border-radius:1px 4px 4px 1px;overflow:hidden;box-shadow:inset 0 -1px 0 rgba(255,236,170,.4)}' +
+    '#usc .u-lf img{width:100%;height:100%;display:block}' +
+    '#usc .u-ld{left:0;width:26px;transform:translateX(-50%) rotateY(-90deg);background:url(' + DORSO + ') center/100% 100%}' +
+    '#usc .u-ld::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.45),rgba(0,0,0,.25))}' +
+    '#usc .u-lr{left:0;width:100%;transform:translateZ(-13px);background:#b98f12;box-shadow:24px 34px 60px rgba(0,0,0,.7)}' +
     '@keyframes uscGira{0%,100%{transform:rotateY(50deg) rotateX(3deg)}50%{transform:rotateY(22deg) rotateX(1deg)}}' +
-    '#usc .l3.gira{animation:uscGira 3.2s ease-in-out infinite}' +
+    '#usc .u-l3.gira{animation:uscGira 3.2s ease-in-out infinite}' +
     '#usc canvas{position:absolute;inset:0;pointer-events:none;z-index:3}' +
     '#usc .testo{position:relative;z-index:2;text-align:center;font-family:"EB Garamond",Georgia,serif;font-style:italic;font-weight:500;padding:0 10px}' +
     '#usc .r{display:block;font-size:clamp(21px,3.3vw,31px);line-height:1.38;color:#e9e6dc;opacity:0;transform:translateY(10px);transition:opacity 1s,transform 1s}' +
@@ -64,7 +64,7 @@
   var o = document.createElement('div'); o.id = 'usc';
   o.innerHTML =
     '<div class="alone"></div><button class="chiudi" aria-label="Chiudi">×</button>' +
-  '<div class="lb"><div class="l3"><div class="lr"></div><div class="ld"></div><div class="lf"><img src="' + COP + '" alt=""></div></div></div>' +
+  '<div class="u-lb"><div class="u-l3"><div class="u-lr"></div><div class="u-ld"></div><div class="u-lf"><img src="' + COP + '" alt=""></div></div></div>' +
     '<canvas></canvas>' +
     '<div class="scena">' +
       '<div class="testo">' +
@@ -94,13 +94,13 @@
     $('.chiudi').onclick = chiudi; $('.entra').onclick = chiudi; conta('libro_anteprima');
     [$('.tit'), $('.bot')].forEach(function (a) { a.addEventListener('click', function () { conta('libro_amazon_anteprima'); }); }); document.addEventListener('keydown', esc);
     // (il testo resta nel flusso: il titolo arriva sotto, senza sovrapporsi)
-    if (fermo) { righe().forEach(function (r) { r.classList.add('su'); }); $('.lb').style.display = 'none'; $('.fine').classList.add('su'); return; }
+    if (fermo) { righe().forEach(function (r) { r.classList.add('su'); }); $('.u-lb').style.display = 'none'; $('.fine').classList.add('su'); return; }
     if (V === 3) preparaTesto();
     // il libro parte inclinato, si raddrizza una volta sola e poi esplode; si parte solo a copertina caricata
-    var l3 = $('.l3'), img = $('.lf img'); l3.style.transition = 'none'; l3.style.transform = 'rotateY(52deg) rotateX(3deg)';
-    $('.lb').style.opacity = 0;
+    var l3 = $('.u-l3'), img = $('.u-lf img'); l3.style.transition = 'none'; l3.style.transform = 'rotateY(52deg) rotateX(3deg)';
+    $('.u-lb').style.opacity = 0;
     function via() {
-      $('.lb').style.transition = 'opacity .4s'; $('.lb').style.opacity = 1; void l3.offsetWidth;
+      $('.u-lb').style.transition = 'opacity .4s'; $('.u-lb').style.opacity = 1; void l3.offsetWidth;
       l3.style.transition = 'transform 1.7s cubic-bezier(.4,0,.2,1)';
       setTimeout(function () { l3.style.transform = 'rotateY(0deg) rotateX(0deg)'; }, 900);
       setTimeout(polvere, 3000);
@@ -135,8 +135,8 @@
     cv.width = sc.width * dpr; cv.height = sc.height * dpr; cv.style.width = sc.width + 'px'; cv.style.height = sc.height + 'px';
     var x = cv.getContext('2d'); x.scale(dpr, dpr);
     // misure del libro DRITTO (il contenitore non ruota): se il raddrizzamento e' in ritardo la copertina non si deforma
-    var l3f = $('.l3'); l3f.style.transition = 'none'; l3f.style.transform = 'rotateY(0deg) rotateX(0deg)';
-    var img = $('.lf img'), rb = $('.lb').getBoundingClientRect();
+    var l3f = $('.u-l3'); l3f.style.transition = 'none'; l3f.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    var img = $('.u-lf img'), rb = $('.u-lb').getBoundingClientRect();
     var bx = rb.left - sc.left, by = rb.top - sc.top, bw = rb.width, bh = rb.height;
     var t = document.createElement('canvas'), tw = Math.round(bw), th = Math.round(bh); t.width = tw; t.height = th;
     var tx = t.getContext('2d'); tx.drawImage(img, 0, 0, tw, th);
@@ -162,7 +162,7 @@
       for (var k = T.length - 1; k > 0; k--) { var j = Math.floor(rnd() * (k + 1)), s = T[k]; T[k] = T[j]; T[j] = s; }
       for (var n = 0; n < P.length; n++) if (n < T.length) P[n].bersaglio = T[n];
     }
-    $('.lb').style.visibility = 'hidden';
+    $('.u-lb').style.visibility = 'hidden';
     var t0 = performance.now(), DUR = V === 2 ? 2.8 : 2.2;
     if (V === 3) setTimeout(scopriTesto, TT === 3 ? 100 : 350);
     (function giro(ora) {
