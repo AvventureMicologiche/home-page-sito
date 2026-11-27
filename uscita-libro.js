@@ -103,7 +103,7 @@
       $('.lb').style.transition = 'opacity .4s'; $('.lb').style.opacity = 1; void l3.offsetWidth;
       l3.style.transition = 'transform 1.7s cubic-bezier(.4,0,.2,1)';
       setTimeout(function () { l3.style.transform = 'rotateY(0deg) rotateX(0deg)'; }, 900);
-      setTimeout(polvere, 2700);
+      setTimeout(polvere, 3000);
     }
     if (img.complete && img.naturalWidth) via(); else { img.onload = via; img.onerror = chiudi; }
   }
@@ -134,7 +134,9 @@
     var cv = $('canvas'), sc = o.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
     cv.width = sc.width * dpr; cv.height = sc.height * dpr; cv.style.width = sc.width + 'px'; cv.style.height = sc.height + 'px';
     var x = cv.getContext('2d'); x.scale(dpr, dpr);
-    var img = $('.lf img'), rb = $('.lf').getBoundingClientRect();
+    // misure del libro DRITTO (il contenitore non ruota): se il raddrizzamento e' in ritardo la copertina non si deforma
+    var l3f = $('.l3'); l3f.style.transition = 'none'; l3f.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    var img = $('.lf img'), rb = $('.lb').getBoundingClientRect();
     var bx = rb.left - sc.left, by = rb.top - sc.top, bw = rb.width, bh = rb.height;
     var t = document.createElement('canvas'), tw = Math.round(bw), th = Math.round(bh); t.width = tw; t.height = th;
     var tx = t.getContext('2d'); tx.drawImage(img, 0, 0, tw, th);
