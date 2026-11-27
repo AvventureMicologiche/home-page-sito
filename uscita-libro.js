@@ -144,8 +144,8 @@
     for (var yy = 0; yy < th; yy += PASSO) for (var xx = 0; xx < tw; xx += PASSO) {
       var i = (yy * tw + xx) * 4, X = bx + xx, Y = by + yy, dx = X - cx, dy = Y - cy, r = Math.sqrt(dx * dx + dy * dy) || 1;
       var v = 60 + rnd() * 260;
-      P.push({ x: X, y: Y, c: [d[i], d[i + 1], d[i + 2]], vx: dx / r * v + (rnd() - .5) * 140, vy: dy / r * v + (rnd() - .5) * 140 - 60,
-        rit: (V === 3 ? (Y - by) / bh * .5 : r / Math.max(bw, bh) * .45) + rnd() * .15, vita: 1 + rnd() * .8 });
+      P.push({ x: X, y: Y, c: [d[i], d[i + 1], d[i + 2]], vx: dx / r * v * .7 + (rnd() - .5) * 440, vy: dy / r * v * .3 + (rnd() - .5) * 150 - 15,
+        rit: (V === 3 ? (Y - by) / bh * .5 : r / Math.max(bw, bh) * .45) + rnd() * .15, vita: .7 + rnd() * .6 });
     }
     // variante 2: i punti delle parole «Una valle,» dove la polvere va a posarsi
     var T = [];
@@ -176,7 +176,7 @@
           x.fillStyle = 'rgb(' + cc + ')'; var s2 = PASSO - (PASSO - 2) * e; x.fillRect(px, py, s2, s2); continue;
         }
         var f2 = u / p.vita; if (f2 >= 1) continue;
-        var sp2 = (1 - Math.exp(-1.4 * u)) / 1.4, qx = p.x + p.vx * sp2, qy = p.y + p.vy * sp2 - 40 * u * u, s3 = PASSO * (1 - .4 * f2);
+        var sp2 = (1 - Math.exp(-1.4 * u)) / 1.4, qx = p.x + p.vx * sp2, qy = p.y + p.vy * sp2 + 70 * u * u, s3 = PASSO * (1 - .4 * f2);
         x.fillStyle = 'rgba(' + p.c + ',' + (1 - f2 * f2) + ')'; x.fillRect(qx, qy, s3, s3);
       }
       if (tt < DUR) requestAnimationFrame(giro); else dopo(cv);
